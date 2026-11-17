@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>다음길</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3182F6">
+<meta name="apple-mobile-web-app-title" content="다음길">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -33,7 +39,7 @@
   .muted { color: var(--mute); font-size: 13px; }
   /* 인트로 */
   .logo { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; color: var(--accent); margin-top: 28px; }
-  .logo span { width: 28px; height: 28px; border-radius: 9px; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 15px; }
+  .logo svg { width: 28px; height: 28px; display: block; flex: none; }
   .feat { display: grid; gap: 10px; margin: 26px 0; }
   .feat div { display: flex; gap: 14px; align-items: center; background: var(--gray); border-radius: 16px; padding: 16px; }
   .feat b { display: block; font-size: 15px; } .feat small { color: var(--sub); font-size: 13px; }
@@ -44,6 +50,11 @@
   select, input[type=text], input[type=number] { width: 100%; font: inherit; font-size: 17px; padding: 14px 16px; border: 0; border-radius: 14px; background: var(--gray); color: var(--ink); appearance: none; outline: none; }
   select { background-image: linear-gradient(45deg, transparent 50%, var(--mute) 50%), linear-gradient(135deg, var(--mute) 50%, transparent 50%); background-position: calc(100% - 22px) 52%, calc(100% - 16px) 52%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 40px; }
   select:focus, input:focus { box-shadow: 0 0 0 2px var(--accent) inset; background-color: #fff; }
+  .catbox { margin-top: 8px; max-height: 216px; overflow-y: auto; -webkit-overflow-scrolling: touch; background: var(--gray); border-radius: 14px; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+  .catbox button { all: unset; box-sizing: border-box; width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 15px; line-height: 1.4; color: var(--ink); cursor: pointer; display: flex; justify-content: space-between; gap: 8px; }
+  .catbox button small { color: var(--mute); font-size: 13px; flex: none; }
+  .catbox button[aria-selected=true] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+  .catbox .empty { padding: 12px; font-size: 14px; color: var(--mute); }
   select[size] { background-image: none; padding: 6px; height: 196px; }
   select[size] option { padding: 9px 10px; border-radius: 8px; }
   select[size] option:checked { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
@@ -131,7 +142,7 @@
 
   <!-- 인트로 -->
   <section id="s0" class="scr">
-    <div class="logo"><span>다</span>다음길</div>
+    <div class="logo"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#3182F6"/><path d="M150 400 C150 300 200 250 270 230 L330 212" fill="none" stroke="#fff" stroke-width="56" stroke-linecap="round"/><path d="M290 150 L372 200 L318 280" fill="none" stroke="#fff" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/><circle cx="150" cy="400" r="34" fill="#BFDBFF"/></svg>다음길</div>
     <h1 class="hero">사장님, 요즘 장사<br>어떠세요?</h1>
     <p class="lead">우리 가게 상권이 어떤지 확인하고, 버틸지 정리할지 다음 길을 함께 찾아 드려요.</p>
     <div class="feat">
@@ -151,7 +162,8 @@
     <div class="field"><label for="dong">행정동</label><select id="dong"></select></div>
     <div class="field"><label for="catq">업종</label>
       <input type="text" id="catq" placeholder="검색 (예: 카페, 치킨, 미용실)">
-      <select id="cat" size="5" style="margin-top:8px"></select></div>
+      <select id="cat" hidden></select>
+      <div id="catBox" class="catbox" role="listbox" aria-label="업종 목록"></div></div>
     <div class="field"><label>가게 위치</label>
       <svg class="map" id="pickmap" viewBox="0 0 400 300" role="img" aria-label="행정동 점포 지도. 눌러서 가게 위치를 고르세요"></svg>
       <div class="hint">지도를 눌러 위치를 옮길 수 있어요 · 파란 점이 같은 업종이에요</div></div>
@@ -239,14 +251,25 @@
 (async function () {
   const R = 500;
   const $ = id => document.getElementById(id);
-  const [cats, IDX, CHGALL, SUP, JC, POLY] = await Promise.all([
+  let loaded;
+  try { loaded = await Promise.all([
     fetch('data/cats.json').then(r => r.json()),
     fetch('data/gg/index.json').then(r => r.json()),
     fetch('data/gg/change.json').then(r => r.json()),
     fetch('data/gg/support.json').then(r => r.json()),
     fetch('data/jobcenters.json').then(r => r.json()).catch(() => ({})),
     fetch('data/poly.json').then(r => r.json()).catch(() => [])
-  ]);
+  ]); } catch (err) {
+    const local = location.protocol === 'file:';
+    const b = $('startBtn'); b.textContent = '데이터를 불러오지 못했어요';
+    b.disabled = true;
+    const m = document.createElement('p'); m.className = 'muted'; m.style.color = 'var(--warn)';
+    m.textContent = local
+      ? '파일을 더블클릭해서 열면 브라우저가 데이터 파일을 막아요. 앱 주소(GitHub Pages)로 열거나, 폴더에서 python -m http.server 를 실행한 뒤 localhost:8000 으로 열어 주세요.'
+      : '인터넷 연결을 확인하고 새로고침해 주세요. data 폴더가 index.html 옆에 함께 올라가 있어야 해요.';
+    b.parentNode.after(m); return;
+  }
+  const [cats, IDX, CHGALL, SUP, JC, POLY] = loaded;
   let city, N, catCount = {}, catList = [], CHG = {}, SIGUN = '';
   const svgNS = 'http://www.w3.org/2000/svg';
   const mk = (tag, attrs) => { const e = document.createElementNS(svgNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
@@ -257,12 +280,31 @@
   const dist = (a, b, c, d) => { const k = mLon((b + d) / 2); return Math.hypot((a - c) * k, (b - d) * M_LAT); };
 
   const CAFE = cats.findIndex(c => c[2] === '카페');
+  let lastCat = -1;
   function fillCats(q) {
-    const sel = $('cat'), keep = Number(sel.value);
+    const sel = $('cat'), keep = sel.value === '' ? lastCat : Number(sel.value);
     sel.innerHTML = '';
     catList.filter(c => !q || cats[c].join(' ').includes(q)).forEach(c =>
       sel.add(new Option(`${cats[c][2]} (${cats[c][1]}) · ${catCount[c].toLocaleString()}곳`, c)));
     if ([...sel.options].some(o => Number(o.value) === keep)) sel.value = keep;
+    paintCats();
+  }
+  function paintCats() {
+    const sel = $('cat'), box = $('catBox'), cur = sel.value;
+    if (cur !== '') lastCat = Number(cur);
+    box.innerHTML = '';
+    if (!sel.options.length) { box.innerHTML = '<div class="empty">찾는 업종이 없어요. 다른 말로 검색해 보세요.</div>'; return; }
+    let on = null;
+    [...sel.options].forEach(o => {
+      const c = Number(o.value), b = document.createElement('button');
+      b.type = 'button'; b.setAttribute('role', 'option');
+      b.setAttribute('aria-selected', o.value === cur);
+      b.innerHTML = `<span>${cats[c][2]}</span><small>${catCount[c].toLocaleString()}곳</small>`;
+      b.title = cats[c][1];
+      b.onclick = () => { sel.value = o.value; paintCats(); sel.dispatchEvent(new Event('change')); };
+      box.appendChild(b); if (o.value === cur) on = b;
+    });
+    if (on) box.scrollTop = on.offsetTop - box.offsetTop - 6;
   }
 
   // 지역 정보 카드
@@ -288,6 +330,7 @@
     const keep = $('cat').value === '' ? -1 : Number($('cat').value);
     fillCats($('catq').value.trim());
     $('cat').value = catCount[keep] ? keep : (catCount[CAFE] ? CAFE : catList[0]);
+    paintCats();
     // 행정동: 고른 업종 점포가 가장 많은 동을 기본값으로
     const dsel = $('dong'); dsel.innerHTML = '';
     city.dongs.forEach((d, i) => dsel.add(new Option(d, i)));
