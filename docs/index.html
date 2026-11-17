@@ -119,6 +119,28 @@
   .reco b { color: var(--accent); }
   .reco.warn { background: var(--warn-soft); } .reco.warn b { color: var(--warn); }
   .tabs button .rk { display: inline-block; margin-left: 4px; font-size: 11px; font-weight: 800; color: #fff; background: var(--accent); border-radius: 6px; padding: 1px 5px; vertical-align: 2px; }
+  .quiz { border: 1px solid var(--line); border-radius: 18px; padding: 18px; margin: 0 0 14px; }
+  .quiz h3 { margin: 0 0 2px; } .quiz .q { margin-top: 14px; } .quiz .q > span { display: block; font-size: 13px; color: var(--sub); font-weight: 500; margin-bottom: 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips button { border: 0; background: var(--gray); color: var(--ink); font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 10px; cursor: pointer; }
+  .chips button.on { background: var(--accent); color: #fff; font-weight: 700; }
+  .qres { margin-top: 16px; background: var(--accent-soft); border-radius: 14px; padding: 16px; }
+  .qres .tot { font-size: 14px; color: var(--sub); } .qres .tot b { display: block; font-size: 28px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; line-height: 1.3; }
+  .qres ul { list-style: none; margin: 10px 0 0; padding: 0; font-size: 14px; }
+  .qres li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-top: 1px solid rgba(49,130,246,.15); }
+  .qres li em { font-style: normal; font-weight: 700; color: var(--accent); flex: none; }
+  .qres li.no { color: var(--mute); } .qres li.no em { color: var(--mute); font-weight: 500; }
+  .qres small { display: block; margin-top: 10px; font-size: 12px; color: var(--sub); }
+  .tl { border: 1px solid var(--line); border-radius: 18px; padding: 18px 18px 6px; margin: 0 0 14px; }
+  .tl h3 { margin: 0 0 4px; } .tl > p { margin: 0 0 12px; font-size: 13px; color: var(--sub); }
+  .tl ol { list-style: none; margin: 0; padding: 0; }
+  .tl li { position: relative; padding: 0 0 16px 40px; }
+  .tl li::before { content: attr(data-n); position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; font-weight: 800; display: grid; place-items: center; }
+  .tl li:not(:last-child)::after { content: ''; position: absolute; left: 12px; top: 28px; bottom: 2px; width: 2px; background: var(--gray2); }
+  .tl li.first::before { background: var(--warn); }
+  .tl b { font-size: 15px; } .tl small { display: block; font-size: 13px; color: var(--sub); margin-top: 2px; }
+  .tl .dday, .tl .tag { margin-top: 6px; }
+  .sharebtn { width: 100%; margin-top: 8px; }
   .warnbox { background: var(--warn-soft); color: #c4243a; border-radius: 16px; padding: 14px 16px; font-size: 14px; margin: 0 0 12px; }
   .calc { background: var(--accent-soft); border-radius: 14px; padding: 14px; margin-top: 12px; font-weight: 400; }
   .calc label { display: block; font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
@@ -213,6 +235,19 @@
     <h2>어떤 길을 생각하세요?</h2>
     <p class="lead">상황에 맞는 지원을 모았어요. 2027년 공고에서 요건이 바뀔 수 있어요.</p>
     <div class="reco" id="reco"></div>
+    <div class="quiz" id="quiz">
+      <h3>나는 얼마나 받을 수 있을까?</h3>
+      <p class="muted" style="margin:0">두세 가지만 누르면 받을 수 있는 지원을 계산해 드려요.</p>
+      <div class="q"><span>가게 상황</span><div class="chips" data-k="st">
+        <button data-v="run">계속 운영 중</button><button data-v="plan">폐업 예정</button><button data-v="closed">2023년 이후 폐업</button><button data-v="old">2022년 이전 폐업</button></div></div>
+      <div class="q" data-show="plan,closed"><span>가게 건물</span><div class="chips" data-k="ls">
+        <button data-v="rent">임차(월세·전세)</button><button data-v="own">내 건물</button></div></div>
+      <div class="q" data-show="run"><span>매출이 전년보다 10% 이상 줄었나요?</span><div class="chips" data-k="dr">
+        <button data-v="y">네</button><button data-v="n">아니요</button></div></div>
+      <div class="q" data-show="run"><span>개업 시기</span><div class="chips" data-k="op">
+        <button data-v="before">2024년 이전</button><button data-v="after">2025년 이후</button></div></div>
+      <div id="qres"></div>
+    </div>
     <div class="tabs" id="tabs">
       <button data-t="stay" class="on">버티기</button>
       <button data-t="close">정리하기</button>
@@ -227,7 +262,18 @@
       </ol>
     </div>
     <div id="t-close" class="hidden">
-      <div class="warnbox">점포 철거비 지원은 <b>철거하기 전에</b> 신청해야 해요. 2026년 접수는 10월 21일에 끝났고, 2027년 1월 공고 예정이에요.</div>
+      <div class="tl">
+        <h3>정리 순서</h3>
+        <p>순서를 바꾸면 못 받는 지원이 있어요. 위에서부터 차례로 하세요.</p>
+        <ol>
+          <li data-n="1" class="first"><b>철거비 지원부터 신청</b><small>철거 공사를 시작하기 <b>전에</b> 소상공인24에서 신청해야 받을 수 있어요. 2026년 접수는 끝났고 2027년 1월에 공고돼요.</small><span class="tag y">가장 먼저</span></li>
+          <li data-n="2"><b>무료 법률·세무 상담</b><small>임대차 계약 해지, 세금, 직원 문제를 정리 전에 물어봐요.</small><span class="dday" data-end="2026-11-30"></span></li>
+          <li data-n="3"><b>철거·원상복구</b><small>공사 계약서, 세금계산서, 철거 전후 사진을 꼭 남겨요. 지원금을 받을 때 필요해요.</small></li>
+          <li data-n="4"><b>폐업 신고</b><small>홈택스나 세무서에서 해요. 폐업사실증명원을 떼 두면 다음 신청이 편해요.</small></li>
+          <li data-n="5"><b>사업정리 컨설팅·채무 조정</b><small>세금 신고 대행, 빚 정리 상담을 희망리턴패키지에서 신청해요.</small></li>
+          <li data-n="6"><b>취업 교육 신청 → 전직장려수당</b><small>교육을 마치면 최대 100만 원을 받아요. '다시 일하기'에서 이어서 보세요.</small><span class="dday" data-end="2026-12-10" data-label="교육 신청"></span></li>
+        </ol>
+      </div>
       <ol class="check">
         <li>점포 철거비 지원<small>임차한 점포의 철거·원상복구 비용을 전용면적 3.3㎡당 20만 원 이내, 최대 600만 원(부가세 제외)까지 지원해요. 1인 1회, 소상공인24에서 신청해요.</small><a class="go" href="https://www.sbiz24.kr" target="_blank" rel="noopener">소상공인24에서 신청 ›</a>
           <div class="calc"><label for="area">우리 가게로 계산해 보기</label>
@@ -439,6 +485,7 @@
       `상권 신호: ${s.signal} · 추천: ${s.rec}부터`,
       `- 경쟁 밀집: 반경 500m ${s.name} ${s.mine}곳 (시 평균 ${s.avg.toFixed(1)}곳, ${s.ratio.toFixed(1)}배)`,
       `- 상권 변화: ${s.ch ? s.dong + ' ' + s.ch.type + ' (2025년 3분기)' : '자료 없음'}`,
+      QRES ? `받을 수 있는 지원: ${QRES.text}` : '',
       `버티기: 희망리턴 재기사업화(경영개선) · 업종 전환 힌트 ${s.alts.join(', ')}`,
       `정리하기: 희망리턴 원스톱폐업지원(철거비 최대 600만 원, 2027년 1월 공고) · 경기도 사업정리 지원 · 중기부 무료 법률·세무 상담(~11.30)`,
       `다시 일하기: 특화취업지원(교육 ~12.10, 전직장려수당 최대 100만 원) · 폴리텍 ${s.camp.join(', ')}`,
@@ -451,11 +498,17 @@
     const lines = sumText().split('\n');
     $('sumBox').innerHTML = `<div class="sum"><h3>상담용 요약</h3><div class="meta">${lines[0].replace('[다음길 상담 요약] ', '')} 작성 · 상담 창구에서 이 화면을 보여 주세요</div><dl>${lines.slice(1).map(l => {
       const i = l.indexOf(': '); return i > 0 && !l.startsWith('-') && !l.startsWith('※') ? `<dt>${l.slice(0, i)}</dt><dd>${l.slice(i + 2)}</dd>` : `<dd>${l}</dd>`; }).join('')}</dl>
-      <button class="btn" id="copyBtn">요약 글 복사</button><span id="copied" class="copied"></span></div>`;
+      <button class="btn" id="copyBtn">요약 글 복사</button><button class="btn line sharebtn" id="shareBtn">결과 링크 보내기</button><span id="copied" class="copied"></span></div>`;
     $('sheet').classList.remove('hidden');
     $('copyBtn').addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(sumText()); $('copied').textContent = '복사했어요. 문자나 카톡에 붙여 넣으세요.'; }
       catch (e) { $('copied').textContent = '복사가 막혀 있어요. 화면을 캡처해 주세요.'; }
+    });
+    $('shareBtn').addEventListener('click', async () => {
+      const url = shareUrl();
+      if (navigator.share) { try { await navigator.share({ title: '다음길 상담 결과', text: `${SUM.sigun} ${SUM.dong} ${SUM.name} 상권 진단 결과예요.`, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+      try { await navigator.clipboard.writeText(url); $('copied').textContent = '링크를 복사했어요. 상담사에게 보내면 같은 결과가 열려요.'; }
+      catch (e) { $('copied').textContent = url; }
     });
 
   });
@@ -588,6 +641,70 @@
     ['stay', 'close', 'work'].forEach(k => $('t-' + k).classList.toggle('hidden', k !== t));
   }
   document.querySelectorAll('#tabs button').forEach(b => b.addEventListener('click', () => setTab(b.dataset.t)));
+
+  // 받을 수 있는 지원 계산
+  const Q = { st: '', ls: '', dr: '', op: '' };
+  let QRES = null;
+  function ddayLeft(end) { return Math.round((new Date(end + 'T00:00:00') - today) / 864e5); }
+  function renderQuiz() {
+    document.querySelectorAll('#quiz .chips').forEach(g => g.querySelectorAll('button').forEach(b => b.classList.toggle('on', Q[g.dataset.k] === b.dataset.v)));
+    document.querySelectorAll('#quiz .q[data-show]').forEach(q => q.classList.toggle('hidden', !q.dataset.show.split(',').includes(Q.st)));
+    const box = $('qres'); QRES = null;
+    if (!Q.st) { box.innerHTML = ''; return; }
+    const closing = Q.st === 'plan' || Q.st === 'closed';
+    if ((closing && !Q.ls) || (Q.st === 'run' && (!Q.dr || !Q.op))) { box.innerHTML = ''; return; }
+    const m2 = parseFloat($('area').value);
+    const demol = m2 > 0 ? Math.min(Math.ceil(Math.round(m2 / 3.3058 * 10) / 10) * 20, 600) : 600;
+    const items = [
+      { n: '점포 철거비', a: demol, ok: closing && Q.ls === 'rent', no: Q.st === 'run' ? '폐업을 정하면 대상' : Q.st === 'old' ? '2023년 이후 폐업만' : '임차 점포만' },
+      { n: '재기사업화 사업화자금', a: 2000, ok: Q.st === 'run' && Q.dr === 'y' && Q.op === 'before', no: Q.st !== 'run' ? '운영 중인 가게만' : Q.op === 'after' ? '2024년 이전 개업만' : '매출 10% 감소 시' },
+      { n: '전직장려수당', a: 100, ok: closing, no: Q.st === 'old' ? '2023년 이후 폐업만' : '폐업(예정) 시' },
+      { n: '사업정리 컨설팅·법률·채무 조정', a: 0, ok: closing, no: Q.st === 'old' ? '2023년 이후 폐업만' : '폐업(예정) 시' },
+      { n: '경기도 사업정리 지원', a: 0, ok: closing, no: '폐업(예정) 시' },
+      { n: '무료 법률·세무·노무 상담', a: 0, ok: ddayLeft('2026-11-30') >= 0, no: '2026년 접수 마감' },
+      { n: '폴리텍 재취업 과정(교육비 무료)', a: 0, ok: true, no: '' }
+    ];
+    const yes = items.filter(i => i.ok), money = yes.reduce((t, i) => t + i.a, 0), free = yes.filter(i => !i.a).length;
+    const fmt = v => v.toLocaleString() + '만 원';
+    box.innerHTML = `<div class="qres"><div class="tot">받을 수 있는 지원금<b>${money ? '최대 ' + fmt(money) : '지원금 대상 아님'}</b>무료 지원 ${free}가지 함께</div>
+      <ul>${items.map(i => `<li class="${i.ok ? '' : 'no'}"><span>${i.n}</span><em>${i.ok ? (i.a ? fmt(i.a) : '무료') : i.no}</em></li>`).join('')}</ul>
+      <small>${m2 > 0 ? `철거비는 입력한 ${m2}㎡ 기준이에요.` : "철거비는 한도 600만 원 기준이에요. '정리하기'에서 면적을 넣으면 다시 계산돼요."} 2026년 공고 기준 예상치이며, 실제 지원은 심사로 정해져요.</small></div>`;
+    QRES = { text: `${money ? '최대 ' + fmt(money) : '지원금 대상 아님'} + 무료 지원 ${free}가지 (${yes.map(i => i.n + (i.a ? ' ' + fmt(i.a) : '')).join(', ')})` };
+  }
+  document.querySelectorAll('#quiz .chips').forEach(g => g.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    Q[g.dataset.k] = b.dataset.v;
+    if (g.dataset.k === 'st') { if (Q.st === 'run') Q.ls = ''; else { Q.dr = ''; Q.op = ''; } }
+    renderQuiz();
+  }));
+  $('area').addEventListener('input', renderQuiz);
+  renderQuiz();
+
+  // 결과 링크: 주소 뒤에 선택값을 담아 같은 결과를 다시 연다 (서버 저장 없음)
+  function shareUrl() {
+    const p = new URLSearchParams({
+      g: IDX.findIndex(x => x.name === SIGUN), d: $('dong').value, c: $('cat').value,
+      x: me[0].toFixed(6), y: me[1].toFixed(6), q: [Q.st, Q.ls, Q.dr, Q.op].join('.'), a: $('area').value || ''
+    });
+    return location.origin + location.pathname + '#' + p.toString();
+  }
+  async function openShared() {
+    const p = new URLSearchParams(location.hash.slice(1));
+    const e = IDX[Number(p.get('g'))]; if (!e || !p.get('c')) return;
+    const x = Number(p.get('x')), y = Number(p.get('y')); if (!(x && y)) return;
+    $('sigun').value = e.name; await loadCity(e.name);
+    if (!catCount[Number(p.get('c'))]) return;
+    $('catq').value = ''; fillCats(''); $('cat').value = p.get('c'); paintCats();
+    if (p.get('d') !== null && Number(p.get('d')) < city.dongs.length) $('dong').value = p.get('d');
+    me = [x, y]; drawPick();
+    const [st, ls, dr, op] = (p.get('q') || '').split('.');
+    Object.assign(Q, { st: st || '', ls: ls || '', dr: dr || '', op: op || '' });
+    if (p.get('a')) { $('area').value = p.get('a'); $('area').dispatchEvent(new Event('input')); }
+    renderQuiz();
+    $('go').click(); show('s4'); $('sumBtn').click();
+    history.replaceState(null, '', location.pathname);
+  }
+  if (location.hash.length > 1) openShared();
 })();
 </script>
 </body>
