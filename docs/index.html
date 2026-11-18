@@ -241,8 +241,7 @@
     <div class="field"><label>가게 위치</label>
       <div class="addr hidden" id="addrBox"><input type="text" id="addrQ" placeholder="주소로 찾기 (예: 시민로 123)" enterkeyhint="search"><button type="button" id="addrGo">찾기</button></div>
       <div id="addrMsg"></div>
-      <div style="position:relative"><div class="lmap hidden" id="pickN"></div><div class="lmap hidden" id="pickL"></div>
-      <div class="cpin hidden" id="cpin"><div class="me-pin"></div><div class="me-lab">내 가게</div></div></div>
+      <div style="position:relative"><div class="lmap hidden" id="pickN"></div><div class="lmap hidden" id="pickL"></div></div>
       <svg class="map" id="pickmap" viewBox="0 0 400 300" role="img" aria-label="행정동 점포 지도. 눌러서 가게 위치를 고르세요"></svg>
       <div class="hint" id="pickHint">지도를 눌러 위치를 옮길 수 있어요 · 파란 점이 같은 업종이에요</div></div>
     <div class="cta"><button class="btn" id="go">내 상권 보기</button></div>
@@ -486,12 +485,22 @@
     MAP[i] = gIdx[g]; cats[gIdx[g]][3] += ' ' + c[2];
   });
   const CAFE = cats.findIndex(c => c[2] === '카페');
+  const CAT_YUHEUNG = cats.findIndex(c => c[2] === '유흥주점');
   let lastCat = -1;
   // 업종 분야: 분야를 먼저 고르고 그 안에서 업종을 고른다 (검색하면 모든 분야에서 찾음)
   const FIELDS = ['음식', '소매점', '생활서비스', '학원·교육', '병원·약국', '운동·오락', '숙박', '사무실·기타'];
   const BIG2F = { '음식': '음식', '소매': '소매점', '수리·개인': '생활서비스', '교육': '학원·교육', '보건의료': '병원·약국', '예술·스포츠': '운동·오락', '숙박': '숙박' };
   const F_OVR = { '약국': '병원·약국', '동물병원': '병원·약국', '사진관': '생활서비스', '만화방': '운동·오락', '여행사': '생활서비스', '스터디카페·독서실': '학원·교육' };
   const FIELD = c => F_OVR[cats[c][2]] || BIG2F[cats[c][0]] || '사무실·기타';
+  // 업종 전환 힌트용 묶음: 같은 분야 안에서도 실제로 옮겨 갈 만한 업종끼리만 비교
+  const HINT_SUB = {
+    '미용실': '미용·관리', '네일숍': '미용·관리', '피부·체형 관리': '미용·관리', '마사지': '미용·관리', '목욕탕·사우나': '미용·관리',
+    '세탁소·빨래방': '세탁·수리', '수선집': '세탁·수리', '수리점(가전·폰·컴퓨터)': '세탁·수리',
+    '자동차 정비소': '자동차', '세차장': '자동차', '자동차 부품·타이어': '자동차', '주유소·충전소': '자동차',
+    '예식장·결혼 상담': '행사', '장례식장': '행사', '사진관': '행사', '여행사': '행사',
+    '병원': '병원', '요양병원': '병원', '유흥주점': '유흥', '모텔': '숙박', '호텔·리조트': '숙박'
+  };
+  const HINT_KEY = c => HINT_SUB[cats[c][2]] || FIELD(c);
   let curField = '음식';
   function fillCats() {
     const sel = $('cat'), keep = sel.value === '' ? lastCat : Number(sel.value);
@@ -605,11 +614,11 @@
     const v = (id, on) => $(id).classList.toggle('hidden', !on);
     v('pickN', MODE === 'naver'); v('radN', MODE === 'naver'); v('addrBox', MODE === 'naver');
     v('pickL', MODE === 'leaflet'); v('radL', MODE === 'leaflet');
-    v('pickmap', MODE === 'svg'); v('cpin', MODE !== 'svg'); v('radmap', MODE === 'svg'); v('radLegend', MODE !== 'svg');
+    v('pickmap', MODE === 'svg'); v('radmap', MODE === 'svg'); v('radLegend', MODE !== 'svg');
     if (MODE === 'naver') {
       $('radLegend').innerHTML = '<i style="background:#3182f6"></i>같은 업종(원 안)<i style="background:#fff;border:2px solid #3182f6;width:7px;height:7px"></i>같은 업종(원 밖)';
-      $('pickHint').textContent = '주소로 찾거나 지도를 움직여 가운데 빨간 점을 내 가게 자리에 맞추세요';
-    } else if (MODE === 'leaflet') $('pickHint').textContent = '지도를 움직여 가운데 빨간 점을 내 가게 자리에 맞추세요 · 두 손가락으로 확대돼요';
+      $('pickHint').textContent = '주소로 찾거나, 빨간 \'내 가게\' 점을 꾹 눌러 끌어서 옮기세요 · 지도를 움직여도 가게 위치는 그대로예요';
+    } else if (MODE === 'leaflet') $('pickHint').textContent = '빨간 \'내 가게\' 점을 꾹 눌러 끌어서 옮기세요 · 지도를 움직여도 가게 위치는 그대로예요';
     if (MODE !== 'naver') $('addrMsg').textContent = '';
   }
   function fallbackFromNaver() {
@@ -634,7 +643,6 @@
   function drawPickN(fit) {
     if (!nPick) {
       nPick = nMap('pickN');
-      naver.maps.Event.addListener(nPick, 'idle', () => { if (!$('pickN').offsetWidth || pickSync) return; const q = nPick.getCenter(); me = [q.lng(), q.lat()]; });
     }
     nClear(nPickObjs);
     const d = Number($('dong').value), c = Number($('cat').value); let b = null;
@@ -642,6 +650,9 @@
       const ll = NLL(city.lon[i], city.lat[i]); b ? b.extend(ll) : (b = new naver.maps.LatLngBounds(ll, ll));
       if (city.cat[i] === c) nDot(nPick, city.lon[i], city.lat[i], '#3182f6', '#ffffff', nPickObjs);
     }
+    const m = new naver.maps.Marker({ map: nPick, position: NLL(me[0], me[1]), draggable: true, zIndex: 1000, icon: { content: pinHTML, anchor: new naver.maps.Point(11, 11) } });
+    naver.maps.Event.addListener(m, 'dragend', () => { const q = m.getPosition(); me = [q.lng(), q.lat()]; });
+    nPickObjs.push(m);
     if (fit) fitPick();
   }
   function drawRadiusN(c) {
@@ -682,8 +693,7 @@
   $('addrQ').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); findAddr(); } });
   function drawPickL(fit) {
     if (!pickMap) {
-      pickMap = baseMap('pickL', { touchZoom: 'center', scrollWheelZoom: 'center', doubleClickZoom: 'center' }); pickLayer = L.layerGroup().addTo(pickMap);
-      pickMap.on('moveend', () => { if (!$('pickL').offsetWidth || pickSync) return; const q = pickMap.getCenter(); me = [q.lng, q.lat]; });
+      pickMap = baseMap('pickL'); pickLayer = L.layerGroup().addTo(pickMap);
     }
     pickLayer.clearLayers();
     const d = Number($('dong').value), c = Number($('cat').value), pts = [];
@@ -691,6 +701,9 @@
     for (let i = 0; i < N; i++) if (city.dong[i] === d) { pts.push([city.lat[i], city.lon[i]]); (city.cat[i] === c ? mine : others).push(i); }
     others.forEach(i => L.circleMarker([city.lat[i], city.lon[i]], { radius: 2.5, stroke: false, fillColor: '#b0b8c1', fillOpacity: .8, interactive: false }).addTo(pickLayer));
     mine.forEach(i => L.circleMarker([city.lat[i], city.lon[i]], { radius: 5, color: '#fff', weight: 1, fillColor: '#3182f6', fillOpacity: 1, interactive: false }).addTo(pickLayer));
+    const mk1 = L.marker([me[1], me[0]], { icon: pinIcon(), draggable: true, zIndexOffset: 1000, autoPan: true }).addTo(pickLayer);
+    mk1.bindTooltip('내 가게', { permanent: true, direction: 'top', offset: [0, -12] });
+    mk1.on('dragend', ev => { const ll = ev.target.getLatLng(); me = [ll.lng, ll.lat]; });
     if (fit) fitPick();
   }
   // 가게 위치 지도는 '내 가게'를 가운데 두고, 사용자가 지도를 움직이면 가운데가 곧 가게 위치가 된다
@@ -879,17 +892,17 @@
       ? `주변에 ${name}이 많아요. 같은 ${cats[c][0]} 업종 안에서 주변 경쟁이 적은 업종을 상담 때 함께 살펴보세요.`
       : `주변 경쟁은 평균 수준이에요. 비용 구조와 운영 방식을 먼저 점검해 보세요.`;
 
-    // 업종 전환 힌트: 같은 대분류에서 '반경 안 비중 ÷ 시 전체 비중'이 낮은 업종
-    const big = cats[c][0], inR = {}, inCity = {}; let rTot = 0, cTot = 0;
+    // 업종 전환 힌트: 비슷한 업종 묶음 안에서 '반경 안 비중 ÷ 시 전체 비중'이 낮은 업종
+    const big = HINT_KEY(c), inR = {}, inCity = {}; let rTot = 0, cTot = 0;
     for (let i = 0; i < N; i++) {
-      const k = city.cat[i]; if (cats[k][0] !== big) continue;
+      const k = city.cat[i]; if (HINT_KEY(k) !== big || k === CAT_YUHEUNG) continue;
       cTot++; inCity[k] = (inCity[k] || 0) + 1;
       if (dist(me[0], me[1], city.lon[i], city.lat[i]) <= R) { rTot++; inR[k] = (inR[k] || 0) + 1; }
     }
-    const alts = Object.keys(inCity).map(Number).filter(k => k !== c && inCity[k] >= 30 && (inR[k] || 0) >= 1)
+    const alts = Object.keys(inCity).map(Number).filter(k => k !== c && inCity[k] >= 30 && (inR[k] || 0) >= 1 && big !== '병원·약국')
       .map(k => ({ k, near: inR[k] || 0, idx: rTot ? ((inR[k] || 0) / rTot) / (inCity[k] / cTot) : 0 }))
-      .sort((a, b) => a.idx - b.idx || b.k - a.k).slice(0, 3);
-    $('altList').innerHTML = alts.map(a => `<li>${cats[a.k][2]} · 반경 안 ${a.near}곳 (시 평균 비중의 ${a.idx.toFixed(1)}배)</li>`).join('');
+      .filter(a => a.idx < 1).sort((a, b) => a.idx - b.idx || b.k - a.k).slice(0, 3);
+    $('altList').innerHTML = alts.length ? alts.map(a => `<li>${cats[a.k][2]} · 반경 안 ${a.near}곳 (시 평균 비중의 ${a.idx.toFixed(1)}배)</li>`).join('') : (big === '병원·약국' ? '<li>면허가 필요한 업종이라 업종 전환 대신 경영 상담을 먼저 권해요.</li>' : '<li>주변에서 비교할 만한 비슷한 업종이 적어요. 상담 때 함께 살펴보세요.</li>');
 
     // 가까운 폴리텍 캠퍼스 3곳
     const camps = POLY.map(p => ({ p, km: dist(me[0], me[1], p.lon, p.lat) / 1000 })).sort((a, b) => a.km - b.km).slice(0, 3);
