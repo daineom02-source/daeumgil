@@ -518,16 +518,16 @@
     return [median(lo), median(la)];
   }
 
-  // 실제 지도(Leaflet + OpenStreetMap). 불러오지 못하면 아래 SVG 그림으로 대신 보여 준다
+  // 실제 지도(Leaflet + OpenStreetMap 타일). 불러오지 못하면 아래 SVG 그림으로 대신 보여 준다
   const HAS_L = typeof window.L !== 'undefined';
-  const TILE = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-  const ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>';
+  const TILE = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  const ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
   let pickMap = null, pickLayer = null, pickBounds = null, radMap = null, radLayer = null, radBounds = null;
   const pinIcon = () => L.divIcon({ className: '', html: '<div class="me-pin"></div>', iconSize: [22, 22], iconAnchor: [11, 11] });
   function baseMap(id) {
     const m = L.map(id, { preferCanvas: true, zoomControl: true, attributionControl: true });
     m.setView([37.5, 127.0], 13);
-    L.tileLayer(TILE, { attribution: ATTR, subdomains: 'abcd', maxZoom: 19 }).addTo(m);
+    L.tileLayer(TILE, { attribution: ATTR, maxZoom: 19 }).addTo(m);
     return m;
   }
   if (HAS_L) {
