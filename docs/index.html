@@ -10,6 +10,8 @@
 <link rel="manifest" href="manifest.json?v=2">
 <meta name="theme-color" content="#3182F6">
 <meta name="apple-mobile-web-app-title" content="다음길">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -58,6 +60,11 @@
   select[size] { background-image: none; padding: 6px; height: 196px; }
   select[size] option { padding: 9px 10px; border-radius: 8px; }
   select[size] option:checked { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+  .lmap { height: 320px; border-radius: 16px; overflow: hidden; position: relative; z-index: 0; background: var(--gray); }
+  #radL { height: 360px; }
+  .me-pin { width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 4px solid var(--warn); box-shadow: 0 2px 6px rgba(0,0,0,.3); box-sizing: border-box; }
+  .maplegend { font-size: 12px; color: var(--sub); margin-top: 8px; }
+  .maplegend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin: 0 3px 0 8px; vertical-align: 0; }
   .hint { font-size: 13px; color: var(--mute); margin-top: 8px; }
   svg.map { width: 100%; height: auto; display: block; border-radius: 16px; background: var(--gray); touch-action: manipulation; cursor: crosshair; }
   svg.map text { paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
@@ -193,8 +200,9 @@
       <select id="cat" hidden></select>
       <div id="catBox" class="catbox" role="listbox" aria-label="업종 목록"></div></div>
     <div class="field"><label>가게 위치</label>
+      <div class="lmap hidden" id="pickL"></div>
       <svg class="map" id="pickmap" viewBox="0 0 400 300" role="img" aria-label="행정동 점포 지도. 눌러서 가게 위치를 고르세요"></svg>
-      <div class="hint">지도를 눌러 위치를 옮길 수 있어요 · 파란 점이 같은 업종이에요</div></div>
+      <div class="hint" id="pickHint">지도를 눌러 위치를 옮길 수 있어요 · 파란 점이 같은 업종이에요</div></div>
     <div class="cta"><button class="btn" id="go">내 상권 보기</button></div>
   </section>
 
@@ -213,6 +221,8 @@
     </div>
     <div class="sect">
       <h3>반경 500m 지도</h3>
+      <div class="lmap hidden" id="radL"></div>
+      <div class="maplegend hidden" id="radLegend"><i style="background:#3182f6"></i>같은 업종(원 안)<i style="background:#fff;border:2px solid #3182f6;width:7px;height:7px"></i>같은 업종(원 밖)<i style="background:#b0b8c1"></i>다른 점포</div>
       <svg class="map" id="radmap" viewBox="0 0 400 400" role="img" aria-label="반경 500미터 지도"></svg>
       <div class="stat">
         <div><b id="nMine">-</b><span>내 가게 반경 500m 같은 업종</span></div>
@@ -319,7 +329,7 @@
     m.textContent = '정보를 불러오지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.';
     b.parentNode.after(m); return;
   }
-  const [cats, IDX, CHGALL, SUP, JC, POLY] = loaded;
+  let [cats, IDX, CHGALL, SUP, JC, POLY] = loaded;
   let city, N, catCount = {}, catList = [], CHG = {}, SIGUN = '';
   const svgNS = 'http://www.w3.org/2000/svg';
   const mk = (tag, attrs) => { const e = document.createElementNS(svgNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
@@ -329,6 +339,109 @@
   const mLon = lat => 111320 * Math.cos(lat * Math.PI / 180);
   const dist = (a, b, c, d) => { const k = mLon((b + d) / 2); return Math.hypot((a - c) * k, (b - d) * M_LAT); };
 
+  // 업종 묶기: 비슷한 세부 업종을 사장님이 부르는 이름으로 합친다 (원래 이름은 검색에 남김)
+  const GROUPS = {
+    '고깃집': ['돼지고기 구이/찜', '소고기 구이/찜', '곱창 전골/구이'],
+    '치킨·닭요리': ['치킨', '닭/오리고기 구이/찜'],
+    '한식당': ['국/탕/찌개류', '백반/한정식', '기타 한식 음식점', '전/부침개'],
+    '국수·냉면': ['국수/칼국수', '냉면/밀면'],
+    '족발·보쌈': ['족발/보쌈'],
+    '횟집·해산물': ['횟집', '해산물 구이/찜', '복 요리 전문'],
+    '중국집': ['중국집', '마라탕/훠궈'],
+    '일식·돈가스': ['일식 회/초밥', '일식 면 요리', '일식 카레/돈가스/덮밥', '기타 일식 음식점'],
+    '양식·레스토랑': ['경양식', '파스타/스테이크', '패밀리레스토랑', '기타 서양식 음식점'],
+    '아시아·외국 음식': ['베트남식 전문', '기타 동남아식 전문', '분류 안된 외국식 음식점'],
+    '분식·김밥': ['김밥/만두/분식'],
+    '버거·샌드위치': ['버거', '토스트/샌드위치/샐러드'],
+    '피자': ['피자'],
+    '빵집·디저트': ['빵/도넛', '떡/한과', '아이스크림/빙수'],
+    '카페': ['카페'],
+    '뷔페·구내식당': ['뷔페', '구내식당', '그 외 기타 간이 음식점'],
+    '술집·호프': ['요리 주점', '생맥주 전문'],
+    '유흥주점': ['일반 유흥 주점', '무도 유흥 주점'],
+    '편의점': ["편의점"],
+    '슈퍼마켓·마트': ["슈퍼마켓", "그 외 기타 종합 소매업"],
+    '옷가게': ["기타 의류 소매업", "남성 의류 소매업", "여성 의류 소매업", "유아용 의류 소매업", "한복 소매업"],
+    '신발·가방·잡화': ["신발 소매업", "가방 소매업", "액세서리/잡화 소매업", "가발 소매업"],
+    '이불·커튼·원단': ["침구류/커튼 소매업", "실/섬유제품 소매업"],
+    '정육점': ["정육점"],
+    '과일·채소 가게': ["채소/과일 소매업"],
+    '생선·건어물 가게': ["수산물 소매업", "건어물/젓갈 소매업"],
+    '반찬·식료품 가게': ["반찬/식료품 소매업", "곡물/곡분 소매업"],
+    '건강식품 가게': ["건강보조식품 소매업"],
+    '음료·아이스크림 판매': ["생수/음료 소매업", "얼음 소매업", "우유 소매업", "주류 소매업", "아이스크림 할인점"],
+    '휴대폰 가게': ["핸드폰 소매업"],
+    '가전·컴퓨터 판매': ["가전제품 소매업", "컴퓨터/소프트웨어 소매업"],
+    '생활용품·주방용품': ["주방/가정용품 소매업", "전기용품/조명장치 소매업", "그 외 기타 상품 전문 소매업"],
+    '약국': ["약국"],
+    '화장품 가게': ["화장품 소매업"],
+    '안경점': ["안경렌즈 소매업"],
+    '꽃집': ["꽃집"],
+    '반려동물 용품': ["애완동물/애완용품 소매업"],
+    '문구점·서점': ["문구/회화용품 소매업", "서점", "음반/비디오물 소매업"],
+    '운동·자전거 용품': ["운동용품 소매업", "자전거 소매업"],
+    '주유소·충전소': ["주유소", "가스 충전소", "가정용 연료 소매업"],
+    '자동차 부품·타이어': ["자동차 부품 소매업", "타이어 소매업", "모터사이클 및 부품 소매업"],
+    '철물점·건축자재': ["철물/공구 소매업", "벽지/장판/마루 소매업", "건설/건축자재 소매업", "기타 건설/건축자재 소매업"],
+    '금은방·시계': ["시계/귀금속 소매업"],
+    '기념품·예술품': ["기념품점", "예술품 소매업"],
+    '중고 매장': ["중고 상품 소매업"],
+    '담배 가게': ["담배/전자담배 소매업"],
+    '가구점': ["가구 소매업"],
+    '피부·체형 관리': ["피부 관리실", "체형/비만 관리"],
+    '마사지': ["마사지/안마"],
+    '목욕탕·사우나': ["목욕탕/사우나"],
+    '세탁소·빨래방': ["세탁소", "셀프 빨래방"],
+    '수선집': ["의류/이불 수선업", "가죽/가방/신발 수선업"],
+    '수리점(가전·폰·컴퓨터)': ["가전제품 수리업", "핸드폰/통신장비 수리업", "컴퓨터/노트북/프린터 수리업", "시계/귀금속/악기 수리업", "그 외 기타 개인/가정용품 수리업"],
+    '자동차 정비소': ["자동차 정비소", "모터사이클 수리업"],
+    '세차장': ["자동차 세차장"],
+    '예식장·결혼 상담': ["예식장업", "결혼 상담 서비스업"],
+    '장례식장': ["장례식장", "화장터/묘지/납골당"],
+    '모텔': ["여관/모텔"],
+    '펜션·캠핑': ["펜션", "캠핑/글램핑"],
+    '호텔·리조트': ["호텔/리조트"],
+    '고시원': ["기숙사/고시원", "그 외 기타 숙박업"],
+    '스터디카페·독서실': ["독서실/스터디 카페"],
+    '골프 연습장': ["골프 연습장"],
+    '운동시설(볼링·수영·테니스 등)': ["볼링장", "수영장", "스쿼시/라켓볼장", "탁구장", "테니스장", "종합 스포츠시설", "기타 스포츠시설 운영업"],
+    '오락실·게임장': ["전자 게임장", "기타 오락장", "기타 오락관련 서비스업", "비디오방", "바둑/장기/체스 경기 운영업", "낚시터 운영업", "수상/해양 레저업"],
+    '복권방': ["복권 발행/판매업"],
+    '예체능 학원': ["음악학원", "미술학원", "태권도/무술학원", "기타 예술/스포츠 교육기관", "레크리에이션 교육기관"],
+    '요가·필라테스': ["요가/필라테스 학원"],
+    '직업·자격증 학원': ["기타 기술/직업 훈련학원", "전문자격/고시학원", "컴퓨터 학원", "운전학원", "직원 훈련기관"],
+    '기타 교육 서비스': ["교육컨설팅업", "기타 교육지원 서비스업", "그 외 기타 교육기관", "사회교육시설", "청소년 수련시설"],
+    '병원': ["요양병원", "일반병원", "종합병원", "한방병원", "치과병원"],
+    '치과': ["치과의원"],
+    '광고·디자인': ["광고 대행업", "광고 매체 판매업", "기타 광고 관련 서비스업", "옥외/전시 광고 대행업", "시각 디자인업", "제품 디자인업", "패션/섬유/기타 전문 디자인업"],
+    '간판·인쇄': ["명함/간판/광고물 제작", "광고물 설계/제작업"],
+    '인테리어': ["인테리어 디자인업"],
+    '법률·행정 사무소': ["변호사", "법무사", "행정사", "공인노무사", "변리사", "기타 법무관련 서비스업"],
+    '세무·회계 사무소': ["세무사", "공인회계사", "기타 회계 관련 서비스업"],
+    '사진관': ["사진촬영업"],
+    '건축·엔지니어링': ["건축 설계 및 관련 서비스업", "건물 및 토목 엔지니어링 서비스업", "기타 엔지니어링 서비스업", "도시 계획 및 조경 설계 서비스업", "환경 관련 엔지니어링 서비스업"],
+    '기타 전문 서비스': ["번역/통역 서비스업", "사업/무형 재산권 중개업", "시장 조사 및 여론 조사업"],
+    '경영 컨설팅': ["경영 컨설팅업"],
+    '청소·방역': ["건축물 일반 청소업", "산업설비; 운송장비 및 공공장소 청소업", "소독; 구충 및 방제 서비스업"],
+    '인력사무소': ["고용 알선업", "임시/일용 인력 공급업", "상용 인력 공급 및 인사관리 서비스업"],
+    '렌터카': ["자동차 대여업", "기타 운송장비 대여업"],
+    '장비 대여': ["건설기계/장비 대여업", "기타 산업용 기계/장비 대여업", "컴퓨터/사무기기 대여업"],
+    '생활용품 대여': ["기타 개인/가정용품 대여업", "스포츠/레크리에이션 용품 대여업", "음반/비디오물 대여업", "의류 대여업"],
+    '여행사': ["여행사", "기타 여행 보조/예약 서비스업"],
+    '행사·전시 대행': ["전시/컨벤션/행사 대행 서비스업"],
+    '복사·사무 지원': ["복사업", "기타 사무 지원 서비스업"],
+    '건물·조경 관리': ["사업시설 유지·관리 서비스업", "조경 유지·관리 서비스업"],
+    '부동산 중개소': ["부동산 중개/대리업"]
+  };
+  const ALIAS = { '술집·호프': '술집 호프 맥주 이자카야', '유흥주점': '술집 유흥 나이트 클럽', '치킨·닭요리': '닭 치킨집 닭갈비 찜닭', '중국집': '중식 짜장 마라', '옷가게': '의류 옷', '수리점(가전·폰·컴퓨터)': '수리 핸드폰 컴퓨터', '인력사무소': '인력 용역', '예체능 학원': '음악 미술 태권도 피아노', '부동산 중개소': '부동산 공인중개사' };
+  const RAW = cats, MAP = [], gIdx = {};
+  cats = [];
+  RAW.forEach((c, i) => {
+    const g = Object.keys(GROUPS).find(k => GROUPS[k].includes(c[2]));
+    if (!g) { MAP[i] = cats.length; cats.push([c[0], c[1], c[2].replace(/ 소매업$/, ' 가게').replace(/ 서비스업$/, '').replace(/업$/, ''), c[2]]); return; }
+    if (gIdx[g] === undefined) { gIdx[g] = cats.length; cats.push([c[0], GROUPS[g].join(', '), g, g + ' ' + (ALIAS[g] || '')]); }
+    MAP[i] = gIdx[g]; cats[gIdx[g]][3] += ' ' + c[2];
+  });
   const CAFE = cats.findIndex(c => c[2] === '카페');
   let lastCat = -1;
   function fillCats(q) {
@@ -374,6 +487,7 @@
     const e = IDX.find(x => x.name === name); if (!e) return;
     $('go').disabled = true; $('go').textContent = '불러오는 중…';
     city = await fetch('data/gg/' + e.file + '.json').then(r => r.json());
+    city.cat = city.cat.map(i => MAP[i]);
     SIGUN = name; N = city.cat.length; CHG = CHGALL[name] || {};
     catCount = {}; city.cat.forEach(c => catCount[c] = (catCount[c] || 0) + 1);
     catList = Object.keys(catCount).map(Number).sort((a, b) => catCount[b] - catCount[a]);
@@ -404,8 +518,43 @@
     return [median(lo), median(la)];
   }
 
+  // 실제 지도(Leaflet + OpenStreetMap). 불러오지 못하면 아래 SVG 그림으로 대신 보여 준다
+  const HAS_L = typeof window.L !== 'undefined';
+  const TILE = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+  const ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>';
+  let pickMap = null, pickLayer = null, pickBounds = null, radMap = null, radLayer = null, radBounds = null;
+  const pinIcon = () => L.divIcon({ className: '', html: '<div class="me-pin"></div>', iconSize: [22, 22], iconAnchor: [11, 11] });
+  function baseMap(id) {
+    const m = L.map(id, { preferCanvas: true, zoomControl: true, attributionControl: true });
+    m.setView([37.5, 127.0], 13);
+    L.tileLayer(TILE, { attribution: ATTR, subdomains: 'abcd', maxZoom: 19 }).addTo(m);
+    return m;
+  }
+  if (HAS_L) {
+    $('pickL').classList.remove('hidden'); $('pickmap').classList.add('hidden');
+    $('radL').classList.remove('hidden'); $('radLegend').classList.remove('hidden'); $('radmap').classList.add('hidden');
+    $('pickHint').textContent = '지도를 눌러 내 가게 위치를 정하거나 빨간 점을 끌어 옮기세요 · 두 손가락으로 확대돼요';
+  }
+  function drawPickL(fit) {
+    if (!pickMap) {
+      pickMap = baseMap('pickL'); pickLayer = L.layerGroup().addTo(pickMap);
+      pickMap.on('click', e => { me = [e.latlng.lng, e.latlng.lat]; drawPickL(false); });
+    }
+    pickLayer.clearLayers();
+    const d = Number($('dong').value), c = Number($('cat').value), pts = [];
+    const others = [], mine = [];
+    for (let i = 0; i < N; i++) if (city.dong[i] === d) { pts.push([city.lat[i], city.lon[i]]); (city.cat[i] === c ? mine : others).push(i); }
+    others.forEach(i => L.circleMarker([city.lat[i], city.lon[i]], { radius: 2.5, stroke: false, fillColor: '#b0b8c1', fillOpacity: .8, interactive: false }).addTo(pickLayer));
+    mine.forEach(i => L.circleMarker([city.lat[i], city.lon[i]], { radius: 5, color: '#fff', weight: 1, fillColor: '#3182f6', fillOpacity: 1, interactive: false }).addTo(pickLayer));
+    const mk1 = L.marker([me[1], me[0]], { icon: pinIcon(), draggable: true, zIndexOffset: 1000 }).addTo(pickLayer);
+    mk1.bindTooltip('내 가게', { permanent: true, direction: 'top', offset: [0, -12] });
+    mk1.on('dragend', ev => { const ll = ev.target.getLatLng(); me = [ll.lng, ll.lat]; });
+    if (fit && pts.length) { pickBounds = L.latLngBounds(pts); fitPick(); }
+  }
+  function fitPick() { if (pickMap && pickBounds && $('pickL').offsetWidth) { pickMap.invalidateSize(); pickMap.fitBounds(pickBounds, { padding: [16, 16], maxZoom: 17 }); } }
   // 1단계 지도: 행정동 점포
-  function drawPick() {
+  function drawPick(fit = true) {
+    if (HAS_L) return drawPickL(fit);
     const svg = $('pickmap'); svg.innerHTML = '';
     const d = Number($('dong').value), c = Number($('cat').value);
     const idx = []; for (let i = 0; i < N; i++) if (city.dong[i] === d) idx.push(i);
@@ -430,7 +579,7 @@
   $('pickmap').addEventListener('click', e => {
     const svg = $('pickmap'), r = svg.getBoundingClientRect();
     const px = (e.clientX - r.left) * 400 / r.width, py = (e.clientY - r.top) * 300 / r.height;
-    me = svg._inv(px, py); drawPick();
+    me = svg._inv(px, py); drawPick(false);
   });
   const reset = () => { me = defaultSpot(); drawPick(); };
   $('dong').addEventListener('change', reset);
@@ -451,6 +600,7 @@
     $('prog').style.width = (k / (ORDER.length - 1) * 100) + '%';
     $('backBtn').disabled = k === 0; $('ttl').textContent = TITLE[id];
     window.scrollTo({ top: 0 });
+    if (HAS_L) setTimeout(() => { if (id === 's1') fitPick(); if (id === 's2') fitRad(); }, 30);
   }
   $('backBtn').addEventListener('click', () => { const k = ORDER.indexOf(cur); if (k > 0) show(ORDER[k - 1]); });
   $('startBtn').addEventListener('click', () => show('s1'));
@@ -610,7 +760,25 @@
     show('s2');
   });
 
+  function drawRadiusL(c) {
+    if (!radMap) { radMap = baseMap('radL'); radLayer = L.layerGroup().addTo(radMap); }
+    radLayer.clearLayers();
+    const half = 900, k = mLon(me[1]);
+    for (let i = 0; i < N; i++) {
+      if (Math.abs((city.lon[i] - me[0]) * k) > half || Math.abs((city.lat[i] - me[1]) * M_LAT) > half) continue;
+      if (city.cat[i] === c) {
+        const inside = dist(me[0], me[1], city.lon[i], city.lat[i]) <= R;
+        L.circleMarker([city.lat[i], city.lon[i]], { radius: 5, color: '#3182f6', weight: 1.5, fillColor: inside ? '#3182f6' : '#fff', fillOpacity: 1, interactive: false }).addTo(radLayer);
+      } else L.circleMarker([city.lat[i], city.lon[i]], { radius: 2, stroke: false, fillColor: '#b0b8c1', fillOpacity: .7, interactive: false }).addTo(radLayer);
+    }
+    const circ = L.circle([me[1], me[0]], { radius: R, color: '#3182f6', weight: 2, dashArray: '6 5', fillColor: '#3182f6', fillOpacity: .06, interactive: false }).addTo(radLayer);
+    L.marker([me[1], me[0]], { icon: pinIcon(), interactive: false, zIndexOffset: 1000 }).addTo(radLayer)
+      .bindTooltip('내 가게', { permanent: true, direction: 'top', offset: [0, -12] });
+    radBounds = circ.getBounds();
+  }
+  function fitRad() { if (radMap && radBounds && $('radL').offsetWidth) { radMap.invalidateSize(); radMap.fitBounds(radBounds, { padding: [10, 10] }); } }
   function drawRadius(c, same) {
+    if (HAS_L) return drawRadiusL(c);
     const svg = $('radmap'); svg.innerHTML = '';
     const half = 750, s = 200 / half; // 1500m 폭
     const k = mLon(me[1]);
