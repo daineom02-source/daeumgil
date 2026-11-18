@@ -42,6 +42,18 @@
   /* 인트로 */
   .logo { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; color: var(--accent); margin-top: 28px; }
   .logo svg { width: 28px; height: 28px; display: block; flex: none; }
+  .heroart { margin: 4px 0 14px; border-radius: 22px; overflow: hidden; background: linear-gradient(135deg, #eaf3ff, #d6e8ff); }
+  .heroart svg { display: block; width: 100%; height: auto; }
+  .heroart text { paint-order: stroke; stroke: #eef5ff; stroke-width: 4px; stroke-linejoin: round; }
+  .soon { background: #fff8ec; border: 1px solid #ffe2b3; border-radius: 16px; padding: 12px 14px; margin: 0 0 14px; }
+  .soon > b { display: block; font-size: 13px; color: #b56d00; margin-bottom: 6px; }
+  .soon div { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 14px; padding: 3px 0; }
+  .soon .dday { flex: none; }
+  .stats3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 14px; }
+  .stats3 div { background: var(--gray); border-radius: 14px; padding: 12px 6px; text-align: center; }
+  .stats3 b { display: block; font-size: 19px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .stats3 span { font-size: 12px; color: var(--sub); }
+  .feat .ic svg { width: 22px; height: 22px; }
   .feat { display: grid; gap: 10px; margin: 26px 0; }
   .feat div { display: flex; gap: 14px; align-items: center; background: var(--gray); border-radius: 16px; padding: 16px; }
   .feat b { display: block; font-size: 15px; } .feat small { color: var(--sub); font-size: 13px; }
@@ -189,12 +201,29 @@
     <div class="logo"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#3182F6"/><path d="M150 400 C150 300 200 250 270 230 L330 212" fill="none" stroke="#fff" stroke-width="56" stroke-linecap="round"/><path d="M290 150 L372 200 L318 280" fill="none" stroke="#fff" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/><circle cx="150" cy="400" r="34" fill="#BFDBFF"/></svg>다음길</div>
     <h1 class="hero">사장님, 다음 길을 같이 찾아요</h1>
     <p class="lead">우리 가게 상권을 확인하고, 버틸지 정리할지에 맞는 지원까지 알려 드려요.</p>
-    <div class="feat">
-      <div><span class="ic" style="background:#3182f6">1</span><span><b>내 상권 리포트</b><small>반경 500m 경쟁 가게와 동네 상권 변화</small></span></div>
-      <div><span class="ic" style="background:#ff9f00">2</span><span><b>받을 수 있는 지원</b><small>폐업 지원, 철거비, 우리 시 지원사업</small></span></div>
-      <div><span class="ic" style="background:#0ca678">3</span><span><b>다시 일할 곳</b><small>가까운 폴리텍 과정과 일자리센터</small></span></div>
+    <div class="heroart"><svg viewBox="0 0 350 150" role="img" aria-label="우리 가게에서 진단, 지원, 일자리로 이어지는 길">
+      <path d="M-10 140 C 70 140, 90 95, 160 92 S 260 60, 360 22" fill="none" stroke="#fff" stroke-width="26" stroke-linecap="round"/>
+      <path d="M-10 140 C 70 140, 90 95, 160 92 S 260 60, 360 22" fill="none" stroke="#b9d6ff" stroke-width="2.5" stroke-dasharray="8 8"/>
+      <g transform="translate(26,96)"><rect x="0" y="12" width="40" height="28" rx="4" fill="#fff" stroke="#3182f6" stroke-width="2.5"/><path d="M-4 14 L20 -2 L44 14 Z" fill="#3182f6"/><rect x="15" y="24" width="10" height="16" fill="#3182f6"/></g>
+      <text x="46" y="88" font-size="11" font-weight="700" fill="#3182f6" text-anchor="middle">우리 가게</text>
+      <g transform="translate(118,62)"><path d="M14 0 C 22 0 28 6 28 14 C 28 24 14 36 14 36 C 14 36 0 24 0 14 C 0 6 6 0 14 0 Z" fill="#3182f6"/><circle cx="14" cy="14" r="5.5" fill="#fff"/></g>
+      <text x="132" y="54" font-size="11" font-weight="700" fill="#1b64da" text-anchor="middle">상권 진단</text>
+      <g transform="translate(200,40)"><path d="M14 0 C 22 0 28 6 28 14 C 28 24 14 36 14 36 C 14 36 0 24 0 14 C 0 6 6 0 14 0 Z" fill="#ff9f00"/><circle cx="14" cy="14" r="5.5" fill="#fff"/></g>
+      <text x="214" y="32" font-size="11" font-weight="700" fill="#b56d00" text-anchor="middle">받을 지원</text>
+      <g transform="translate(282,14)"><path d="M14 0 C 22 0 28 6 28 14 C 28 24 14 36 14 36 C 14 36 0 24 0 14 C 0 6 6 0 14 0 Z" fill="#0ca678"/><circle cx="14" cy="14" r="5.5" fill="#fff"/></g>
+      <text x="296" y="68" font-size="11" font-weight="700" fill="#08875f" text-anchor="middle">다시 일하기</text>
+    </svg></div>
+    <div class="soon" id="soonBox"><b>지금 신청할 수 있어요</b>
+      <div><span>무료 법률·세무·노무 상담</span><span class="dday" data-end="2026-11-30"></span></div>
+      <div><span>폐업 후 취업 교육 신청 (수당 최대 100만 원)</span><span class="dday" data-end="2026-12-10"></span></div>
     </div>
-    <p class="muted">로그인 없이 써요. 입력한 내용은 저장하지 않아요.<br>경기도 31개 시·군 · 점포 666,254곳 실제 공공데이터(2026.9.30 기준)</p>
+    <div class="feat">
+      <div><span class="ic" style="background:#3182f6"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span><span><b>내 상권 리포트</b><small>반경 500m 경쟁 가게와 동네 상권 변화</small></span></div>
+      <div><span class="ic" style="background:#ff9f00"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 9l2 6 2-5 2 5 2-6M7.5 12h9"/></svg></span><span><b>받을 수 있는 지원</b><small>폐업 지원, 철거비, 우리 시 지원사업</small></span></div>
+      <div><span class="ic" style="background:#0ca678"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="7.5" width="17" height="12" rx="2"/><path d="M9 7.5V5.5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5.5v2M3.5 12.5h17"/></svg></span><span><b>다시 일할 곳</b><small>가까운 폴리텍 과정과 일자리센터</small></span></div>
+    </div>
+    <div class="stats3"><div><b>31개</b><span>경기도 시·군</span></div><div><b>66.6만</b><span>점포 데이터</span></div><div><b>7종</b><span>공공데이터</span></div></div>
+    <p class="muted">로그인 없이 써요. 입력한 내용은 저장하지 않아요.<br>소상공인시장진흥공단 상가(상권)정보 2026.9.30 기준</p>
     <div class="cta"><button class="btn" id="startBtn" disabled>불러오는 중…</button></div>
   </section>
 
@@ -459,8 +488,8 @@
   const CAFE = cats.findIndex(c => c[2] === '카페');
   let lastCat = -1;
   // 업종 분야: 분야를 먼저 고르고 그 안에서 업종을 고른다 (검색하면 모든 분야에서 찾음)
-  const FIELDS = ['음식', '가게', '생활서비스', '학원·교육', '병원·약국', '운동·오락', '숙박', '사무실·기타'];
-  const BIG2F = { '음식': '음식', '소매': '가게', '수리·개인': '생활서비스', '교육': '학원·교육', '보건의료': '병원·약국', '예술·스포츠': '운동·오락', '숙박': '숙박' };
+  const FIELDS = ['음식', '소매점', '생활서비스', '학원·교육', '병원·약국', '운동·오락', '숙박', '사무실·기타'];
+  const BIG2F = { '음식': '음식', '소매': '소매점', '수리·개인': '생활서비스', '교육': '학원·교육', '보건의료': '병원·약국', '예술·스포츠': '운동·오락', '숙박': '숙박' };
   const F_OVR = { '약국': '병원·약국', '동물병원': '병원·약국', '사진관': '생활서비스', '만화방': '운동·오락', '여행사': '생활서비스', '스터디카페·독서실': '학원·교육' };
   const FIELD = c => F_OVR[cats[c][2]] || BIG2F[cats[c][0]] || '사무실·기타';
   let curField = '음식';
@@ -749,6 +778,8 @@
     const lab = el.dataset.label ? el.dataset.label + ' ' : '';
     if (d < 0) { el.textContent = '마감'; el.classList.add('end'); } else el.textContent = lab + (d === 0 ? 'D-DAY' : 'D-' + d);
   });
+  document.querySelectorAll('#soonBox .dday.end').forEach(el => el.parentNode.remove());
+  if (!document.querySelector('#soonBox .dday')) $('soonBox').remove();
 
   let SUM = null;
   function sumText() {
