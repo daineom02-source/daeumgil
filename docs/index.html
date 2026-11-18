@@ -63,6 +63,11 @@
   .lmap { height: 320px; border-radius: 16px; overflow: hidden; position: relative; z-index: 0; background: var(--gray); }
   #radL { height: 360px; }
   .me-pin { width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 4px solid var(--warn); box-shadow: 0 2px 6px rgba(0,0,0,.3); box-sizing: border-box; }
+  .me-lab { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); background: #fff; color: var(--warn); padding: 2px 7px; border-radius: 7px; font-size: 12px; font-weight: 700; white-space: nowrap; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
+  .addr { display: flex; gap: 8px; margin-bottom: 10px; }
+  .addr input { flex: 1; min-width: 0; }
+  .addr button { flex: none; border: 0; border-radius: 14px; padding: 0 18px; font: inherit; font-size: 16px; font-weight: 700; background: var(--accent); color: #fff; cursor: pointer; }
+  #addrMsg { font-size: 13px; color: var(--sub); margin: -4px 0 10px; min-height: 0; }
   .maplegend { font-size: 12px; color: var(--sub); margin-top: 8px; }
   .maplegend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin: 0 3px 0 8px; vertical-align: 0; }
   .hint { font-size: 13px; color: var(--mute); margin-top: 8px; }
@@ -186,7 +191,7 @@
       <div><span class="ic" style="background:#0ca678">3</span><span><b>다시 일할 곳</b><small>가까운 폴리텍 과정과 일자리센터</small></span></div>
     </div>
     <p class="muted">로그인 없이 써요. 입력한 내용은 저장하지 않아요.<br>경기도 31개 시·군 · 점포 666,254곳 실제 공공데이터(2026.9.30 기준)</p>
-    <div class="cta"><button class="btn" id="startBtn">시작하기</button></div>
+    <div class="cta"><button class="btn" id="startBtn" disabled>불러오는 중…</button></div>
   </section>
 
   <!-- 입력 -->
@@ -200,6 +205,9 @@
       <select id="cat" hidden></select>
       <div id="catBox" class="catbox" role="listbox" aria-label="업종 목록"></div></div>
     <div class="field"><label>가게 위치</label>
+      <div class="addr hidden" id="addrBox"><input type="text" id="addrQ" placeholder="주소로 찾기 (예: 시민로 123)" enterkeyhint="search"><button type="button" id="addrGo">찾기</button></div>
+      <div id="addrMsg"></div>
+      <div class="lmap hidden" id="pickN"></div>
       <div class="lmap hidden" id="pickL"></div>
       <svg class="map" id="pickmap" viewBox="0 0 400 300" role="img" aria-label="행정동 점포 지도. 눌러서 가게 위치를 고르세요"></svg>
       <div class="hint" id="pickHint">지도를 눌러 위치를 옮길 수 있어요 · 파란 점이 같은 업종이에요</div></div>
@@ -221,6 +229,7 @@
     </div>
     <div class="sect">
       <h3>반경 500m 지도</h3>
+      <div class="lmap hidden" id="radN"></div>
       <div class="lmap hidden" id="radL"></div>
       <div class="maplegend hidden" id="radLegend"><i style="background:#3182f6"></i>같은 업종(원 안)<i style="background:#fff;border:2px solid #3182f6;width:7px;height:7px"></i>같은 업종(원 밖)<i style="background:#b0b8c1"></i>다른 점포</div>
       <svg class="map" id="radmap" viewBox="0 0 400 400" role="img" aria-label="반경 500미터 지도"></svg>
@@ -323,7 +332,7 @@
     fetch('data/jobcenters.json').then(r => r.json()).catch(() => ({})),
     fetch('data/poly.json').then(r => r.json()).catch(() => [])
   ]); } catch (err) {
-    const b = $('startBtn'); b.textContent = '다시 시도하기';
+    const b = $('startBtn'); b.textContent = '다시 시도하기'; b.disabled = false;
     b.onclick = () => location.reload();
     const m = document.createElement('p'); m.className = 'muted'; m.style.color = 'var(--warn)';
     m.textContent = '정보를 불러오지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.';
@@ -530,11 +539,102 @@
     L.tileLayer(TILE, { attribution: ATTR, maxZoom: 19 }).addTo(m);
     return m;
   }
-  if (HAS_L) {
-    $('pickL').classList.remove('hidden'); $('pickmap').classList.add('hidden');
-    $('radL').classList.remove('hidden'); $('radLegend').classList.remove('hidden'); $('radmap').classList.add('hidden');
-    $('pickHint').textContent = '지도를 눌러 내 가게 위치를 정하거나 빨간 점을 끌어 옮기세요 · 두 손가락으로 확대돼요';
+  // 지도 고르기: 네이버지도 → (실패 시) OpenStreetMap → (실패 시) 그림 지도
+  const NAVER_ID = 'gh0oe71rmf';
+  let MODE = 'svg', naverFailed = false, lastRad = null;
+  window.navermap_authFailure = () => { naverFailed = true; if (MODE === 'naver') fallbackFromNaver(); };
+  function loadNaver() {
+    return new Promise(res => {
+      if (!NAVER_ID) return res(false);
+      const sc = document.createElement('script');
+      sc.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NAVER_ID}&submodules=geocoder`;
+      sc.onload = () => res(!!(window.naver && naver.maps && naver.maps.Map));
+      sc.onerror = () => res(false);
+      document.head.appendChild(sc); setTimeout(() => res(false), 4000);
+    });
   }
+  function applyMode() {
+    const v = (id, on) => $(id).classList.toggle('hidden', !on);
+    v('pickN', MODE === 'naver'); v('radN', MODE === 'naver'); v('addrBox', MODE === 'naver');
+    v('pickL', MODE === 'leaflet'); v('radL', MODE === 'leaflet');
+    v('pickmap', MODE === 'svg'); v('radmap', MODE === 'svg'); v('radLegend', MODE !== 'svg');
+    if (MODE === 'naver') {
+      $('radLegend').innerHTML = '<i style="background:#3182f6"></i>같은 업종(원 안)<i style="background:#fff;border:2px solid #3182f6;width:7px;height:7px"></i>같은 업종(원 밖)';
+      $('pickHint').textContent = '주소로 찾거나 지도를 눌러 내 가게 위치를 정하세요 · 빨간 점은 끌어서 옮길 수 있어요';
+    } else if (MODE === 'leaflet') $('pickHint').textContent = '지도를 눌러 내 가게 위치를 정하거나 빨간 점을 끌어 옮기세요 · 두 손가락으로 확대돼요';
+    if (MODE !== 'naver') $('addrMsg').textContent = '';
+  }
+  function fallbackFromNaver() {
+    MODE = HAS_L ? 'leaflet' : 'svg'; applyMode();
+    if (city) { drawPick(true); if (lastRad !== null) drawRadius(lastRad); }
+    setTimeout(() => { fitPick(); fitRad(); }, 60);
+  }
+  MODE = (await loadNaver()) && !naverFailed ? 'naver' : (HAS_L ? 'leaflet' : 'svg');
+  applyMode();
+
+  // 네이버지도 그리기 (같은 업종만 점으로, 다른 가게는 네이버 지도에 이미 보임)
+  let nPick = null, nPickObjs = [], nPickBounds = null, nRad = null, nRadObjs = [], nRadBounds = null;
+  const NLL = (lon, lat) => new naver.maps.LatLng(lat, lon);
+  const dotHTML = (fill, stroke) => `<div style="width:11px;height:11px;border-radius:50%;background:${fill};border:2px solid ${stroke};box-sizing:border-box;box-shadow:0 0 0 1px rgba(255,255,255,.7)"></div>`;
+  const pinHTML = '<div style="position:relative;width:22px;height:22px"><div class="me-pin"></div><div class="me-lab">내 가게</div></div>';
+  const nClear = arr => { arr.forEach(o => o.setMap(null)); arr.length = 0; };
+  function nMap(id) {
+    return new naver.maps.Map(id, { center: NLL(127.03, 37.74), zoom: 15, zoomControl: true,
+      zoomControlOptions: { position: naver.maps.Position.TOP_RIGHT, style: naver.maps.ZoomControlStyle.SMALL }, mapDataControl: false, scaleControl: false });
+  }
+  function nDot(map, lon, lat, fill, stroke, arr) { arr.push(new naver.maps.Marker({ map, position: NLL(lon, lat), clickable: false, icon: { content: dotHTML(fill, stroke), anchor: new naver.maps.Point(5, 5) } })); }
+  function drawPickN(fit) {
+    if (!nPick) {
+      nPick = nMap('pickN');
+      naver.maps.Event.addListener(nPick, 'click', e => { me = [e.coord.lng(), e.coord.lat()]; drawPickN(false); });
+    }
+    nClear(nPickObjs);
+    const d = Number($('dong').value), c = Number($('cat').value); let b = null;
+    for (let i = 0; i < N; i++) if (city.dong[i] === d) {
+      const ll = NLL(city.lon[i], city.lat[i]); b ? b.extend(ll) : (b = new naver.maps.LatLngBounds(ll, ll));
+      if (city.cat[i] === c) nDot(nPick, city.lon[i], city.lat[i], '#3182f6', '#ffffff', nPickObjs);
+    }
+    const m = new naver.maps.Marker({ map: nPick, position: NLL(me[0], me[1]), draggable: true, zIndex: 1000, icon: { content: pinHTML, anchor: new naver.maps.Point(11, 11) } });
+    naver.maps.Event.addListener(m, 'dragend', () => { const q = m.getPosition(); me = [q.lng(), q.lat()]; });
+    nPickObjs.push(m);
+    if (fit && b) { nPickBounds = b; fitPick(); }
+  }
+  function drawRadiusN(c) {
+    if (!nRad) nRad = nMap('radN');
+    nClear(nRadObjs);
+    const half = 900, k = mLon(me[1]);
+    for (let i = 0; i < N; i++) {
+      if (city.cat[i] !== c) continue;
+      if (Math.abs((city.lon[i] - me[0]) * k) > half || Math.abs((city.lat[i] - me[1]) * M_LAT) > half) continue;
+      const inside = dist(me[0], me[1], city.lon[i], city.lat[i]) <= R;
+      nDot(nRad, city.lon[i], city.lat[i], inside ? '#3182f6' : '#ffffff', '#3182f6', nRadObjs);
+    }
+    const circ = new naver.maps.Circle({ map: nRad, center: NLL(me[0], me[1]), radius: R, strokeColor: '#3182f6', strokeWeight: 2, strokeStyle: 'shortdash', fillColor: '#3182f6', fillOpacity: 0.06, clickable: false });
+    nRadObjs.push(circ);
+    nRadObjs.push(new naver.maps.Marker({ map: nRad, position: NLL(me[0], me[1]), zIndex: 1000, clickable: false, icon: { content: pinHTML, anchor: new naver.maps.Point(11, 11) } }));
+    nRadBounds = circ.getBounds();
+  }
+  const nFit = (map, el, bounds) => { if (map && bounds && $(el).offsetWidth) { map.setSize(new naver.maps.Size($(el).offsetWidth, $(el).offsetHeight)); map.fitBounds(bounds, { top: 16, right: 16, bottom: 16, left: 16 }); } };
+
+  // 주소로 가게 위치 찾기 (네이버 지오코딩)
+  function findAddr() {
+    const q0 = $('addrQ').value.trim(); if (!q0 || MODE !== 'naver') return;
+    const q = q0.includes(SIGUN.slice(0, 2)) ? q0 : `경기도 ${SIGUN} ${q0}`;
+    $('addrMsg').textContent = '찾는 중…';
+    naver.maps.Service.geocode({ query: q }, (status, res) => {
+      const list = status === naver.maps.Service.Status.OK && res && res.v2 && res.v2.addresses;
+      if (!list || !list.length) { $('addrMsg').textContent = '주소를 찾지 못했어요. 도로명이나 지번을 다시 확인해 주세요.'; return; }
+      const a = list[0], x = Number(a.x), y = Number(a.y);
+      let best = -1, bd = Infinity;
+      for (let i = 0; i < N; i++) { const dd = dist(x, y, city.lon[i], city.lat[i]); if (dd < bd) { bd = dd; best = i; } }
+      if (best < 0 || bd > 1500) { $('addrMsg').textContent = `${SIGUN} 밖의 주소 같아요. 위에서 시·군을 먼저 바꿔 주세요.`; return; }
+      me = [x, y]; $('dong').value = city.dong[best];
+      drawPick(false); nPick.setCenter(NLL(x, y)); nPick.setZoom(17);
+      $('addrMsg').textContent = `${a.roadAddress || a.jibunAddress} · ${city.dongs[city.dong[best]]}`;
+    });
+  }
+  $('addrGo').addEventListener('click', findAddr);
+  $('addrQ').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); findAddr(); } });
   function drawPickL(fit) {
     if (!pickMap) {
       pickMap = baseMap('pickL'); pickLayer = L.layerGroup().addTo(pickMap);
@@ -551,10 +651,11 @@
     mk1.on('dragend', ev => { const ll = ev.target.getLatLng(); me = [ll.lng, ll.lat]; });
     if (fit && pts.length) { pickBounds = L.latLngBounds(pts); fitPick(); }
   }
-  function fitPick() { if (pickMap && pickBounds && $('pickL').offsetWidth) { pickMap.invalidateSize(); pickMap.fitBounds(pickBounds, { padding: [16, 16], maxZoom: 17 }); } }
+  function fitPick() { if (MODE === 'naver') return nFit(nPick, 'pickN', nPickBounds); if (pickMap && pickBounds && $('pickL').offsetWidth) { pickMap.invalidateSize(); pickMap.fitBounds(pickBounds, { padding: [16, 16], maxZoom: 17 }); } }
   // 1단계 지도: 행정동 점포
   function drawPick(fit = true) {
-    if (HAS_L) return drawPickL(fit);
+    if (MODE === 'naver') return drawPickN(fit);
+    if (MODE === 'leaflet') return drawPickL(fit);
     const svg = $('pickmap'); svg.innerHTML = '';
     const d = Number($('dong').value), c = Number($('cat').value);
     const idx = []; for (let i = 0; i < N; i++) if (city.dong[i] === d) idx.push(i);
@@ -600,10 +701,11 @@
     $('prog').style.width = (k / (ORDER.length - 1) * 100) + '%';
     $('backBtn').disabled = k === 0; $('ttl').textContent = TITLE[id];
     window.scrollTo({ top: 0 });
-    if (HAS_L) setTimeout(() => { if (id === 's1') fitPick(); if (id === 's2') fitRad(); }, 30);
+    if (MODE !== 'svg') setTimeout(() => { if (id === 's1') fitPick(); if (id === 's2') fitRad(); }, 30);
   }
   $('backBtn').addEventListener('click', () => { const k = ORDER.indexOf(cur); if (k > 0) show(ORDER[k - 1]); });
   $('startBtn').addEventListener('click', () => show('s1'));
+  $('startBtn').disabled = false; $('startBtn').textContent = '시작하기';
   document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => show(b.dataset.next)));
   $('restart').addEventListener('click', () => show('s1'));
   const closeSheet = () => $('sheet').classList.add('hidden');
@@ -776,9 +878,11 @@
       .bindTooltip('내 가게', { permanent: true, direction: 'top', offset: [0, -12] });
     radBounds = circ.getBounds();
   }
-  function fitRad() { if (radMap && radBounds && $('radL').offsetWidth) { radMap.invalidateSize(); radMap.fitBounds(radBounds, { padding: [10, 10] }); } }
+  function fitRad() { if (MODE === 'naver') return nFit(nRad, 'radN', nRadBounds); if (radMap && radBounds && $('radL').offsetWidth) { radMap.invalidateSize(); radMap.fitBounds(radBounds, { padding: [10, 10] }); } }
   function drawRadius(c, same) {
-    if (HAS_L) return drawRadiusL(c);
+    lastRad = c;
+    if (MODE === 'naver') return drawRadiusN(c);
+    if (MODE === 'leaflet') return drawRadiusL(c);
     const svg = $('radmap'); svg.innerHTML = '';
     const half = 750, s = 200 / half; // 1500m 폭
     const k = mLon(me[1]);
