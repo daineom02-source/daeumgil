@@ -52,6 +52,8 @@
   select, input[type=text], input[type=number] { width: 100%; font: inherit; font-size: 17px; padding: 14px 16px; border: 0; border-radius: 14px; background: var(--gray); color: var(--ink); appearance: none; outline: none; }
   select { background-image: linear-gradient(45deg, transparent 50%, var(--mute) 50%), linear-gradient(135deg, var(--mute) 50%, transparent 50%); background-position: calc(100% - 22px) 52%, calc(100% - 16px) 52%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 40px; }
   select:focus, input:focus { box-shadow: 0 0 0 2px var(--accent) inset; background-color: #fff; }
+  .fchips { margin-bottom: 10px; }
+  .fchips button.dim { opacity: .45; }
   .catbox { margin-top: 8px; max-height: 216px; overflow-y: auto; -webkit-overflow-scrolling: touch; background: var(--gray); border-radius: 14px; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
   .catbox button { all: unset; box-sizing: border-box; width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 15px; line-height: 1.4; color: var(--ink); cursor: pointer; display: flex; justify-content: space-between; gap: 8px; }
   .catbox button small { color: var(--mute); font-size: 13px; flex: none; }
@@ -64,6 +66,8 @@
   #radL { height: 360px; }
   .me-pin { width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 4px solid var(--warn); box-shadow: 0 2px 6px rgba(0,0,0,.3); box-sizing: border-box; }
   .me-lab { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); background: #fff; color: var(--warn); padding: 2px 7px; border-radius: 7px; font-size: 12px; font-weight: 700; white-space: nowrap; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
+  .cpin { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; z-index: 1000; pointer-events: none; }
+  .cpin .me-pin { width: 22px; height: 22px; }
   .addr { display: flex; gap: 8px; margin-bottom: 10px; }
   .addr input { flex: 1; min-width: 0; }
   .addr button { flex: none; border: 0; border-radius: 14px; padding: 0 18px; font: inherit; font-size: 16px; font-weight: 700; background: var(--accent); color: #fff; cursor: pointer; }
@@ -201,14 +205,15 @@
     <div class="field"><label for="sigun">시·군</label><select id="sigun"></select></div>
     <div class="field"><label for="dong">행정동</label><select id="dong"></select></div>
     <div class="field"><label for="catq">업종</label>
-      <input type="text" id="catq" placeholder="검색 (예: 카페, 치킨, 미용실)">
+      <div class="chips fchips" id="fieldChips"></div>
+      <input type="text" id="catq" placeholder="업종 이름으로 찾기 (예: 꽃집, 세탁소)">
       <select id="cat" hidden></select>
       <div id="catBox" class="catbox" role="listbox" aria-label="업종 목록"></div></div>
     <div class="field"><label>가게 위치</label>
       <div class="addr hidden" id="addrBox"><input type="text" id="addrQ" placeholder="주소로 찾기 (예: 시민로 123)" enterkeyhint="search"><button type="button" id="addrGo">찾기</button></div>
       <div id="addrMsg"></div>
-      <div class="lmap hidden" id="pickN"></div>
-      <div class="lmap hidden" id="pickL"></div>
+      <div style="position:relative"><div class="lmap hidden" id="pickN"></div><div class="lmap hidden" id="pickL"></div>
+      <div class="cpin hidden" id="cpin"><div class="me-pin"></div><div class="me-lab">내 가게</div></div></div>
       <svg class="map" id="pickmap" viewBox="0 0 400 300" role="img" aria-label="행정동 점포 지도. 눌러서 가게 위치를 고르세요"></svg>
       <div class="hint" id="pickHint">지도를 눌러 위치를 옮길 수 있어요 · 파란 점이 같은 업종이에요</div></div>
     <div class="cta"><button class="btn" id="go">내 상권 보기</button></div>
@@ -453,28 +458,42 @@
   });
   const CAFE = cats.findIndex(c => c[2] === '카페');
   let lastCat = -1;
-  function fillCats(q) {
+  // 업종 분야: 분야를 먼저 고르고 그 안에서 업종을 고른다 (검색하면 모든 분야에서 찾음)
+  const FIELDS = ['음식', '가게', '생활서비스', '학원·교육', '병원·약국', '운동·오락', '숙박', '사무실·기타'];
+  const BIG2F = { '음식': '음식', '소매': '가게', '수리·개인': '생활서비스', '교육': '학원·교육', '보건의료': '병원·약국', '예술·스포츠': '운동·오락', '숙박': '숙박' };
+  const F_OVR = { '약국': '병원·약국', '동물병원': '병원·약국', '사진관': '생활서비스', '만화방': '운동·오락', '여행사': '생활서비스', '스터디카페·독서실': '학원·교육' };
+  const FIELD = c => F_OVR[cats[c][2]] || BIG2F[cats[c][0]] || '사무실·기타';
+  let curField = '음식';
+  function fillCats() {
     const sel = $('cat'), keep = sel.value === '' ? lastCat : Number(sel.value);
     sel.innerHTML = '';
-    catList.filter(c => !q || cats[c].join(' ').includes(q)).forEach(c =>
-      sel.add(new Option(`${cats[c][2]} (${cats[c][1]}) · ${catCount[c].toLocaleString()}곳`, c)));
-    if ([...sel.options].some(o => Number(o.value) === keep)) sel.value = keep;
+    catList.forEach(c => sel.add(new Option(cats[c][2], c)));
+    if (catCount[keep]) sel.value = keep;
     paintCats();
   }
   function paintCats() {
-    const sel = $('cat'), box = $('catBox'), cur = sel.value;
+    const sel = $('cat'), box = $('catBox'), cur = sel.value, q = $('catq').value.trim();
     if (cur !== '') lastCat = Number(cur);
+    const fc = $('fieldChips'); fc.innerHTML = '';
+    FIELDS.forEach(f => {
+      const n = catList.filter(c => FIELD(c) === f).length; if (!n) return;
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = f;
+      if (!q && f === curField) b.className = 'on'; else if (q) b.className = 'dim';
+      b.onclick = () => { curField = f; $('catq').value = ''; paintCats(); };
+      fc.appendChild(b);
+    });
+    const list = catList.filter(c => q ? cats[c].join(' ').includes(q) : FIELD(c) === curField);
     box.innerHTML = '';
-    if (!sel.options.length) { box.innerHTML = '<div class="empty">찾는 업종이 없어요. 다른 말로 검색해 보세요.</div>'; return; }
+    if (!list.length) { box.innerHTML = `<div class="empty">${q ? '찾는 업종이 없어요. 다른 말로 검색해 보세요.' : '이 지역에는 이 분야 가게가 없어요.'}</div>`; return; }
     let on = null;
-    [...sel.options].forEach(o => {
-      const c = Number(o.value), b = document.createElement('button');
+    list.forEach(c => {
+      const b = document.createElement('button');
       b.type = 'button'; b.setAttribute('role', 'option');
-      b.setAttribute('aria-selected', o.value === cur);
-      b.innerHTML = `<span>${cats[c][2]}</span><small>${catCount[c].toLocaleString()}곳</small>`;
+      b.setAttribute('aria-selected', String(c) === cur);
+      b.innerHTML = `<span>${cats[c][2]}${q ? ` <small style="font-weight:400">· ${FIELD(c)}</small>` : ''}</span><small>${catCount[c].toLocaleString()}곳</small>`;
       b.title = cats[c][1];
-      b.onclick = () => { sel.value = o.value; paintCats(); sel.dispatchEvent(new Event('change')); };
-      box.appendChild(b); if (o.value === cur) on = b;
+      b.onclick = () => { sel.value = c; curField = FIELD(c); if (q) $('catq').value = ''; paintCats(); sel.dispatchEvent(new Event('change')); };
+      box.appendChild(b); if (String(c) === cur) on = b;
     });
     if (on) box.scrollTop = on.offsetTop - box.offsetTop - 6;
   }
@@ -501,9 +520,9 @@
     catCount = {}; city.cat.forEach(c => catCount[c] = (catCount[c] || 0) + 1);
     catList = Object.keys(catCount).map(Number).sort((a, b) => catCount[b] - catCount[a]);
     const keep = $('cat').value === '' ? -1 : Number($('cat').value);
-    fillCats($('catq').value.trim());
+    fillCats();
     $('cat').value = catCount[keep] ? keep : (catCount[CAFE] ? CAFE : catList[0]);
-    paintCats();
+    curField = FIELD(Number($('cat').value)); paintCats();
     // 행정동: 고른 업종 점포가 가장 많은 동을 기본값으로
     const dsel = $('dong'); dsel.innerHTML = '';
     city.dongs.forEach((d, i) => dsel.add(new Option(d, i)));
@@ -514,7 +533,7 @@
     me = defaultSpot(); drawPick();
     $('go').disabled = false; $('go').textContent = '내 상권 보기';
   }
-  $('catq').addEventListener('input', e => fillCats(e.target.value.trim()));
+  $('catq').addEventListener('input', () => paintCats());
 
   let me = null; // [lon, lat]
 
@@ -533,8 +552,8 @@
   const ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
   let pickMap = null, pickLayer = null, pickBounds = null, radMap = null, radLayer = null, radBounds = null;
   const pinIcon = () => L.divIcon({ className: '', html: '<div class="me-pin"></div>', iconSize: [22, 22], iconAnchor: [11, 11] });
-  function baseMap(id) {
-    const m = L.map(id, { preferCanvas: true, zoomControl: true, attributionControl: true });
+  function baseMap(id, opts) {
+    const m = L.map(id, Object.assign({ preferCanvas: true, zoomControl: true, attributionControl: true }, opts || {}));
     m.setView([37.5, 127.0], 13);
     L.tileLayer(TILE, { attribution: ATTR, maxZoom: 19 }).addTo(m);
     return m;
@@ -557,11 +576,11 @@
     const v = (id, on) => $(id).classList.toggle('hidden', !on);
     v('pickN', MODE === 'naver'); v('radN', MODE === 'naver'); v('addrBox', MODE === 'naver');
     v('pickL', MODE === 'leaflet'); v('radL', MODE === 'leaflet');
-    v('pickmap', MODE === 'svg'); v('radmap', MODE === 'svg'); v('radLegend', MODE !== 'svg');
+    v('pickmap', MODE === 'svg'); v('cpin', MODE !== 'svg'); v('radmap', MODE === 'svg'); v('radLegend', MODE !== 'svg');
     if (MODE === 'naver') {
       $('radLegend').innerHTML = '<i style="background:#3182f6"></i>같은 업종(원 안)<i style="background:#fff;border:2px solid #3182f6;width:7px;height:7px"></i>같은 업종(원 밖)';
-      $('pickHint').textContent = '주소로 찾거나 지도를 눌러 내 가게 위치를 정하세요 · 빨간 점은 끌어서 옮길 수 있어요';
-    } else if (MODE === 'leaflet') $('pickHint').textContent = '지도를 눌러 내 가게 위치를 정하거나 빨간 점을 끌어 옮기세요 · 두 손가락으로 확대돼요';
+      $('pickHint').textContent = '주소로 찾거나 지도를 움직여 가운데 빨간 점을 내 가게 자리에 맞추세요';
+    } else if (MODE === 'leaflet') $('pickHint').textContent = '지도를 움직여 가운데 빨간 점을 내 가게 자리에 맞추세요 · 두 손가락으로 확대돼요';
     if (MODE !== 'naver') $('addrMsg').textContent = '';
   }
   function fallbackFromNaver() {
@@ -586,7 +605,7 @@
   function drawPickN(fit) {
     if (!nPick) {
       nPick = nMap('pickN');
-      naver.maps.Event.addListener(nPick, 'click', e => { me = [e.coord.lng(), e.coord.lat()]; drawPickN(false); });
+      naver.maps.Event.addListener(nPick, 'idle', () => { if (!$('pickN').offsetWidth || pickSync) return; const q = nPick.getCenter(); me = [q.lng(), q.lat()]; });
     }
     nClear(nPickObjs);
     const d = Number($('dong').value), c = Number($('cat').value); let b = null;
@@ -594,10 +613,7 @@
       const ll = NLL(city.lon[i], city.lat[i]); b ? b.extend(ll) : (b = new naver.maps.LatLngBounds(ll, ll));
       if (city.cat[i] === c) nDot(nPick, city.lon[i], city.lat[i], '#3182f6', '#ffffff', nPickObjs);
     }
-    const m = new naver.maps.Marker({ map: nPick, position: NLL(me[0], me[1]), draggable: true, zIndex: 1000, icon: { content: pinHTML, anchor: new naver.maps.Point(11, 11) } });
-    naver.maps.Event.addListener(m, 'dragend', () => { const q = m.getPosition(); me = [q.lng(), q.lat()]; });
-    nPickObjs.push(m);
-    if (fit && b) { nPickBounds = b; fitPick(); }
+    if (fit) fitPick();
   }
   function drawRadiusN(c) {
     if (!nRad) nRad = nMap('radN');
@@ -629,7 +645,7 @@
       for (let i = 0; i < N; i++) { const dd = dist(x, y, city.lon[i], city.lat[i]); if (dd < bd) { bd = dd; best = i; } }
       if (best < 0 || bd > 1500) { $('addrMsg').textContent = `${SIGUN} 밖의 주소 같아요. 위에서 시·군을 먼저 바꿔 주세요.`; return; }
       me = [x, y]; $('dong').value = city.dong[best];
-      drawPick(false); nPick.setCenter(NLL(x, y)); nPick.setZoom(17);
+      drawPick(false); fitPick();
       $('addrMsg').textContent = `${a.roadAddress || a.jibunAddress} · ${city.dongs[city.dong[best]]}`;
     });
   }
@@ -637,8 +653,8 @@
   $('addrQ').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); findAddr(); } });
   function drawPickL(fit) {
     if (!pickMap) {
-      pickMap = baseMap('pickL'); pickLayer = L.layerGroup().addTo(pickMap);
-      pickMap.on('click', e => { me = [e.latlng.lng, e.latlng.lat]; drawPickL(false); });
+      pickMap = baseMap('pickL', { touchZoom: 'center', scrollWheelZoom: 'center', doubleClickZoom: 'center' }); pickLayer = L.layerGroup().addTo(pickMap);
+      pickMap.on('moveend', () => { if (!$('pickL').offsetWidth || pickSync) return; const q = pickMap.getCenter(); me = [q.lng, q.lat]; });
     }
     pickLayer.clearLayers();
     const d = Number($('dong').value), c = Number($('cat').value), pts = [];
@@ -646,12 +662,18 @@
     for (let i = 0; i < N; i++) if (city.dong[i] === d) { pts.push([city.lat[i], city.lon[i]]); (city.cat[i] === c ? mine : others).push(i); }
     others.forEach(i => L.circleMarker([city.lat[i], city.lon[i]], { radius: 2.5, stroke: false, fillColor: '#b0b8c1', fillOpacity: .8, interactive: false }).addTo(pickLayer));
     mine.forEach(i => L.circleMarker([city.lat[i], city.lon[i]], { radius: 5, color: '#fff', weight: 1, fillColor: '#3182f6', fillOpacity: 1, interactive: false }).addTo(pickLayer));
-    const mk1 = L.marker([me[1], me[0]], { icon: pinIcon(), draggable: true, zIndexOffset: 1000 }).addTo(pickLayer);
-    mk1.bindTooltip('내 가게', { permanent: true, direction: 'top', offset: [0, -12] });
-    mk1.on('dragend', ev => { const ll = ev.target.getLatLng(); me = [ll.lng, ll.lat]; });
-    if (fit && pts.length) { pickBounds = L.latLngBounds(pts); fitPick(); }
+    if (fit) fitPick();
   }
-  function fitPick() { if (MODE === 'naver') return nFit(nPick, 'pickN', nPickBounds); if (pickMap && pickBounds && $('pickL').offsetWidth) { pickMap.invalidateSize(); pickMap.fitBounds(pickBounds, { padding: [16, 16], maxZoom: 17 }); } }
+  // 가게 위치 지도는 '내 가게'를 가운데 두고, 사용자가 지도를 움직이면 가운데가 곧 가게 위치가 된다
+  let pickSync = false;
+  function fitPick() {
+    if (!me) return;
+    pickSync = true;
+    try {
+      if (MODE === 'naver' && nPick && $('pickN').offsetWidth) { nPick.setSize(new naver.maps.Size($('pickN').offsetWidth, $('pickN').offsetHeight)); nPick.setCenter(NLL(me[0], me[1])); nPick.setZoom(16); }
+      if (MODE === 'leaflet' && pickMap && $('pickL').offsetWidth) { pickMap.invalidateSize(); pickMap.setView([me[1], me[0]], 16, { animate: false }); }
+    } finally { setTimeout(() => { pickSync = false; }, 400); }
+  }
   // 1단계 지도: 행정동 점포
   function drawPick(fit = true) {
     if (MODE === 'naver') return drawPickN(fit);
@@ -966,7 +988,7 @@
     const x = Number(p.get('x')), y = Number(p.get('y')); if (!(x && y)) return;
     $('sigun').value = e.name; await loadCity(e.name);
     if (!catCount[Number(p.get('c'))]) return;
-    $('catq').value = ''; fillCats(''); $('cat').value = p.get('c'); paintCats();
+    $('catq').value = ''; fillCats(); $('cat').value = p.get('c'); curField = FIELD(Number(p.get('c'))); paintCats();
     if (p.get('d') !== null && Number(p.get('d')) < city.dongs.length) $('dong').value = p.get('d');
     me = [x, y]; drawPick();
     const [st, ls, dr, op] = (p.get('q') || '').split('.');
