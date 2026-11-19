@@ -67,6 +67,12 @@
   select { background-image: linear-gradient(45deg, transparent 50%, var(--mute) 50%), linear-gradient(135deg, var(--mute) 50%, transparent 50%); background-position: calc(100% - 22px) 52%, calc(100% - 16px) 52%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 40px; }
   select:focus, input:focus { box-shadow: 0 0 0 2px var(--accent) inset; background-color: #fff; }
   .fchips { margin-bottom: 10px; }
+  .shopbox { margin-top: 8px; background: var(--gray); border-radius: 14px; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+  .shopbox button { all: unset; box-sizing: border-box; width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 15px; line-height: 1.4; color: var(--ink); cursor: pointer; }
+  .shopbox button:active, .shopbox button:hover { background: #fff; }
+  .shopbox small { display: block; color: var(--sub); font-size: 13px; }
+  .shopbox .empty { padding: 10px 12px; color: var(--sub); font-size: 14px; }
+  .shopok { margin-top: 8px; font-size: 14px; font-weight: 700; color: var(--accent); }
   .fchips button.dim { opacity: .45; }
   .catbox { margin-top: 8px; max-height: 216px; overflow-y: auto; -webkit-overflow-scrolling: touch; background: var(--gray); border-radius: 14px; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
   .catbox button { all: unset; box-sizing: border-box; width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 15px; line-height: 1.4; color: var(--ink); cursor: pointer; display: flex; justify-content: space-between; gap: 8px; }
@@ -267,6 +273,9 @@
     <h2 id="s1t">가게 정보를 알려 주세요</h2>
     <p class="lead" id="s1l">세 가지만 고르면 돼요.</p>
     <div class="field"><label for="sigun">시·군</label><select id="sigun"></select></div>
+    <div class="field" id="f-shop"><label for="shopq">가게 이름으로 찾기 <span style="font-weight:400">(선택 · 찾으면 아래가 자동으로 채워져요)</span></label>
+      <input type="text" id="shopq" placeholder="예: 메가커피 의정부역점, 행복미용실" autocomplete="off">
+      <div class="shopbox hidden" id="shopBox"></div><div class="shopok hidden" id="shopOk"></div></div>
     <div class="field" id="f-dong"><label for="dong">행정동</label><select id="dong"></select></div>
     <div class="field" id="f-cat"><label for="catq">업종</label>
       <div class="chips fchips" id="fieldChips"></div>
@@ -469,7 +478,7 @@
     return;
   }
   let [cats, IDX, CHGALL, SUP, JC, POLY, LMETA, FMETA, NTS] = loaded;
-  let LIC = null, PATH = 'think', FRB = new Map(); // 점포 번호 → 브랜드 번호
+  let LIC = null, NAMES = null, NAMES_FILE = '', PATH = 'think', FRB = new Map(); // 점포 번호 → 브랜드 번호
   let city, N, catCount = {}, catList = [], CHG = {}, SIGUN = '';
   const svgNS = 'http://www.w3.org/2000/svg';
   const mk = (tag, attrs) => { const e = document.createElementNS(svgNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
@@ -656,6 +665,7 @@
       LMETA ? fetch('data/gg/lic/' + e.file + '.json').then(r => r.json()).catch(() => null) : null,
       FMETA ? fetch('data/gg/fr/' + e.file + '.json').then(r => r.json()).catch(() => null) : null]);
     FRB = new Map(); if (fr) fr.i.forEach((k, j) => FRB.set(k, fr.b[j]));
+    NAMES = null; NAMES_FILE = e.file; $('shopq').value = ''; $('shopBox').classList.add('hidden'); $('shopOk').classList.add('hidden');
     city.cat = city.cat.map(i => MAP[i]);
     SIGUN = name; N = city.cat.length; CHG = CHGALL[name] || {};
     catCount = {}; city.cat.forEach(c => catCount[c] = (catCount[c] || 0) + 1);
@@ -675,6 +685,44 @@
     $('go').disabled = false; $('go').textContent = $('go').dataset.l || '내 상권 보기';
   }
   $('catq').addEventListener('input', () => paintCats());
+
+  // ---------- 가게 이름으로 위치 찾기 (상가정보 상호명·지점명) ----------
+  const norm = t => t.toLowerCase().replace(/[\s()·.,\-_/]/g, '');
+  const SHOP_ALIAS = [[/메가커피|메가mgc/, '메가엠지씨커피'], [/빽다방/, '빽다방'], [/bbq/, '비비큐'], [/bhc/, '비에이치씨'], [/cu편의점|^cu/, '씨유'], [/gs25/, '지에스25']];
+  let NAMES_N = null, shopT = 0;
+  async function loadNames() {
+    if (NAMES || !NAMES_FILE) return;
+    const f = NAMES_FILE;
+    try { const a = await fetch('data/gg/nm/' + f + '.json').then(r => r.json()); if (f === NAMES_FILE) { NAMES = a; NAMES_N = a.map(norm); } } catch (e) { NAMES = []; NAMES_N = []; }
+  }
+  function shopSearch() {
+    const box = $('shopBox'), q0 = $('shopq').value.trim();
+    if (q0.length < 2) { box.classList.add('hidden'); return; }
+    if (!NAMES) { box.classList.remove('hidden'); box.innerHTML = '<div class="empty">가게 이름을 불러오는 중…</div>'; loadNames().then(shopSearch); return; }
+    let q = norm(q0); const qs = [q]; SHOP_ALIAS.forEach(([re, to]) => { if (re.test(q)) qs.push(q.replace(re, to)); });
+    // 띄어쓰기로 나눈 단어가 모두 들어 있으면 찾은 것으로 본다 (예: '메가커피 의정부역')
+    const parts = q0.toLowerCase().split(/\s+/).filter(Boolean).map(norm);
+    const hit = [];
+    for (let i = 0; i < NAMES_N.length && hit.length < 30; i++) {
+      const n = NAMES_N[i];
+      if (qs.some(x => n.includes(x)) || (parts.length > 1 && parts.every((p, j) => n.includes(j === 0 ? (qs.length > 1 && /메가커피|메가mgc/.test(p) ? '메가엠지씨커피' : p) : p)))) hit.push(i);
+    }
+    box.classList.remove('hidden');
+    if (!hit.length) { box.innerHTML = `<div class="empty">${SIGUN}에서 '${q0.replace(/</g, '')}' 가게를 못 찾았어요. 다른 이름이나 지점명으로 찾아보거나, 아래에서 직접 골라 주세요.</div>`; return; }
+    box.innerHTML = hit.slice(0, 8).map(i => `<button type="button" data-i="${i}">${NAMES[i].replace(/</g, '')}<small>${cats[city.cat[i]][2]} · ${city.dongs[city.dong[i]]}</small></button>`).join('') +
+      (hit.length > 8 ? `<div class="empty">${hit.length >= 30 ? '30곳 넘게' : hit.length + '곳'} 찾았어요. 지점명까지 쓰면 더 정확해요.</div>` : '');
+    box.querySelectorAll('button').forEach(b => b.onclick = () => pickShop(Number(b.dataset.i)));
+  }
+  function pickShop(i) {
+    $('dong').value = city.dong[i];
+    if (catCount[city.cat[i]]) { $('catq').value = ''; $('cat').value = city.cat[i]; curField = FIELD(city.cat[i]); paintCats(); }
+    me = [city.lon[i], city.lat[i]]; drawPick(true);
+    $('shopBox').classList.add('hidden'); $('shopq').value = NAMES[i];
+    const ok = $('shopOk'); ok.classList.remove('hidden');
+    ok.textContent = `✓ ${city.dongs[city.dong[i]]} · ${cats[city.cat[i]][2]} · 지도 위치까지 맞췄어요. 다르면 아래에서 고쳐 주세요.`;
+  }
+  $('shopq').addEventListener('focus', () => loadNames());
+  $('shopq').addEventListener('input', () => { clearTimeout(shopT); $('shopOk').classList.add('hidden'); shopT = setTimeout(shopSearch, 150); });
 
   let me = null; // [lon, lat]
 
@@ -888,9 +936,9 @@
   });
   // 상황 고르기 → 상황에 맞게 입력 화면을 바꾼다
   const S1 = {
-    think: ['가게 정보를 알려 주세요', '세 가지만 고르면 돼요.', '내 상권 보기'],
+    think: ['가게 정보를 알려 주세요', '가게 이름으로 찾거나, 동네·업종·위치를 골라 주세요.', '내 상권 보기'],
     close: ['어디서 어떤 가게를 하세요?', '가까운 상담 창구와 교육, 우리 시 지원을 찾는 데 써요.', '정리 플랜 보기'],
-    restart: ['지금 가게 정보를 알려 주세요', '지금 자리와 비교해서 바꿀 업종과 옮길 동네를 골라 드려요.', '지금 상권부터 보기'],
+    restart: ['지금 가게 정보를 알려 주세요', '가게 이름으로 찾으면 편해요. 지금 자리와 비교해서 바꿀 업종과 옮길 동네를 골라 드려요.', '지금 상권부터 보기'],
     closed: ['어느 시·군에 계세요?', '가까운 교육과 일자리센터, 우리 시 지원을 찾아 드려요.', '챙길 것 보기']
   };
   function setPath(p) {
@@ -898,6 +946,7 @@
     const [t, l, g] = S1[p]; $('s1t').textContent = t; $('s1l').textContent = l; $('go').dataset.l = g; if (!$('go').disabled) $('go').textContent = g;
     $('f-loc').classList.toggle('hidden', p === 'close' || p === 'closed');
     $('f-dong').classList.toggle('hidden', p === 'closed');
+    $('f-shop').classList.toggle('hidden', p === 'closed');
     $('s2next').textContent = p === 'restart' ? '바꿀 업종·옮길 동네 보기' : '다음 단계 보기';
   }
   document.querySelectorAll('#sit button').forEach(b => { b.disabled = false; b.addEventListener('click', () => { setPath(b.dataset.p); show('s1'); }); });
