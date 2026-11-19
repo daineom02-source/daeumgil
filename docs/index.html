@@ -67,7 +67,8 @@
   select { background-image: linear-gradient(45deg, transparent 50%, var(--mute) 50%), linear-gradient(135deg, var(--mute) 50%, transparent 50%); background-position: calc(100% - 22px) 52%, calc(100% - 16px) 52%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 40px; }
   select:focus, input:focus { box-shadow: 0 0 0 2px var(--accent) inset; background-color: #fff; }
   .fchips { margin-bottom: 10px; }
-  .shopbox { margin-top: 8px; background: var(--gray); border-radius: 14px; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+  .shopbox { margin-top: 8px; max-height: 300px; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; background: var(--gray); border-radius: 14px; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+  .shopbox .cnt { position: sticky; top: -6px; z-index: 1; background: var(--gray); padding: 8px 12px 6px; font-size: 13px; font-weight: 700; color: var(--sub); }
   .shopbox button { all: unset; box-sizing: border-box; width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 15px; line-height: 1.4; color: var(--ink); cursor: pointer; }
   .shopbox button:active, .shopbox button:hover { background: #fff; }
   .shopbox small { display: block; color: var(--sub); font-size: 13px; }
@@ -703,14 +704,16 @@
     // 띄어쓰기로 나눈 단어가 모두 들어 있으면 찾은 것으로 본다 (예: '메가커피 의정부역')
     const parts = q0.toLowerCase().split(/\s+/).filter(Boolean).map(norm);
     const hit = [];
-    for (let i = 0; i < NAMES_N.length && hit.length < 30; i++) {
+    for (let i = 0; i < NAMES_N.length && hit.length < 300; i++) {
       const n = NAMES_N[i];
       if (qs.some(x => n.includes(x)) || (parts.length > 1 && parts.every((p, j) => n.includes(j === 0 ? (qs.length > 1 && /메가커피|메가mgc/.test(p) ? '메가엠지씨커피' : p) : p)))) hit.push(i);
     }
     box.classList.remove('hidden');
     if (!hit.length) { box.innerHTML = `<div class="empty">${SIGUN}에서 '${q0.replace(/</g, '')}' 가게를 못 찾았어요. 다른 이름이나 지점명으로 찾아보거나, 아래에서 직접 골라 주세요.</div>`; return; }
-    box.innerHTML = hit.slice(0, 8).map(i => `<button type="button" data-i="${i}">${NAMES[i].replace(/</g, '')}<small>${cats[city.cat[i]][2]} · ${city.dongs[city.dong[i]]}</small></button>`).join('') +
-      (hit.length > 8 ? `<div class="empty">${hit.length >= 30 ? '30곳 넘게' : hit.length + '곳'} 찾았어요. 지점명까지 쓰면 더 정확해요.</div>` : '');
+    box.innerHTML = `<div class="cnt">${hit.length >= 300 ? '300곳 넘게' : hit.length + '곳'} 찾았어요${hit.length > 6 ? ' · 내려서 더 보기' : ''}</div>` +
+      hit.map(i => `<button type="button" data-i="${i}">${NAMES[i].replace(/</g, '')}<small>${cats[city.cat[i]][2]} · ${city.dongs[city.dong[i]]}</small></button>`).join('') +
+      (hit.length >= 300 ? `<div class="empty">너무 많아서 300곳까지만 보여요. 지점명이나 동네 이름을 같이 써 주세요.</div>` : '');
+    box.scrollTop = 0;
     box.querySelectorAll('button').forEach(b => b.onclick = () => pickShop(Number(b.dataset.i)));
   }
   function pickShop(i) {
