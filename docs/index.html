@@ -74,6 +74,14 @@
   .shopbox small { display: block; color: var(--sub); font-size: 13px; }
   .shopbox .empty { padding: 10px 12px; color: var(--sub); font-size: 14px; }
   .shopok { margin-top: 8px; font-size: 14px; font-weight: 700; color: var(--accent); }
+  .shopcard { display: flex; align-items: center; gap: 12px; margin-top: 4px; padding: 16px; border-radius: 16px; background: var(--accent-soft); border: 1.5px solid var(--accent); }
+  .shopcard .ic { flex: none; width: 40px; height: 40px; border-radius: 12px; background: #fff; display: grid; place-items: center; color: var(--accent); font-size: 20px; }
+  .shopcard b { display: block; font-size: 17px; font-weight: 800; word-break: keep-all; }
+  .shopcard small { display: block; font-size: 14px; color: var(--sub); margin-top: 2px; word-break: keep-all; }
+  .shopcard button { margin-left: auto; flex: none; border: 0; background: #fff; color: var(--accent); font: inherit; font-size: 14px; font-weight: 700; padding: 8px 12px; border-radius: 10px; cursor: pointer; }
+  .linkbtn { display: block; width: 100%; margin: 4px 0 22px; padding: 12px; border: 0; background: none; font: inherit; font-size: 15px; font-weight: 700; color: var(--sub); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .manual-hd { display: flex; justify-content: space-between; align-items: center; margin: 4px 0 14px; padding-top: 16px; border-top: 1px solid var(--line); font-weight: 800; font-size: 16px; }
+  .manual-hd button { border: 0; background: none; font: inherit; font-size: 14px; color: var(--sub); cursor: pointer; }
   .fchips button.dim { opacity: .45; }
   .catbox { margin-top: 8px; max-height: 216px; overflow-y: auto; -webkit-overflow-scrolling: touch; background: var(--gray); border-radius: 14px; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
   .catbox button { all: unset; box-sizing: border-box; width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 15px; line-height: 1.4; color: var(--ink); cursor: pointer; display: flex; justify-content: space-between; gap: 8px; }
@@ -109,6 +117,32 @@
   .signal #sigSmall { font-size: 14px; font-weight: 700; opacity: .85; }
   .signal b { display: block; font-size: 40px; font-weight: 800; letter-spacing: -1px; line-height: 1.2; margin: 2px 0; }
   .signal #sigNote { font-size: 14px; }
+  .signal .vline { margin: 8px 0 0; font-size: 15px; font-weight: 500; color: var(--ink); line-height: 1.55; }
+  .vt { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 14px; }
+  .vt div { background: var(--gray); border-radius: 14px; padding: 12px 6px 10px; text-align: center; }
+  .vt b { display: block; font-size: 21px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.25; }
+  .vt b.bad { color: var(--warn); } .vt b.good { color: var(--ok); }
+  .vt span { display: block; font-size: 12px; color: var(--sub); margin-top: 3px; line-height: 1.35; }
+  .why { list-style: none; margin: 0 0 16px; padding: 0; }
+  .why li { position: relative; padding: 7px 0 7px 30px; font-size: 15px; line-height: 1.5; border-bottom: 1px solid var(--gray); }
+  .why li:last-child { border-bottom: 0; }
+  .why li::before { position: absolute; left: 0; top: 8px; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; }
+  .why li.bad::before { content: '!'; background: var(--warn-soft); color: var(--warn); }
+  .why li.good::before { content: '✓'; background: var(--ok-soft); color: var(--ok); }
+  .why li.mid::before { content: '·'; background: var(--gray); color: var(--sub); }
+  .acts { display: grid; gap: 8px; margin: 0 0 22px; }
+  .acts h3 { margin: 0 0 2px; font-size: 16px; }
+  .acts button { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; border: 1.5px solid var(--line); background: #fff; border-radius: 16px; padding: 14px 16px; font: inherit; color: var(--ink); cursor: pointer; }
+  .acts button.pri { border-color: var(--accent); background: var(--accent-soft); }
+  .acts button b { display: block; font-size: 16px; font-weight: 800; }
+  .acts button small { display: block; font-size: 13px; color: var(--sub); margin-top: 1px; }
+  .acts button .arr { margin-left: auto; color: var(--mute); font-size: 22px; }
+  details.deep { margin: 18px 0 8px; border-top: 1px solid var(--line); }
+  details.deep > summary { list-style: none; cursor: pointer; padding: 16px 2px; font-weight: 800; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
+  details.deep > summary::-webkit-details-marker { display: none; }
+  details.deep > summary::after { content: '펼치기 ›'; font-size: 14px; font-weight: 700; color: var(--accent); }
+  details.deep[open] > summary::after { content: '접기'; }
+  details.deep > summary small { display: block; font-size: 13px; font-weight: 500; color: var(--sub); margin-top: 2px; }
   .signal.ok { background: var(--ok-soft); color: var(--ok); }
   .signal.mid { background: var(--mid-soft); color: #c27c00; }
   .signal.warn { background: var(--warn-soft); color: var(--warn); }
@@ -274,9 +308,13 @@
     <h2 id="s1t">가게 정보를 알려 주세요</h2>
     <p class="lead" id="s1l">세 가지만 고르면 돼요.</p>
     <div class="field"><label for="sigun">시·군</label><select id="sigun"></select></div>
-    <div class="field" id="f-shop"><label for="shopq">가게 이름으로 찾기 <span style="font-weight:400">(선택 · 찾으면 아래가 자동으로 채워져요)</span></label>
+    <div class="field" id="f-shop"><label for="shopq">가게 이름</label>
       <input type="text" id="shopq" placeholder="예: 메가커피 의정부역점, 행복미용실" autocomplete="off">
-      <div class="shopbox hidden" id="shopBox"></div><div class="shopok hidden" id="shopOk"></div></div>
+      <div class="shopbox hidden" id="shopBox"></div><div class="shopok hidden" id="shopOk"></div>
+      <div class="shopcard hidden" id="shopCard"><span class="ic">✓</span><span><b id="scName"></b><small id="scMeta"></small></span><button type="button" id="scChange">다른 가게</button></div></div>
+    <button type="button" class="linkbtn" id="manualBtn">가게가 안 나와요 · 직접 고를게요</button>
+    <div id="manual" class="hidden">
+    <div class="manual-hd"><span id="manualT">직접 고르기</span><button type="button" id="manualClose">닫기</button></div>
     <div class="field" id="f-dong"><label for="dong">행정동</label><select id="dong"></select></div>
     <div class="field" id="f-cat"><label for="catq">업종</label>
       <div class="chips fchips" id="fieldChips"></div>
@@ -289,6 +327,7 @@
       <div style="position:relative"><div class="lmap hidden" id="pickN"></div><div class="lmap hidden" id="pickL"></div></div>
       <svg class="map" id="pickmap" viewBox="0 0 400 300" role="img" aria-label="행정동 점포 지도. 눌러서 가게 위치를 고르세요"></svg>
       <div class="hint" id="pickHint">지도를 눌러 위치를 옮길 수 있어요 · 파란 점이 같은 업종이에요</div></div>
+    </div>
     <div class="cta"><button class="btn" id="go">내 상권 보기</button></div>
   </section>
 
@@ -296,7 +335,11 @@
   <section id="s2" class="scr hidden">
     <h2 id="s2title"></h2>
     <p class="lead" id="s2lead"></p>
-    <div class="signal" id="sig"><span id="sigSmall">상권 신호</span><b id="sigWord">-</b><span id="sigNote"></span></div>
+    <div class="signal" id="sig"><span id="sigSmall">상권 신호</span><b id="sigWord">-</b><span id="sigNote"></span><p class="vline" id="vLine"></p></div>
+    <div class="vt" id="vTiles"></div>
+    <ul class="why" id="vWhy"></ul>
+    <div class="acts" id="vAct"></div>
+    <details class="deep" id="deep"><summary><span>근거 자세히 보기<small id="deepNote">지표별 설명과 숫자</small></span></summary>
     <div class="ind">
       <div class="top"><span>경쟁 밀집</span><span class="tag" id="denTag"></span></div>
       <p id="denText"></p>
@@ -321,6 +364,12 @@
       <p id="lfText"></p>
     </div>
     <div class="sect">
+      <h3>행정동별 같은 업종 점포 수</h3>
+      <p class="muted" id="dongBarsNote" style="margin:0"></p>
+      <div class="bars" id="dongBars"></div>
+    </div>
+    </details>
+    <div class="sect">
       <h3>반경 500m 지도</h3>
       <div class="lmap hidden" id="radN"></div>
       <div class="lmap hidden" id="radL"></div>
@@ -330,11 +379,6 @@
         <div><b id="nMine">-</b><span>내 가게 반경 500m 같은 업종</span></div>
         <div><b id="nAvg">-</b><span id="avgLabel">시 같은 업종 평균</span></div>
       </div>
-    </div>
-    <div class="sect">
-      <h3>행정동별 같은 업종 점포 수</h3>
-      <p class="muted" id="dongBarsNote" style="margin:0"></p>
-      <div class="bars" id="dongBars"></div>
     </div>
     <details class="more"><summary>신호는 어떻게 계산하나요?</summary>
       <p>두 지표가 모두 해당하면 주의, 하나만 해당하면 보통, 해당이 없으면 양호예요. 경쟁 밀집은 시 평균의 1.5배 이상(초기값), 동네 상권 변화는 행정동이 '상권축소'일 때 해당이에요.</p>
@@ -479,7 +523,7 @@
     return;
   }
   let [cats, IDX, CHGALL, SUP, JC, POLY, LMETA, FMETA, NTS] = loaded;
-  let LIC = null, NAMES = null, NAMES_FILE = '', PATH = 'think', FRB = new Map(); // 점포 번호 → 브랜드 번호
+  let PICKED = false, MANUAL = false, VN = null, VL = null, VF = null, LIC = null, NAMES = null, NAMES_FILE = '', PATH = 'think', FRB = new Map(); // 점포 번호 → 브랜드 번호
   let city, N, catCount = {}, catList = [], CHG = {}, SIGUN = '';
   const svgNS = 'http://www.w3.org/2000/svg';
   const mk = (tag, attrs) => { const e = document.createElementNS(svgNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
@@ -667,6 +711,7 @@
       FMETA ? fetch('data/gg/fr/' + e.file + '.json').then(r => r.json()).catch(() => null) : null]);
     FRB = new Map(); if (fr) fr.i.forEach((k, j) => FRB.set(k, fr.b[j]));
     NAMES = null; NAMES_FILE = e.file; $('shopq').value = ''; $('shopBox').classList.add('hidden'); $('shopOk').classList.add('hidden');
+    PICKED = false; $('shopCard').classList.add('hidden'); $('shopq').classList.remove('hidden');
     city.cat = city.cat.map(i => MAP[i]);
     SIGUN = name; N = city.cat.length; CHG = CHGALL[name] || {};
     catCount = {}; city.cat.forEach(c => catCount[c] = (catCount[c] || 0) + 1);
@@ -683,7 +728,7 @@
     dsel.value = (name === '의정부시' && city.dongs.includes('의정부1동')) ? city.dongs.indexOf('의정부1동') : byD.indexOf(Math.max(...byD));
     renderLocal();
     me = defaultSpot(); drawPick();
-    $('go').disabled = false; $('go').textContent = $('go').dataset.l || '내 상권 보기';
+    $('go').disabled = false; $('go').textContent = $('go').dataset.l || '내 상권 보기'; updGo();
   }
   $('catq').addEventListener('input', () => paintCats());
 
@@ -716,13 +761,32 @@
     box.scrollTop = 0;
     box.querySelectorAll('button').forEach(b => b.onclick = () => pickShop(Number(b.dataset.i)));
   }
+  // 가게를 찾았거나 직접 고르기를 열었을 때만 다음으로 넘어갈 수 있다
+  function updGo() {
+    const need = PATH !== 'closed' && !PICKED && !MANUAL, b = $('go');
+    if (!city) return;
+    b.disabled = need; b.textContent = need ? '가게를 찾아 주세요' : ($('go').dataset.l || '내 상권 보기');
+    $('manualBtn').textContent = PICKED ? '업종이나 위치가 다르면 직접 고칠게요' : '가게가 안 나와요 · 직접 고를게요';
+  }
+  function setManual(on) {
+    MANUAL = on;
+    $('manual').classList.toggle('hidden', !on && PATH !== 'closed'); $('manualBtn').classList.toggle('hidden', on || PATH === 'closed');
+    if (on) { $('shopBox').classList.add('hidden'); setTimeout(() => { if (MODE !== 'svg') fitPick(); $('manual').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); }
+    updGo();
+  }
+  $('manualBtn').addEventListener('click', () => setManual(true));
+  $('manualClose').addEventListener('click', () => setManual(false));
+  $('scChange').addEventListener('click', () => {
+    PICKED = false; $('shopCard').classList.add('hidden'); $('shopq').classList.remove('hidden'); $('shopq').value = ''; $('shopq').focus(); updGo();
+  });
   function pickShop(i) {
     $('dong').value = city.dong[i];
     if (catCount[city.cat[i]]) { $('catq').value = ''; $('cat').value = city.cat[i]; curField = FIELD(city.cat[i]); paintCats(); }
     me = [city.lon[i], city.lat[i]]; drawPick(true);
-    $('shopBox').classList.add('hidden'); $('shopq').value = NAMES[i];
-    const ok = $('shopOk'); ok.classList.remove('hidden');
-    ok.textContent = `✓ ${city.dongs[city.dong[i]]} · ${cats[city.cat[i]][2]} · 지도 위치까지 맞췄어요. 다르면 아래에서 고쳐 주세요.`;
+    $('shopBox').classList.add('hidden'); $('shopq').value = NAMES[i]; $('shopq').classList.add('hidden');
+    $('scName').textContent = NAMES[i]; $('scMeta').textContent = `${cats[city.cat[i]][2]} · ${SIGUN} ${city.dongs[city.dong[i]]}`;
+    $('shopCard').classList.remove('hidden'); PICKED = true; updGo();
+    if (MANUAL) setTimeout(() => { if (MODE !== 'svg') fitPick(); }, 60);
   }
   $('shopq').addEventListener('focus', () => loadNames());
   $('shopq').addEventListener('input', () => { clearTimeout(shopT); $('shopOk').classList.add('hidden'); shopT = setTimeout(shopSearch, 150); });
@@ -939,9 +1003,9 @@
   });
   // 상황 고르기 → 상황에 맞게 입력 화면을 바꾼다
   const S1 = {
-    think: ['가게 정보를 알려 주세요', '가게 이름으로 찾거나, 동네·업종·위치를 골라 주세요.', '내 상권 보기'],
-    close: ['어디서 어떤 가게를 하세요?', '가까운 상담 창구와 교육, 우리 시 지원을 찾는 데 써요.', '정리 플랜 보기'],
-    restart: ['지금 가게 정보를 알려 주세요', '가게 이름으로 찾으면 편해요. 지금 자리와 비교해서 바꿀 업종과 옮길 동네를 골라 드려요.', '지금 상권부터 보기'],
+    think: ['어떤 가게를 하세요?', '가게 이름만 찾으면 동네와 업종은 알아서 채워져요.', '내 상권 보기'],
+    close: ['어떤 가게를 정리하세요?', '가게 이름을 찾으면 가까운 상담 창구와 우리 시 지원을 맞춰 드려요.', '정리 플랜 보기'],
+    restart: ['지금 하는 가게를 찾아 주세요', '지금 자리와 비교해서 바꿀 업종과 옮길 동네를 골라 드려요.', '지금 상권부터 보기'],
     closed: ['어느 시·군에 계세요?', '가까운 교육과 일자리센터, 우리 시 지원을 찾아 드려요.', '챙길 것 보기']
   };
   function setPath(p) {
@@ -950,11 +1014,16 @@
     $('f-loc').classList.toggle('hidden', p === 'close' || p === 'closed');
     $('f-dong').classList.toggle('hidden', p === 'closed');
     $('f-shop').classList.toggle('hidden', p === 'closed');
+    $('manualBtn').classList.toggle('hidden', p === 'closed' || MANUAL);
+    $('manual').classList.toggle('hidden', p !== 'closed' && !MANUAL);
+    $('manualT').textContent = p === 'close' ? '동네와 업종 직접 고르기' : '동네·업종·위치 직접 고르기';
+    $('manualClose').classList.toggle('hidden', p === 'closed');
+    updGo();
     $('s2next').textContent = p === 'restart' ? '바꿀 업종·옮길 동네 보기' : '다음 단계 보기';
   }
   document.querySelectorAll('#sit button').forEach(b => { b.disabled = false; b.addEventListener('click', () => { setPath(b.dataset.p); show('s1'); }); });
   $('loadMsg').remove();
-  $('s2next').addEventListener('click', () => { if (PATH === 'restart') { renderRestart(); show('s3'); } else show('s4'); });
+  $('s2next').addEventListener('click', () => goAct($('s2next').dataset.a || (PATH === 'restart' ? 'move' : 'stay')));
   document.querySelectorAll('[data-home]').forEach(b => b.addEventListener('click', () => show('s0')));
   const closeSheet = () => { const open = !$('sheet').classList.contains('hidden'); $('sheet').classList.add('hidden'); if (open && history.state && history.state.sheet) history.back(); };
   $('sheetDim').addEventListener('click', closeSheet);
@@ -1136,6 +1205,7 @@
     const frTxt = renderFr(name, near.filter(i => dist(me[0], me[1], city.lon[i], city.lat[i]) >= 10 || !self), same);
     SUM = { sigun: SIGUN, dong: city.dongs[Number($('dong').value)], name, mine, avg, ratio, ch, hits, dense, signal: ['양호', '보통', '주의'][hits], alts: alts.map(a => cats[a.k][2]), camp: camps.map(({ p, km }) => `${p.name}(직선 ${km.toFixed(0)}km)`), jc: JC[SIGUN], rec: RK[rec], life: lifeTxt, fr: frTxt, nts: ntsTxt, c };
     closeSheet();
+    renderVerdict({ name, mine, ratio, dense, ch, shrink, hits, dn });
     if (PATH === 'close' || PATH === 'closed') { initPlan(); show('s5'); }
     else show('s2');
   });
@@ -1165,7 +1235,7 @@
   const ym = m => { m = Math.round(m); const y = Math.floor(m / 12), r = m % 12; return y ? `${y}년${r ? ' ' + r + '개월' : ''}` : `${r}개월`; };
   const pct = v => Math.round(v * 100) + '%';
   function renderLife(c, name) {
-    const ts = licSet(c), box = $('life');
+    const ts = licSet(c), box = $('life'); VL = null;
     if (!ts) { box.classList.add('hidden'); return ''; }
     const near = lifeStat(ts, i => dist(me[0], me[1], LIC.lon[i], LIC.lat[i]) <= R);
     const all = lifeStat(ts, () => true);
@@ -1178,12 +1248,60 @@
     const high = near.surv !== null && all.surv !== null && near.surv > all.surv + 0.05;
     $('lifeTag').textContent = near.surv === null ? '표본 적음' : low ? '시 평균보다 짧게 버팀' : high ? '시 평균보다 오래 버팀' : '시 평균과 비슷';
     $('lifeTag').className = 'tag ' + (near.surv === null ? 'w' : low ? 'y' : 'n');
+    VL = { s, low, high, local: near.surv !== null, cl: near.cl, op: near.op };
     const cafe = name === '카페' ? ' 카페는 대부분 휴게음식점으로 등록해서, 일반음식점으로 등록한 곳만 들어 있어요.' : '';
     $('lfText').textContent = `반경 500m 안에서 지난 3년 동안 ${name} ${near.op}곳이 문을 열고 ${near.cl}곳이 문을 닫았어요.` +
       (near.cl ? ` 문 닫은 가게는 평균 ${ym(near.avg)} 영업했어요.` : '') +
       (s !== null ? ` 3~6년 전에 문 연 가게 중 3년 넘게 버틴 곳은 ${pct(s)}${near.surv === null ? '(표본이 적어 ' + SIGUN + ' 전체 기준)' : ''}${near.surv !== null && all.surv !== null ? `, ${SIGUN} 전체는 ${pct(all.surv)}` : ''}예요.` : '') +
       ` 경기도 일반음식점 인허가 기록 기준이에요.${cafe}`;
     return `반경 500m 3년간 개업 ${near.op}·폐업 ${near.cl}곳${s !== null ? `, 3년 생존 ${pct(s)}` : ''}${all.surv !== null ? ` (시 ${pct(all.surv)})` : ''}`;
+  }
+
+  // ---------- 리포트 맨 위: 한 줄 결론 · 핵심 숫자 3개 · 이유 · 다음 행동 ----------
+  function renderVerdict(o) {
+    const { name, mine, ratio, dense, ch, shrink, hits, dn } = o;
+    const bad = [], good = [], mid = [];
+    if (dense) bad.push(`주변에 같은 ${name}${ga(name)} 시 평균의 ${ratio.toFixed(1)}배로 많아요`); else good.push(`주변 ${name} 경쟁은 시 평균${ratio < 0.8 ? '보다 적은' : ' 수준인'} 편이에요`);
+    if (shrink) bad.push(`${dn} 상권이 줄고 있어요 (상권축소)`); else if (ch && ch.type === '상권확장') good.push(`${dn} 상권이 커지고 있어요 (상권확장)`); else if (ch) mid.push(`${dn} 상권은 '${ch.type}'이에요`);
+    if (VN) { if (VN.r < -0.03) bad.push(`${SIGUN} ${VN.t} 사장님이 1년 새 ${Math.abs(VN.r * 100).toFixed(1)}% 줄었어요`); else if (VN.r > 0.03) good.push(`${SIGUN} ${VN.t} 사장님이 1년 새 ${(VN.r * 100).toFixed(1)}% 늘었어요`); else mid.push(`${SIGUN} ${VN.t} 사장님 수는 1년 동안 비슷해요`); }
+    if (VL && VL.s !== null) { if (VL.low) bad.push(`이 근처는 3년 넘게 버틴 가게가 ${pct(VL.s)}로 시 평균보다 적어요`); else if (VL.high) good.push(`이 근처는 3년 넘게 버틴 가게가 ${pct(VL.s)}로 시 평균보다 많아요`); }
+    if (VF && VF.hi) bad.push(`프랜차이즈가 많은 자리예요 (같은 업종의 ${Math.round(VF.p * 100)}%)`); else if (VF && VF.lo) mid.push(`주변은 개인 가게가 많아요 (프랜차이즈 ${Math.round(VF.p * 100)}%)`);
+    const level = hits === 2 || (hits === 1 && bad.length >= 3) ? 2 : (hits === 1 || bad.length >= 2) ? 1 : 0;
+    const sub = ['', ' 다만', ''][level];
+    $('s2title').textContent = [`이 자리 ${name}, 아직 해 볼 만해요`, `버틸 수는 있지만, 대비가 필요해요`, `이 자리 ${name}, 버티기 쉽지 않아요`][level];
+    $('s2lead').textContent = `${SIGUN} ${dn} · ${name} · 내 가게 반경 500m 기준`;
+    $('vLine').textContent = [
+      `걱정할 신호가 많지 않아요. 지원사업으로 비용을 줄이고 경영 상담을 받아 보세요.`,
+      `위험 신호가 ${bad.length}가지 보여요. 버티는 방법과 함께, 매출이 계속 줄 때를 대비해 정리 방법도 미리 알아 두세요.`,
+      `위험 신호가 ${bad.length}가지예요. 정리하거나 업종·자리를 바꾸는 방법을 먼저 보시길 권해요. 철거비 같은 지원은 정리하기 전에 신청해야 받아요.`][level];
+    // 핵심 숫자 3개
+    const t1 = `<div><b class="${dense ? 'bad' : 'good'}">${mine}곳</b><span>반경 500m ${name}<br>시 평균의 ${ratio.toFixed(1)}배</span></div>`;
+    const t2 = VN ? `<div><b class="${VN.r < -0.03 ? 'bad' : VN.r > 0.03 ? 'good' : ''}">${sgn(VN.r)}</b><span>${SIGUN} 사장님 수<br>1년 변화</span></div>`
+      : `<div><b class="${shrink ? 'bad' : ch && ch.type === '상권확장' ? 'good' : ''}">${ch ? ch.type : '-'}</b><span>동네 상권<br>변화</span></div>`;
+    const t3 = VL && VL.s !== null ? `<div><b class="${VL.low ? 'bad' : VL.high ? 'good' : ''}">${pct(VL.s)}</b><span>3년 넘게<br>버틴 가게</span></div>`
+      : VF ? `<div><b class="${VF.hi ? 'bad' : ''}">${Math.round(VF.p * 100)}%</b><span>주변 같은 업종 중<br>프랜차이즈</span></div>`
+      : `<div><b class="${shrink ? 'bad' : ''}">${ch ? ch.type : '-'}</b><span>동네 상권<br>변화</span></div>`;
+    $('vTiles').innerHTML = t1 + t2 + t3;
+    $('vWhy').innerHTML = bad.map(x => `<li class="bad">${x}</li>`).concat(good.map(x => `<li class="good">${x}</li>`), mid.slice(0, 1).map(x => `<li class="mid">${x}</li>`)).slice(0, 5).join('');
+    const nInd = 2 + (VN ? 1 : 0) + (VL ? 1 : 0) + (VF ? 1 : 0);
+    $('sigNote').textContent = `기본 지표 2개 중 ${hits}개 해당`;
+    $('deepNote').textContent = `지표 ${nInd}가지 · 행정동별 점포 수`;
+    // 다음 행동
+    const A = {
+      stay: ['버티는 방법 보기', '우리 시 지원사업 · 경영 상담 · 업종 전환 힌트'],
+      move: ['업종 바꾸기 · 가게 옮기기', '같은 데이터로 바꿀 업종과 옮길 동네 3곳씩'],
+      close: ['손해 없이 정리하는 방법', '받을 수 있는 돈과 날짜별 할 일']
+    };
+    const ord = PATH === 'restart' ? ['move', 'stay', 'close'] : level === 2 ? ['close', 'move', 'stay'] : level === 1 ? ['stay', 'move', 'close'] : ['stay', 'move', 'close'];
+    $('vAct').innerHTML = `<h3>이렇게 해 보세요</h3>` + ord.map((k, n) => `<button type="button" data-a="${k}" class="${n === 0 ? 'pri' : ''}"><span><b>${A[k][0]}</b><small>${A[k][1]}</small></span><span class="arr">›</span></button>`).join('');
+    $('vAct').querySelectorAll('button').forEach(b => b.onclick = () => goAct(b.dataset.a));
+    $('s2next').dataset.a = ord[0]; $('s2next').textContent = A[ord[0]][0];
+    $('deep').open = false;
+  }
+  function goAct(a) {
+    if (a === 'stay') { if (PATH !== 'think') setPath('think'); show('s4'); }
+    else if (a === 'move') { if (PATH !== 'restart') setPath('restart'); renderRestart(); show('s3'); }
+    else { if (PATH !== 'close') setPath('close'); initPlan(); show('s5'); }
   }
 
   // ---------- 국세청 100대 생활업종: 우리 시 같은 업종 사업자 수와 1년 증감 ----------
@@ -1213,9 +1331,11 @@
   const sgn = r => (r > 0 ? '+' : '') + (r * 100).toFixed(1) + '%';
   function renderNts(c, name) {
     const box = $('ntsBox'), k = ntsType(c), me_ = k >= 0 ? ntsYoY(SIGUN, k) : null, gg = k >= 0 ? ntsYoY('경기도', k) : null;
+    VN = null;
     if (!me_) { box.classList.add('hidden'); return ''; }
     box.classList.remove('hidden');
     const t = NTS.types[k], d = me_.n - me_.prev;
+    VN = { r: me_.r, t, gg: gg ? gg.r : null, n: me_.n };
     $('ntNl').textContent = `${SIGUN} 사업자`;
     $('ntN').textContent = me_.n.toLocaleString() + '명'; $('ntC').textContent = sgn(me_.r); $('ntG').textContent = gg ? sgn(gg.r) : '-';
     const worse = gg && me_.r < gg.r - 0.02, better = gg && me_.r > gg.r + 0.02;
@@ -1230,13 +1350,14 @@
   // ---------- 프랜차이즈 (상호명 기준 추정) ----------
   const frShare = list => list.length ? list.filter(i => FRB.has(i)).length / list.length : 0;
   function renderFr(name, near, same) {
-    const box = $('frBox');
+    const box = $('frBox'); VF = null;
     if (!FMETA || !FRB.size || near.length < 3) { box.classList.add('hidden'); return ''; }
     const nf = near.filter(i => FRB.has(i)), p = nf.length / near.length, cp = frShare(same);
     if (cp < 0.03 && !nf.length) { box.classList.add('hidden'); return ''; }
     box.classList.remove('hidden');
     $('frN').textContent = nf.length + '곳'; $('frP').textContent = Math.round(p * 100) + '%'; $('frC').textContent = Math.round(cp * 100) + '%';
     const hi = p >= cp + 0.1, lo = p <= cp - 0.1;
+    VF = { p, cp, hi, lo, n: nf.length };
     $('frTag').textContent = hi ? '프랜차이즈 많은 편' : lo ? '개인 가게 많은 편' : '시 평균과 비슷';
     $('frTag').className = 'tag ' + (hi ? 'y' : lo ? 'n' : 'w');
     const bc = {}; nf.forEach(i => { const b = FMETA.brands[FRB.get(i)]; bc[b] = (bc[b] || 0) + 1; });
@@ -1514,7 +1635,7 @@
     $('catq').value = ''; fillCats(); $('cat').value = p.get('c'); curField = FIELD(Number(p.get('c'))); paintCats();
     if (p.get('d') !== null && Number(p.get('d')) < city.dongs.length) $('dong').value = p.get('d');
     me = [x, y]; drawPick();
-    if (PATHS[p.get('p')]) setPath(p.get('p'));
+    MANUAL = true; if (PATHS[p.get('p')]) setPath(p.get('p')); else setManual(true);
     const [pl, py, pe, pd] = (p.get('k') || '').split('.'); Object.assign(P, { ls: pl || '', yu: py || '', ei: pe || '', dt: pd || '' });
     if (p.get('t')) { $('cdate').value = p.get('t'); $('cdate').dataset.p = PATH; } if (p.get('m')) $('parea').value = p.get('m');
     const [st, ls, dr, op] = (p.get('q') || '').split('.');
