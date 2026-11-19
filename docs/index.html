@@ -27,10 +27,12 @@
   .app { max-width: 480px; min-height: 100vh; margin: 0 auto; background: var(--bg); position: relative; }
   /* 상단 바 */
   .bar-top { position: sticky; top: 0; z-index: 5; background: rgba(255,255,255,.94); backdrop-filter: blur(8px); }
-  .bar-top .row { display: flex; align-items: center; height: 54px; padding: 0 8px; }
-  .bar-top .back { width: 40px; height: 40px; border: 0; background: none; font-size: 22px; color: var(--ink); cursor: pointer; border-radius: 10px; }
+  .bar-top .row { display: grid; grid-template-columns: 76px 1fr 76px; align-items: center; height: 54px; padding: 0 8px; }
+  .bar-top .back { display: inline-flex; align-items: center; gap: 2px; height: 38px; padding: 0 12px 0 6px; border: 0; background: var(--gray); font: inherit; font-size: 15px; font-weight: 700; color: var(--ink); cursor: pointer; border-radius: 19px; justify-self: start; }
+  .bar-top .back span { font-size: 22px; line-height: 1; margin-top: -2px; }
+  .bar-top .back:active { background: var(--gray2); }
   .bar-top .back:disabled { visibility: hidden; }
-  .bar-top .ttl { flex: 1; text-align: center; font-weight: 700; font-size: 17px; margin-right: 40px; }
+  .bar-top .ttl { text-align: center; font-weight: 700; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .progress { height: 3px; background: var(--gray); } .progress i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
   .scr { padding: 8px 20px 120px; }
   .hidden { display: none !important; }
@@ -235,7 +237,7 @@
 <body>
 <div class="app">
   <div class="bar-top">
-    <div class="row"><button class="back" id="backBtn" aria-label="뒤로" disabled>‹</button><div class="ttl" id="ttl">다음길</div></div>
+    <div class="row"><button class="back" id="backBtn" aria-label="이전 화면" disabled><span>‹</span>이전</button><div class="ttl" id="ttl">다음길</div></div>
     <div class="progress"><i id="prog"></i></div>
   </div>
 
@@ -294,13 +296,13 @@
       <p id="chgText"></p>
     </div>
     <div class="life hidden" id="ntsBox">
-      <div class="top"><span>국세청 기준 같은 업종 사장님 수</span><span class="tag w" id="ntsTag"></span></div>
+      <div class="top"><span>같은 업종 사장님 수</span><span class="tag w" id="ntsTag"></span></div>
       <div class="g3"><div><b id="ntN">-</b><span id="ntNl">우리 시 사업자</span></div><div><b id="ntC">-</b><span>1년 전보다</span></div><div><b id="ntG">-</b><span>경기도 전체</span></div></div>
       <p id="ntText"></p>
     </div>
     <div class="life hidden" id="frBox">
       <div class="top"><span>주변 같은 업종 중 프랜차이즈</span><span class="tag w" id="frTag"></span></div>
-      <div class="g3"><div><b id="frN">-</b><span>반경 500m 프랜차이즈</span></div><div><b id="frP">-</b><span>프랜차이즈 비율</span></div><div><b id="frC">-</b><span>시 평균 비율</span></div></div>
+      <div class="g3"><div><b id="frN">-</b><span>반경 500m</span></div><div><b id="frP">-</b><span>프랜차이즈 비율</span></div><div><b id="frC">-</b><span>시 평균 비율</span></div></div>
       <p id="frText"></p>
     </div>
     <div class="life hidden" id="life">
@@ -862,7 +864,9 @@
   let ORDER = PATHS.think;
   const TITLE = { s0: '', s1: '가게 정보', s2: '내 상권 리포트', s3: '다시 시작하기', s4: '다음 단계', s5: '폐업 정리 플랜' };
   let cur = 's0';
-  function show(id) {
+  // 폰의 뒤로가기(제스처·버튼)도 앱 안에서 이전 화면으로 가게 기록을 남긴다
+  function show(id, fromPop) {
+    if (!fromPop && id !== cur) { try { history.pushState({ scr: id, p: PATH }, ''); } catch (e) {} }
     SCR.forEach(s => $(s).classList.toggle('hidden', s !== id));
     cur = id; const k = ORDER.indexOf(id);
     if (id === 's5' && PATH === 'closed') TITLE.s5 = '폐업 후 챙길 것'; else TITLE.s5 = '폐업 정리 플랜';
@@ -871,7 +875,17 @@
     window.scrollTo({ top: 0 });
     if (MODE !== 'svg') setTimeout(() => { if (id === 's1') fitPick(); if (id === 's2') fitRad(); }, 30);
   }
-  $('backBtn').addEventListener('click', () => { const k = ORDER.indexOf(cur); if (k > 0) show(ORDER[k - 1]); });
+  $('backBtn').addEventListener('click', () => {
+    if (history.state && history.state.scr && history.length > 1) history.back();
+    else { const k = ORDER.indexOf(cur); if (k > 0) show(ORDER[k - 1], true); }
+  });
+  try { history.replaceState({ scr: 's0', p: 'think' }, ''); } catch (e) {}
+  window.addEventListener('popstate', e => {
+    const st = e.state || { scr: 's0' };
+    $('sheet').classList.add('hidden');
+    if (st.p && st.p !== PATH) setPath(st.p);
+    show(st.scr || 's0', true);
+  });
   // 상황 고르기 → 상황에 맞게 입력 화면을 바꾼다
   const S1 = {
     think: ['가게 정보를 알려 주세요', '세 가지만 고르면 돼요.', '내 상권 보기'],
@@ -890,7 +904,7 @@
   $('loadMsg').remove();
   $('s2next').addEventListener('click', () => { if (PATH === 'restart') { renderRestart(); show('s3'); } else show('s4'); });
   document.querySelectorAll('[data-home]').forEach(b => b.addEventListener('click', () => show('s0')));
-  const closeSheet = () => $('sheet').classList.add('hidden');
+  const closeSheet = () => { const open = !$('sheet').classList.contains('hidden'); $('sheet').classList.add('hidden'); if (open && history.state && history.state.sheet) history.back(); };
   $('sheetDim').addEventListener('click', closeSheet);
 
   // 철거비 예상: ㎡ → 평(소수점 올림) × 20만 원, 최대 600만 원
@@ -958,6 +972,7 @@
       const i = l.indexOf(': '); return i > 0 && !l.startsWith('-') && !l.startsWith('※') ? `<dt>${l.slice(0, i)}</dt><dd>${l.slice(i + 2)}</dd>` : `<dd>${l}</dd>`; }).join('')}</dl>
       <button class="btn" id="copyBtn">요약 글 복사</button><button class="btn line sharebtn" id="shareBtn">결과 링크 보내기</button><span id="copied" class="copied"></span></div>`;
     $('sheet').classList.remove('hidden');
+    try { history.pushState({ scr: cur, p: PATH, sheet: 1 }, ''); } catch (e) {}
     $('copyBtn').addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(sumText()); $('copied').textContent = '복사했어요. 문자나 카톡에 붙여 넣으세요.'; }
       catch (e) { $('copied').textContent = '복사가 막혀 있어요. 화면을 캡처해 주세요.'; }
@@ -1149,10 +1164,10 @@
     if (!me_) { box.classList.add('hidden'); return ''; }
     box.classList.remove('hidden');
     const t = NTS.types[k], d = me_.n - me_.prev;
-    $('ntNl').textContent = `${SIGUN} ${t}`;
+    $('ntNl').textContent = `${SIGUN} 사업자`;
     $('ntN').textContent = me_.n.toLocaleString() + '명'; $('ntC').textContent = sgn(me_.r); $('ntG').textContent = gg ? sgn(gg.r) : '-';
     const worse = gg && me_.r < gg.r - 0.02, better = gg && me_.r > gg.r + 0.02;
-    $('ntsTag').textContent = me_.r < -0.03 ? '사장님 수 줄어드는 중' : me_.r > 0.03 ? '사장님 수 늘어나는 중' : '큰 변화 없음';
+    $('ntsTag').textContent = me_.r < -0.03 ? '줄어드는 중' : me_.r > 0.03 ? '늘어나는 중' : '큰 변화 없음';
     $('ntsTag').className = 'tag ' + (me_.r < -0.03 ? 'y' : me_.r > 0.03 ? 'n' : 'w');
     $('ntText').textContent = `${SIGUN}에서 ${t} 사업자는 ${me_.n.toLocaleString()}명으로, 1년 전보다 ${Math.abs(d).toLocaleString()}명 ${d < 0 ? '줄었어요' : d > 0 ? '늘었어요' : '그대로예요'}(${sgn(me_.r)}).` +
       (gg ? ` 경기도 전체는 ${sgn(gg.r)}${worse ? '라서, 우리 시가 더 빠르게 줄고 있어요.' : better ? '라서, 우리 시는 상대적으로 나은 편이에요.' : '로 비슷해요.'}` : '') +
