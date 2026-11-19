@@ -217,7 +217,10 @@
   .rc .why { display: inline-block; font-size: 12px; font-weight: 700; color: #6b5bd2; background: #efedff; border-radius: 8px; padding: 2px 8px; margin-left: auto; }
   .pathnote { font-size: 13px; color: var(--sub); background: var(--gray); border-radius: 12px; padding: 10px 12px; margin: 0 0 12px; }
   /* 폐업 플랜 */
-  .dateinp { width: 100%; font: inherit; font-size: 16px; padding: 10px 12px; border: 0; border-radius: 12px; background: var(--gray); color: var(--ink); }
+  .dateinp { display: block; box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0; height: 48px; font: inherit; font-size: 16px; padding: 0 14px; border: 0; border-radius: 12px; background: var(--gray); color: var(--ink); text-align: left; -webkit-appearance: none; appearance: none; }
+  /* 아이폰 사파리: 날짜 칸이 오른쪽으로 밀리거나 가운데 정렬되는 문제 */
+  .dateinp::-webkit-date-and-time-value { text-align: left; margin: 0; }
+  .dateinp::-webkit-datetime-edit { padding: 0; }
   .money .amt { float: right; color: var(--accent); font-size: 15px; font-weight: 800; }
   .money li.off { color: var(--mute); background: var(--gray); border-color: var(--gray); }
   .money li.off .amt { color: var(--mute); font-weight: 500; font-size: 13px; }
