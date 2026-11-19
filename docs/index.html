@@ -293,6 +293,16 @@
       <div class="top"><span>동네 상권 변화</span><span class="tag" id="chgTag"></span></div>
       <p id="chgText"></p>
     </div>
+    <div class="life hidden" id="ntsBox">
+      <div class="top"><span>국세청 기준 같은 업종 사장님 수</span><span class="tag w" id="ntsTag"></span></div>
+      <div class="g3"><div><b id="ntN">-</b><span id="ntNl">우리 시 사업자</span></div><div><b id="ntC">-</b><span>1년 전보다</span></div><div><b id="ntG">-</b><span>경기도 전체</span></div></div>
+      <p id="ntText"></p>
+    </div>
+    <div class="life hidden" id="frBox">
+      <div class="top"><span>주변 같은 업종 중 프랜차이즈</span><span class="tag w" id="frTag"></span></div>
+      <div class="g3"><div><b id="frN">-</b><span>반경 500m 프랜차이즈</span></div><div><b id="frP">-</b><span>프랜차이즈 비율</span></div><div><b id="frC">-</b><span>시 평균 비율</span></div></div>
+      <p id="frText"></p>
+    </div>
     <div class="life hidden" id="life">
       <div class="top"><span>이 근처 같은 업종, 얼마나 버텼나</span><span class="tag w" id="lifeTag"></span></div>
       <div class="g3"><div><b id="lfOpen">-</b><span>3년간 새로 연 곳</span></div><div><b id="lfClose">-</b><span>3년간 문 닫은 곳</span></div><div><b id="lfSurv">-</b><span>3년 넘게 버틴 비율</span></div></div>
@@ -317,6 +327,8 @@
     <details class="more"><summary>신호는 어떻게 계산하나요?</summary>
       <p>두 지표가 모두 해당하면 주의, 하나만 해당하면 보통, 해당이 없으면 양호예요. 경쟁 밀집은 시 평균의 1.5배 이상(초기값), 동네 상권 변화는 행정동이 '상권축소'일 때 해당이에요.</p>
       <p>'얼마나 버텼나'는 경기도 일반음식점 인허가 기록(문 연 날·문 닫은 날)으로 계산해요. 음식점 업종만 나오고, 휴게음식점으로 등록하는 카페·빵집은 일부만 들어 있어요.</p>
+      <p>'같은 업종 사장님 수'는 국세청 100대 생활업종 사업자 현황(2026년 9월, 시군구별)이에요. 개인·법인 사업자 수를 1년 전과 비교해요.</p>
+      <p>프랜차이즈는 상가정보의 상호명과 지점명으로 추정해요. 같은 이름으로 여러 곳에 지점을 낸 상호를 브랜드로 보고 세기 때문에, 공정거래위원회 공식 가맹점 수와는 다를 수 있어요.</p>
       <p>이 데이터에는 매출과 유동인구가 없어서, 장사가 잘되는지는 판단하지 않아요. 결과는 참고용이에요.</p></details>
     <div class="cta"><button class="btn" id="s2next">다음 단계 보기</button></div>
   </section>
@@ -446,14 +458,16 @@
     fetch('data/gg/support.json').then(r => r.json()),
     fetch('data/jobcenters.json').then(r => r.json()).catch(() => ({})),
     fetch('data/poly.json').then(r => r.json()).catch(() => []),
-    fetch('data/gg/lic/meta.json').then(r => r.json()).catch(() => null)
+    fetch('data/gg/lic/meta.json').then(r => r.json()).catch(() => null),
+    fetch('data/gg/fr/meta.json').then(r => r.json()).catch(() => null),
+    fetch('data/gg/nts.json').then(r => r.json()).catch(() => null)
   ]); } catch (err) {
     const m = $('loadMsg'); m.style.color = 'var(--warn)';
     m.innerHTML = '정보를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.<br><button class="btn line" style="margin-top:8px;height:44px" onclick="location.reload()">다시 시도하기</button>';
     return;
   }
-  let [cats, IDX, CHGALL, SUP, JC, POLY, LMETA] = loaded;
-  let LIC = null, PATH = 'think';
+  let [cats, IDX, CHGALL, SUP, JC, POLY, LMETA, FMETA, NTS] = loaded;
+  let LIC = null, PATH = 'think', FRB = new Map(); // 점포 번호 → 브랜드 번호
   let city, N, catCount = {}, catList = [], CHG = {}, SIGUN = '';
   const svgNS = 'http://www.w3.org/2000/svg';
   const mk = (tag, attrs) => { const e = document.createElementNS(svgNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
@@ -635,8 +649,11 @@
   async function loadCity(name) {
     const e = IDX.find(x => x.name === name); if (!e) return;
     $('go').disabled = true; $('go').textContent = '불러오는 중…';
-    [city, LIC] = await Promise.all([fetch('data/gg/' + e.file + '.json').then(r => r.json()),
-      LMETA ? fetch('data/gg/lic/' + e.file + '.json').then(r => r.json()).catch(() => null) : null]);
+    let fr;
+    [city, LIC, fr] = await Promise.all([fetch('data/gg/' + e.file + '.json').then(r => r.json()),
+      LMETA ? fetch('data/gg/lic/' + e.file + '.json').then(r => r.json()).catch(() => null) : null,
+      FMETA ? fetch('data/gg/fr/' + e.file + '.json').then(r => r.json()).catch(() => null) : null]);
+    FRB = new Map(); if (fr) fr.i.forEach((k, j) => FRB.set(k, fr.b[j]));
     city.cat = city.cat.map(i => MAP[i]);
     SIGUN = name; N = city.cat.length; CHG = CHGALL[name] || {};
     catCount = {}; city.cat.forEach(c => catCount[c] = (catCount[c] || 0) + 1);
@@ -910,10 +927,12 @@
     if (PATH === 'restart') return [head,
       `상황: 업종 변경·이전 검토 · ${s.sigun} ${s.dong} · ${s.name}`,
       `지금 상권: ${s.signal} (반경 500m ${s.mine}곳, 시 평균의 ${s.ratio.toFixed(1)}배)${s.life ? ' · ' + s.life : ''}`,
+      s.nts ? `같은 업종 사장님 수: ${s.nts}` : '',
+      s.fr ? `프랜차이즈: ${s.fr}` : '',
       `바꿀 업종 후보: ${RS.biz.join(', ') || '없음'}`,
       `옮길 동네 후보: ${RS.move.join(', ') || '없음'}`,
       `함께 볼 지원: 희망리턴 재기사업화(2027년 1월 공고) · 경기 재도전학교 · 통합콜센터 1533-0100`,
-      `※ 임대료와 매출은 반영하지 않은 참고용 정보예요.`].join('\n');
+      `※ 임대료와 매출은 반영하지 않은 참고용 정보예요.`].filter(Boolean).join('\n');
     return [
       `[다음길 상담 요약] ${t.getFullYear()}.${t.getMonth() + 1}.${t.getDate()}`,
       `상황: 계속할지 고민 중 · ${s.sigun} ${s.dong} · ${s.name}`,
@@ -921,6 +940,8 @@
       `- 경쟁 밀집: 반경 500m ${s.name} ${s.mine}곳 (시 평균 ${s.avg.toFixed(1)}곳, ${s.ratio.toFixed(1)}배)`,
       `- 상권 변화: ${s.ch ? s.dong + ' ' + s.ch.type + ' (2025년 3분기)' : '자료 없음'}`,
       s.life ? `- 얼마나 버텼나: ${s.life}` : '',
+      s.nts ? `- 같은 업종 사장님 수: ${s.nts}` : '',
+      s.fr ? `- 프랜차이즈: ${s.fr}` : '',
       QRES ? `받을 수 있는 지원: ${QRES.text}` : '',
       `버티기: 희망리턴 재기사업화(경영개선) · 업종 전환 힌트 ${s.alts.join(', ')}`,
       `정리하기: 희망리턴 원스톱폐업지원(철거비 최대 600만 원, 2027년 1월 공고) · 경기도 사업정리 지원 · 중기부 무료 법률·세무 상담(~11.30)`,
@@ -971,7 +992,7 @@
     const pct = Math.max(1, Math.round(higher / Math.max(counts.length, 1) * 100));
 
     $('s2title').textContent = `반경 500m 안 ${name} ${mine.toLocaleString()}곳`;
-    $('s2lead').textContent = `${city.dongs[Number($('dong').value)]} 내 가게 기준이에요. ${SIGUN} ${name}은 모두 ${same.length.toLocaleString()}곳이에요.`;
+    $('s2lead').textContent = `${city.dongs[Number($('dong').value)]} 내 가게 기준이에요. ${SIGUN} ${name}${(c => c >= 0 && c <= 11171 && c % 28 ? '은' : '는')(name.charCodeAt(name.length - 1) - 0xAC00)} 모두 ${same.length.toLocaleString()}곳이에요.`;
     $('nMine').textContent = mine.toLocaleString() + '곳';
     $('nAvg').textContent = avg.toFixed(1) + '곳';
     $('avgLabel').textContent = `${SIGUN} ${name} 평균 (반경 500m)`;
@@ -1044,7 +1065,9 @@
     setTab(rec);
     // 이 근처 같은 업종이 얼마나 버텼나 (인허가 기록)
     const lifeTxt = renderLife(c, name);
-    SUM = { sigun: SIGUN, dong: city.dongs[Number($('dong').value)], name, mine, avg, ratio, ch, hits, dense, signal: ['양호', '보통', '주의'][hits], alts: alts.map(a => cats[a.k][2]), camp: camps.map(({ p, km }) => `${p.name}(직선 ${km.toFixed(0)}km)`), jc: JC[SIGUN], rec: RK[rec], life: lifeTxt, c };
+    const ntsTxt = renderNts(c, name);
+    const frTxt = renderFr(name, near.filter(i => dist(me[0], me[1], city.lon[i], city.lat[i]) >= 10 || !self), same);
+    SUM = { sigun: SIGUN, dong: city.dongs[Number($('dong').value)], name, mine, avg, ratio, ch, hits, dense, signal: ['양호', '보통', '주의'][hits], alts: alts.map(a => cats[a.k][2]), camp: camps.map(({ p, km }) => `${p.name}(직선 ${km.toFixed(0)}km)`), jc: JC[SIGUN], rec: RK[rec], life: lifeTxt, fr: frTxt, nts: ntsTxt, c };
     closeSheet();
     if (PATH === 'close' || PATH === 'closed') { initPlan(); show('s5'); }
     else show('s2');
@@ -1096,6 +1119,68 @@
     return `반경 500m 3년간 개업 ${near.op}·폐업 ${near.cl}곳${s !== null ? `, 3년 생존 ${pct(s)}` : ''}${all.surv !== null ? ` (시 ${pct(all.surv)})` : ''}`;
   }
 
+  // ---------- 국세청 100대 생활업종: 우리 시 같은 업종 사업자 수와 1년 증감 ----------
+  const NTSMAP = {
+    '카페': '커피음료점', '빵집·디저트': '제과점', '분식·김밥': '분식점', '치킨·닭요리': '패스트푸드점', '버거·샌드위치': '패스트푸드점', '피자': '패스트푸드점',
+    '중국집': '중식음식점', '일식·돈가스': '일식음식점', '양식·레스토랑': '기타외국식음식점', '아시아·외국 음식': '기타외국식음식점',
+    '한식당': '한식음식점', '국수·냉면': '한식음식점', '족발·보쌈': '한식음식점', '고깃집': '한식음식점', '횟집·해산물': '한식음식점',
+    '뷔페·구내식당': '구내식당', '술집·호프': '호프주점', '편의점': '편의점', '슈퍼마켓·마트': '슈퍼마켓', '옷가게': '옷가게', '신발·가방·잡화': '신발가게',
+    '이불·커튼·원단': '침구ㆍ커튼가게', '정육점': '정육점', '과일·채소 가게': '과일가게', '생선·건어물 가게': '생선가게', '반찬·식료품 가게': '식료품가게',
+    '건강식품 가게': '건강보조식품가게', '휴대폰 가게': '휴대폰가게', '가전·컴퓨터 판매': '가전제품판매점', '약국': '약국', '화장품 가게': '화장품가게',
+    '안경점': '안경점', '꽃집': '꽃가게', '반려동물 용품': '애완용품점', '문구점·서점': '문구점', '운동·자전거 용품': '스포츠용품점', '주유소·충전소': '주유소',
+    '철물점·건축자재': '철물점', '금은방·시계': '시계ㆍ귀금속점', '담배 가게': '담배ㆍ복권소매업', '가구점': '가구점', '피부·체형 관리': '피부관리업',
+    '목욕탕·사우나': '목욕탕', '세탁소·빨래방': '세탁소', '수리점(가전·폰·컴퓨터)': '가전제품수리점', '자동차 정비소': '자동차수리점', '예식장·결혼 상담': '예식장',
+    '모텔': '여관ㆍ모텔', '펜션·캠핑': '펜션ㆍ게스트하우스', '스터디카페·독서실': '독서실', '골프 연습장': '실외골프연습장', '운동시설(볼링·수영·테니스 등)': '스포츠시설운영업',
+    '예체능 학원': '예술학원', '직업·자격증 학원': '기술ㆍ직업훈련학원', '치과': '치과의원', '간판·인쇄': '간판광고물업', '인테리어': '실내장식가게',
+    '세무·회계 사무소': '세무사', '사진관': '사진촬영업'
+  };
+  const NTSRULE = [[/미용/, '미용실'], [/이발/, '이발소'], [/노래/, '노래방'], [/PC방|pc방|인터넷/, 'pc방'], [/부동산 중개|공인중개/, '부동산중개업'],
+    [/공부방|교습소/, '교습소ㆍ공부방'], [/입시|교과|보습|외국어/, '교습학원'], [/헬스|체력단련/, '헬스클럽'], [/당구/, '당구장'], [/스크린 골프/, '실내스크린골프점'],
+    [/동물병원/, '동물병원'], [/여행사/, '여행사'], [/한의원/, '한방병원ㆍ한의원'], [/내과|소아/, '내과ㆍ소아과의원'], [/안과/, '안과의원'], [/이비인후/, '이비인후과의원'],
+    [/산부인과/, '산부인과의원'], [/성형외과/, '성형외과의원'], [/피부과|비뇨/, '피부ㆍ비뇨기과의원'], [/정신/, '신경정신과의원'], [/주차장/, '주차장운영업'], [/간이 주점|간이주점/, '간이주점']];
+  function ntsType(c) {
+    const nm = cats[c][2], t = NTSMAP[nm] || (NTSRULE.find(([re]) => re.test(nm + ' ' + cats[c][3])) || [])[1];
+    return NTS && t ? NTS.types.indexOf(t) : -1;
+  }
+  const ntsYoY = (sg, k) => { const v = NTS && NTS.g[sg] && NTS.g[sg][k]; return v && v[1] >= 20 ? { n: v[0], prev: v[1], r: v[0] / v[1] - 1 } : null; };
+  const sgn = r => (r > 0 ? '+' : '') + (r * 100).toFixed(1) + '%';
+  function renderNts(c, name) {
+    const box = $('ntsBox'), k = ntsType(c), me_ = k >= 0 ? ntsYoY(SIGUN, k) : null, gg = k >= 0 ? ntsYoY('경기도', k) : null;
+    if (!me_) { box.classList.add('hidden'); return ''; }
+    box.classList.remove('hidden');
+    const t = NTS.types[k], d = me_.n - me_.prev;
+    $('ntNl').textContent = `${SIGUN} ${t}`;
+    $('ntN').textContent = me_.n.toLocaleString() + '명'; $('ntC').textContent = sgn(me_.r); $('ntG').textContent = gg ? sgn(gg.r) : '-';
+    const worse = gg && me_.r < gg.r - 0.02, better = gg && me_.r > gg.r + 0.02;
+    $('ntsTag').textContent = me_.r < -0.03 ? '사장님 수 줄어드는 중' : me_.r > 0.03 ? '사장님 수 늘어나는 중' : '큰 변화 없음';
+    $('ntsTag').className = 'tag ' + (me_.r < -0.03 ? 'y' : me_.r > 0.03 ? 'n' : 'w');
+    $('ntText').textContent = `${SIGUN}에서 ${t} 사업자는 ${me_.n.toLocaleString()}명으로, 1년 전보다 ${Math.abs(d).toLocaleString()}명 ${d < 0 ? '줄었어요' : d > 0 ? '늘었어요' : '그대로예요'}(${sgn(me_.r)}).` +
+      (gg ? ` 경기도 전체는 ${sgn(gg.r)}${worse ? '라서, 우리 시가 더 빠르게 줄고 있어요.' : better ? '라서, 우리 시는 상대적으로 나은 편이에요.' : '로 비슷해요.'}` : '') +
+      (t !== name ? ` 국세청 통계에서는 ${name}${ga(name)} '${t}'에 포함돼요.` : '') + ` 국세청 100대 생활업종(${NTS.asof}) 기준이에요.`;
+    return `${SIGUN} ${t} 사업자 ${me_.n.toLocaleString()}명, 1년 ${sgn(me_.r)}${gg ? ` (경기도 ${sgn(gg.r)})` : ''}`;
+  }
+
+  // ---------- 프랜차이즈 (상호명 기준 추정) ----------
+  const frShare = list => list.length ? list.filter(i => FRB.has(i)).length / list.length : 0;
+  function renderFr(name, near, same) {
+    const box = $('frBox');
+    if (!FMETA || !FRB.size || near.length < 3) { box.classList.add('hidden'); return ''; }
+    const nf = near.filter(i => FRB.has(i)), p = nf.length / near.length, cp = frShare(same);
+    if (cp < 0.03 && !nf.length) { box.classList.add('hidden'); return ''; }
+    box.classList.remove('hidden');
+    $('frN').textContent = nf.length + '곳'; $('frP').textContent = Math.round(p * 100) + '%'; $('frC').textContent = Math.round(cp * 100) + '%';
+    const hi = p >= cp + 0.1, lo = p <= cp - 0.1;
+    $('frTag').textContent = hi ? '프랜차이즈 많은 편' : lo ? '개인 가게 많은 편' : '시 평균과 비슷';
+    $('frTag').className = 'tag ' + (hi ? 'y' : lo ? 'n' : 'w');
+    const bc = {}; nf.forEach(i => { const b = FMETA.brands[FRB.get(i)]; bc[b] = (bc[b] || 0) + 1; });
+    const top = Object.entries(bc).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    $('frText').textContent = `반경 500m ${name} ${near.length}곳 중 ${nf.length}곳이 프랜차이즈로 보여요` +
+      (top.length ? ` (${top.map(([b, n]) => b + (n > 1 ? ' ' + n + '곳' : '')).join(', ')})` : '') + '. ' +
+      (hi ? '브랜드 가게와 가격·홍보로 경쟁해야 하는 자리예요. ' : lo ? '개인 가게끼리 경쟁하는 자리예요. ' : '') +
+      `상가정보 상호명 기준 추정이에요.`;
+    return `반경 500m ${name} ${near.length}곳 중 프랜차이즈 ${nf.length}곳(${Math.round(p * 100)}%, 시 평균 ${Math.round(cp * 100)}%, 상호명 기준 추정)`;
+  }
+
   // ---------- 다시 시작: 업종 바꾸기 · 가게 옮기기 ----------
   const RS = { biz: [], move: [] };
   // 하던 일과 설비·기술이 비슷해서 옮겨 가기 쉬운 업종
@@ -1131,37 +1216,44 @@
     }
     let biz = [];
     const easy = EASY[name] || [];
+    const frOf = k => { let t = 0, f = 0; for (let i = 0; i < N; i++) if (city.cat[i] === k) { t++; if (FRB.has(i)) f++; } return t ? f / t : 0; };
     if (big !== '병원·약국') biz = Object.keys(inCity).map(Number).filter(k => k !== c && inCity[k] >= 30).map(k => {
       const ts = licSet(k), st = ts ? lifeStat(ts, () => true) : null;
       const idx = rTot ? ((inR[k] || 0) / rTot) / (inCity[k] / cTot) : 1, ez = easy.includes(cats[k][2]);
       // 주변에 적을수록, 오래 버틸수록, 하던 일과 비슷할수록 위로. 주변에 한 곳도 없으면 수요가 없을 수도 있어 조금 내림
-      return { k, near: inR[k] || 0, idx, ez, surv: st && st.surv, score: Math.min(idx, 1.5) - (ez ? 0.6 : 0) + (inR[k] ? 0 : 0.35) - (st && st.surv !== null ? (st.surv - 0.5) * 0.8 : 0) };
+      const ny = ntsType(k) >= 0 ? ntsYoY(SIGUN, ntsType(k)) : null;
+      return { k, near: inR[k] || 0, idx, ez, ny, surv: st && st.surv, score: (ny ? -ny.r * 3 : 0) + Math.min(idx, 1.5) - (ez ? 0.6 : 0) + (inR[k] ? 0 : 0.35) - (st && st.surv !== null ? (st.surv - 0.5) * 0.8 : 0) };
     }).sort((a, b) => a.score - b.score).slice(0, 3);
     RS.biz = biz.map(b => cats[b.k][2]);
     $('r-biz').innerHTML = biz.length ? `<p class="pathnote">같은 '${big}' 분야에서 지금 가게 반경 500m 안에 적고, ${LMETA ? '경기도 인허가 기록상 오래 버티고, ' : ''}하던 일과 설비·기술이 비슷한 업종을 위로 올렸어요.</p>` + biz.map((b, n) => `<div class="rc"><div class="hd"><span class="n">${n + 1}</span><b>${cats[b.k][2]}</b>${b.ez ? '<span class="why">하던 일과 비슷</span>' : ''}</div><ul>
         <li>반경 500m 안 <b>${b.near}곳</b> · 시 전체 비중의 <b>${b.idx.toFixed(1)}배</b>${b.idx < 1 ? ' (주변에 적은 편)' : ''}</li>
-        <li>${SIGUN} 전체 ${inCity[b.k].toLocaleString()}곳</li>
+        <li>${SIGUN} 전체 ${inCity[b.k].toLocaleString()}곳${FRB.size ? ` · 그중 프랜차이즈 ${Math.round(frOf(b.k) * 100)}%` : ''}</li>
+        ${b.ny ? `<li>${SIGUN} ${NTS.types[ntsType(b.k)]} 사업자 1년 <b>${sgn(b.ny.r)}</b> (국세청)</li>` : ''}
         ${b.surv !== null && b.surv !== undefined ? `<li>${SIGUN}에서 3년 넘게 버틴 비율 <b>${pct(b.surv)}</b> (인허가 기록)</li>` : ''}
       </ul><button class="go" data-cat="${b.k}">이 업종으로 진단해 보기 ›</button></div>`).join('')
       : `<p class="pathnote">${big === '병원·약국' ? '면허가 필요한 업종이라 업종 전환 대신 경영 상담과 이전을 먼저 권해요.' : '주변에서 비교할 만한 비슷한 업종이 적어요. 상담 때 함께 살펴보세요.'}</p>`;
     // 가게 옮기기: 같은 업종 비중이 낮고, 상권이 줄지 않고, 문 닫는 비율이 낮은 동네
-    const tot = city.dongs.map(() => 0), same = city.dongs.map(() => 0), lo = city.dongs.map(() => []), la = city.dongs.map(() => []);
-    let sAll = 0;
-    for (let i = 0; i < N; i++) { const d = city.dong[i]; tot[d]++; lo[d].push(city.lon[i]); la[d].push(city.lat[i]); if (city.cat[i] === c) { same[d]++; sAll++; } }
+    const tot = city.dongs.map(() => 0), same = city.dongs.map(() => 0), sfr = city.dongs.map(() => 0), lo = city.dongs.map(() => []), la = city.dongs.map(() => []);
+    let sAll = 0, fAll = 0;
+    for (let i = 0; i < N; i++) { const d = city.dong[i]; tot[d]++; lo[d].push(city.lon[i]); la[d].push(city.lat[i]); if (city.cat[i] === c) { same[d]++; sAll++; if (FRB.has(i)) { sfr[d]++; fAll++; } } }
+    const cityFr = sAll ? fAll / sAll : 0, useFr = FRB.size && cityFr >= 0.05;
     const cityShare = sAll / N, ts = licSet(c), cityLife = ts ? lifeStat(ts, () => true) : null;
     const cand = city.dongs.map((dn, d) => {
       if (d === myD || tot[d] < 80) return null;
       const share = same[d] / tot[d], ratio = cityShare ? share / cityShare : 1, ch = CHG[dn];
       const cx = median(lo[d]), cy = median(la[d]), km = dist(me[0], me[1], cx, cy) / 1000;
       const lf = ts ? lifeStat(ts, i => LIC.d[i] === d) : null, rate = lf && lf.rate;
-      const score = ratio + (ch && ch.type === '상권축소' ? 0.6 : 0) - (ch && ch.type === '상권확장' ? 0.25 : 0) + km * 0.04
+      const frp = same[d] >= 3 ? sfr[d] / same[d] : null;
+      const score = ratio + (useFr && frp !== null ? (frp - cityFr) * 0.8 : 0) + (ch && ch.type === '상권축소' ? 0.6 : 0) - (ch && ch.type === '상권확장' ? 0.25 : 0) + km * 0.04
         + (rate !== null && rate !== undefined && cityLife && cityLife.rate !== null ? (rate - cityLife.rate) * 1.5 : 0);
-      return { d, dn, n: same[d], tot: tot[d], ratio, ch, km, rate, score };
+      return { d, dn, n: same[d], tot: tot[d], ratio, ch, km, rate, frp, score };
     }).filter(x => x && x.tot >= 80).sort((a, b) => a.score - b.score).slice(0, 3);
     RS.move = cand.map(x => x.dn);
     $('r-move').innerHTML = `<p class="pathnote">${SIGUN} 안에서 ${name}${ga(name)} 동네 점포 중 차지하는 비중이 낮고, 상권이 줄지 않는 동네를 골랐어요${ts ? '. 음식점은 지난 3년 문 닫은 비율도 함께 봤어요' : ''}. 가까운 순서로 가산점을 줬어요.</p>` +
+      (useFr ? `<p class="pathnote" style="margin-top:-4px">개인 가게라면 프랜차이즈가 적은 동네에 가산점을 줬어요 (상호명 기준 추정).</p>` : '') +
       cand.map((x, n) => `<div class="rc"><div class="hd"><span class="n">${n + 1}</span><b>${x.dn}</b></div><ul>
         <li>${name} <b>${x.n}곳</b> · 동네 점포 중 비중이 시 평균의 <b>${x.ratio.toFixed(1)}배</b></li>
+        ${useFr && x.frp !== null ? `<li>이 동네 ${name} 중 프랜차이즈 <b>${Math.round(x.frp * 100)}%</b> (시 평균 ${Math.round(cityFr * 100)}%)</li>` : ''}
         <li>동네 상권: <b>${x.ch ? x.ch.type : '자료 없음'}</b>${x.ch ? ' (2025년 3분기)' : ''}</li>
         ${x.rate !== null && x.rate !== undefined ? `<li>지난 3년 문 닫은 비율 <b>${pct(x.rate)}</b>${cityLife && cityLife.rate !== null ? ` (시 평균 ${pct(cityLife.rate)})` : ''}</li>` : ''}
         <li>지금 가게에서 직선 ${x.km.toFixed(1)}km</li>
