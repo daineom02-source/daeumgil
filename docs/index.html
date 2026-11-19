@@ -273,6 +273,20 @@
   .money .amt { float: right; color: var(--accent); font-size: 15px; font-weight: 800; }
   .money li.off { color: var(--mute); background: var(--gray); border-color: var(--gray); }
   .money li.off .amt { color: var(--mute); font-weight: 500; font-size: 13px; }
+  .mrow { border: 1px solid var(--line); border-radius: 14px; margin-bottom: 8px; background: #fff; }
+  .mrow > summary { display: flex; align-items: center; gap: 10px; padding: 14px 16px; list-style: none; cursor: pointer; font-weight: 700; font-size: 16px; }
+  .mrow > summary::-webkit-details-marker { display: none; }
+  .mrow > summary .amt { margin-left: auto; color: var(--accent); font-weight: 800; white-space: nowrap; }
+  .mrow > summary::after { content: '›'; color: var(--mute); font-size: 20px; transition: transform .15s; }
+  .mrow[open] > summary::after { transform: rotate(90deg); }
+  .mrow .bd { padding: 0 16px 14px; font-size: 14px; color: var(--sub); line-height: 1.6; }
+  .mrow .bd b { color: var(--ink); }
+  .mrow.off > summary { color: var(--mute); font-weight: 500; font-size: 15px; }
+  .mrow.off > summary .amt { color: var(--mute); font-weight: 500; font-size: 13px; }
+  .todo { list-style: none; margin: 14px 0 0; padding: 0; counter-reset: td; }
+  .todo li { counter-increment: td; display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 1px solid rgba(49,130,246,.15); color: var(--ink); font-size: 15px; font-weight: 700; line-height: 1.45; }
+  .todo li::before { content: counter(td); flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; font-weight: 800; display: grid; place-items: center; margin-top: 1px; }
+  .todo li span { flex: 1; } .todo li em { flex: none; font-style: normal; font-size: 13px; font-weight: 700; color: var(--accent); background: #fff; border-radius: 8px; padding: 2px 8px; }
   .mtot { background: var(--accent-soft); border-radius: 16px; padding: 16px; margin: 0 0 12px; font-size: 14px; color: var(--sub); }
   .mtot b { display: block; font-size: 26px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; line-height: 1.3; }
   .tl .when { display: inline-block; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 8px; padding: 2px 8px; margin-top: 6px; }
@@ -491,16 +505,17 @@
       <div class="q"><span>사장님 본인이 고용보험에 1년 넘게 가입했나요?</span><div class="chips" data-k="ei"><button data-v="y">네</button><button data-v="n">아니요</button><button data-v="u">모르겠어요</button></div></div>
       <div class="q"><span>사업하며 생긴 빚을 갚기 어려운가요?</span><div class="chips" data-k="dt"><button data-v="y">네</button><button data-v="n">아니요</button></div></div>
     </div>
-    <h3 style="margin-top:22px">놓치면 안 되는 돈</h3>
     <div id="mtot"></div>
-    <ol class="check money" id="money"></ol>
-    <div class="tl" id="sched"></div>
-    <h3 style="margin-top:22px">다시 일할 곳</h3>
-    <ol class="check">
+    <h3 style="margin-top:22px">받을 수 있는 돈 <small class="muted" style="font-weight:500;font-size:13px">눌러서 신청 방법 보기</small></h3>
+    <div id="money"></div>
+    <details class="deep" id="schedBox"><summary><span id="schedT">전체 일정 보기<small id="schedN"></small></span></summary><div class="tl" id="sched"></div></details>
+    <details class="deep"><summary><span>다시 일할 곳<small>취업 교육 · 폴리텍 · 일자리센터</small></span></summary>
+    <ol class="check" style="margin-top:0">
       <li>희망리턴패키지 특화취업지원<small>온라인 기초교육 → 심화교육(1:1 상담 포함)을 마치면 전직장려수당 60만 원, 취업해 60일 이상 다니면 40만 원을 더 받아요. 2023.1.1 이후 폐업자가 대상이에요.</small><span class="dday" data-end="2026-12-10" data-label="교육 신청"></span><br><a class="go" href="https://www.sbiz24.kr/#/pbanc" target="_blank" rel="noopener">소상공인24에서 교육 신청 ›</a><a class="go tel" href="https://www.sbiz.or.kr/nhrp/edc/edcCgjbAbout.do" target="_blank" rel="noopener">수당 자세히 ›</a></li>
       <li>가까운 폴리텍 재취업 과정<small>교육비 무료, 훈련수당 지급. 2027학년도 과정은 2026.11.1 ~ 2027.3월 중순 모집 중이에요. 아래는 2025년 운영 과정이에요.</small><div class="polyList"></div><a class="go" href="https://www.kopo.ac.kr" target="_blank" rel="noopener">폴리텍 모집 과정 보기 ›</a></li>
       <li class="jcItem"></li>
     </ol>
+    </details>
     <p class="src">날짜는 입력한 폐업일로 계산한 기준이에요. 세금·보험 신고 기한은 국세청·근로복지공단 안내를 함께 확인하세요.<br>출처: 희망리턴패키지 누리집(2026.11.17 확인), 노란우산공제·새출발기금·통합폐업신고 공개 안내, 학교법인한국폴리텍 재취업과정(2025).</p>
     <div class="cta"><button class="btn sub" data-home>처음으로</button><button class="btn sumgo">상담용 요약</button></div>
   </section>
@@ -1513,8 +1528,10 @@
         d: '경기도시장상권진흥원 사업정리 지원이에요. 도내 폐업(예정) 소상공인에게 재기장려금 200만 원과 1:1 컨설팅을 줘요. <b>선착순</b>이라 예산이 떨어지면 끝나요.', extra: dday('2026-12-31'), go: ['https://www.ggbaro.kr', '경기바로에서 신청'] }
     ];
     const yes = items.filter(i => i.ok), money = yes.reduce((t, i) => t + i.a, 0), others = yes.filter(i => !i.a).length;
-    $('mtot').innerHTML = `<div class="mtot">확정 계산되는 지원금<b>${money ? '최대 ' + money.toLocaleString() + '만 원' : '해당 없음'}</b>여기에 공제금·실업급여·채무 감면 등 ${others}가지를 더 챙길 수 있어요</div>`;
-    $('money').innerHTML = items.map(i => `<li class="${i.ok ? '' : 'off'}">${i.n}<span class="amt">${i.ok ? (i.a ? i.a.toLocaleString() + '만 원' : i.amt) : i.off}</span>${i.ok ? `<small>${i.d}</small>${i.extra || ''}<br><a class="go${i.go[0].startsWith('tel') ? ' tel' : ''}" href="${i.go[0]}"${i.go[0].startsWith('http') ? ' target="_blank" rel="noopener"' : ''}>${i.go[1]} ›</a>` : ''}</li>`).join('');
+    const link = i => `<a class="go${i.go[0].startsWith('tel') ? ' tel' : ''}" href="${i.go[0]}"${i.go[0].startsWith('http') ? ' target="_blank" rel="noopener"' : ''}>${i.go[1]} ›</a>`;
+    const no = items.filter(i => !i.ok);
+    $('money').innerHTML = yes.map(i => `<details class="mrow"><summary>${i.n}<span class="amt">${i.a ? i.a.toLocaleString() + '만 원' : i.amt}</span></summary><div class="bd">${i.d}${i.extra ? '<br>' + i.extra : ''}<br>${link(i)}</div></details>`).join('') +
+      (no.length ? `<details class="mrow off"><summary>해당 안 되는 지원 ${no.length}가지</summary><div class="bd">${no.map(i => `${i.n} — ${i.off}`).join('<br>')}</div></details>` : '');
     // 내 일정표
     const vat = new Date(D.getFullYear(), D.getMonth() + 1, 25), inc = new Date(D.getFullYear() + 1, 4, 31);
     const ev = [];
@@ -1533,7 +1550,13 @@
     if (P.dt === 'y') ev.push([new Date('2026-12-31T00:00:00'), '새출발기금 신청 마감', '빚 부담이 크다면 마감 전에 신청을 검토하세요.']);
     ev.push([inc, '종합소득세 확정신고', '폐업한 다음 해 5월 31일까지 그해 소득을 신고해요.']);
     ev.sort((a, b) => a[0] - b[0]);
-    $('sched').innerHTML = `<h3>${closed ? '남은 일정' : '내 폐업 일정표'}</h3><p>${closed ? '이미 지난 일은 했는지 확인만 하세요.' : '날짜는 폐업 예정일 기준이에요. 위에서부터 차례로 하세요.'}</p><ol>` +
+    $('schedT').firstChild.textContent = closed ? '남은 일정 전체 보기' : '폐업 일정표 전체 보기';
+    $('schedN').textContent = `${ev.length}가지 · 날짜순${closed ? ' · 지난 일은 했는지 확인만' : ''}`;
+    // 맨 위 요약: 받을 돈 + 지금 할 일 3가지
+    const up = ev.filter(e => left(e[0]) >= 0).slice(0, 3);
+    $('mtot').innerHTML = `<div class="mtot">${closed ? '아직 받을 수 있는 지원금' : '받을 수 있는 지원금'}<b>${money ? '최대 ' + money.toLocaleString() + '만 원' : '확정 금액 없음'}</b>${others ? `+ 공제금·실업급여·채무 감면 등 ${others}가지` : ''}` +
+      (up.length ? `<ol class="todo">${up.map(([d, t, , k]) => `<li><span>${t}</span><em>${left(d) === 0 ? '오늘' : dd(d)}</em></li>`).join('')}</ol>` : '') + `</div>`;
+    $('sched').innerHTML = `<ol>` +
       ev.map(([d, t, x, k], n) => { const past = left(d) < 0; return `<li data-n="${n + 1}" class="${past ? 'past' : k === 'now' ? 'now' : ''}"><b>${t}</b><small>${x}</small><span class="when">${left(d) === 0 && k ? '지금' : fmtD(d)} · ${past ? '지남' : dd(d)}</span></li>`; }).join('') + '</ol>';
     PLAN.text = {
       date: fmtD(D),
