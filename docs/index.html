@@ -316,10 +316,26 @@
   .cbar i { display: block; height: 100%; }
   .clegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; color: var(--sub); }
   .clegend b { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
-  .cmp { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; font-size: 14px; margin-top: 6px; }
+  details.cfold { border: 1.5px dashed var(--gray2); border-radius: 16px; padding: 0 14px; margin-top: 8px; }
+  details.cfold > .money-in { margin: 0 -8px; }
+  details.cfold > .money-in label { padding-left: 12px; padding-right: 10px; gap: 8px; }
+  details.cfold[open] { padding-bottom: 14px; }
+  details.cfold > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 14px 0; }
+  details.cfold > summary::-webkit-details-marker { display: none; }
+  details.cfold > summary span { flex: 1; } details.cfold > summary b { font-size: 16px; display: block; }
+  details.cfold > summary small { display: block; font-size: 12px; color: var(--sub); line-height: 1.45; margin-top: 2px; word-break: keep-all; }
+  details.cfold > summary em { white-space: nowrap; flex-shrink: 0; font-style: normal; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 8px; padding: 3px 8px; }
+  details.cfold[open] > summary em { color: var(--sub); background: var(--gray); }
+  .chead { display: flex; align-items: center; gap: 14px; background: var(--gray); border-radius: 20px; padding: 18px 16px; margin: 6px 0 4px; }
+  .chead .vart { width: 64px; height: 64px; border-radius: 20px; } .chead .vart svg { width: 44px; height: 44px; }
+  .chead h3 { margin: 0; font-size: 21px; line-height: 1.35; } .chead h3 .hl { color: var(--hlc); }
+  .chead p { margin: 4px 0 0; font-size: 14px; color: var(--sub); line-height: 1.5; word-break: keep-all; }
+  .cbox { border: 1px solid var(--line); border-radius: 18px; padding: 4px 16px 12px; margin-top: 14px; }
+  .cbox h3 { margin: 14px 0 4px; font-size: 16px; }
+  .cmp { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 0; font-size: 14px; margin-top: 6px; }
   .cmp > * { padding: 10px 6px; border-bottom: 1px solid var(--gray); text-align: right; word-break: keep-all; }
   .cmp > .h { font-weight: 700; color: var(--mute); font-size: 13px; }
-  .cmp > .l { text-align: left; color: var(--sub, #4e5968); padding-left: 0; }
+  .cmp > .l { font-size: 13px; text-align: left; color: var(--sub, #4e5968); padding-left: 0; }
   .cmp b.bad { color: #e5484d; } .cmp b.good { color: #0ca678; }
   .crow { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--gray); font-size: 15px; }
   .crow b { font-size: 18px; font-weight: 800; } .crow b.bad { color: var(--warn); } .crow b.good { color: var(--ok); }
@@ -644,14 +660,15 @@
       <div class="grp">사장님 살림</div>
       <label><i class="ico" data-ic="home"></i><span>사장님 생활비<small>가게에서 가져가야 하는 돈</small></span><input data-f="v" inputmode="numeric" placeholder="0"><em>만 원</em></label>
       <label><i class="ico" data-ic="wallet"></i><span>지금 쓸 수 있는 돈<small>예금·비상금 (보증금 빼고)</small></span><input data-f="k" inputmode="numeric" placeholder="0"><em>만 원</em></label>
-      <div class="grp">가게를 접는다면 <small class="muted" style="font-weight:500">채우면 '계속 vs 접기'를 비교해 드려요</small></div>
+      <details class="cfold" id="cFold"><summary><span><b>가게를 접는다면</b><small>보증금·철거비·접은 뒤 수입을 넣으면 '계속할 때 vs 지금 접을 때'를 비교해 드려요</small></span><em>선택</em></summary><div class="money-in">
       <label><i class="ico" data-ic="wallet"></i><span>돌려받을 보증금<small>계약서상 보증금 (밀린 월세 빼고)</small></span><input data-f="b" inputmode="numeric" placeholder="0"><em>만 원</em></label>
       <label><i class="ico" data-ic="hammer"></i><span>철거·원상복구 비용<small>모르면 견적 전 대략</small></span><input data-f="x" inputmode="numeric" placeholder="0"><em>만 원</em></label>
       <label><i class="ico" data-ic="brief"></i><span>접은 뒤 한 달 수입<small>취업 월급·실업급여 등 (모르면 0)</small></span><input data-f="w" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      </div></details>
     </div>
     <button type="button" class="linkbtn sm" id="cEx">예시 숫자로 채워 보기</button>
     <div class="cres" id="cres"></div>
-    <p class="src">계산은 입력한 숫자만으로 한 단순 추정이에요. 세금, 계절 변동, 보증금 반환은 넣지 않았어요. 지원 마감일은 2026년 공고 기준이에요.<br>업종 평균 연매출: 국세청 통계로 보는 생활업종(개인사업자 종합소득세 신고 총수입금액, 2024년 귀속).</p>
+    <p class="src">계산은 입력한 숫자만으로 한 단순 추정이에요. 세금과 계절 변동은 넣지 않았어요. 보증금은 '가게를 접는다면'을 채웠을 때만 넣어요. 지원 마감일은 2026년 공고 기준이에요.<br>업종 평균 연매출: 국세청 통계로 보는 생활업종(개인사업자 종합소득세 신고 총수입금액, 2024년 귀속).</p>
     <div class="cta"><button class="btn sub" data-home>처음으로</button><button class="btn sumgo">상담용 요약</button></div>
   </section>
   <!-- 가게 넘기기 (권리금) -->
@@ -1626,6 +1643,11 @@
     i.value = raw ? Number(raw).toLocaleString() : ''; renderSell(true);
   }));
 
+  const SIGNS = [
+    ['#e6f7ee', '#0a8a52', '초록 표지판', '<circle cx="32" cy="32" r="26" fill="#1fb866" stroke="#0a8a52" stroke-width="3"/><path d="M20 33l8 8 16-17" stroke="#fff" stroke-width="5.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'],
+    ['#fff4e0', '#c26a00', '노란 주의 표지판', '<path d="M32 6l26 26-26 26L6 32z" fill="#ffb020" stroke="#e08a00" stroke-width="3" stroke-linejoin="round"/><path d="M32 20v15" stroke="#333d4b" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="43" r="3.2" fill="#333d4b"/>'],
+    ['#ffeded', '#d63b3b', '빨간 경고 표지판', '<path d="M22 6h20l16 16v20L42 58H22L6 42V22z" fill="#f04452" stroke="#c9303d" stroke-width="3" stroke-linejoin="round"/><path d="M32 18v18" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/><circle cx="32" cy="45" r="3.6" fill="#fff"/>']
+  ];
   // ---------- 숫자로 따져 보기: 월 손익 · 버틸 기간 · 손익분기 매출 · 업종 평균 연매출 비교 ----------
   const CV = { s: 0, r: 0, l: 0, c: 0, o: 0, p: 0, v: 0, k: 0, b: 0, x: 0, w: 0 };
   const man = v => { v = Math.round(v); const a = Math.abs(v), e = Math.floor(a / 10000), r = a % 10000; return (v < 0 ? '-' : '') + (e ? e + '억' + (r ? ' ' + r.toLocaleString() : '') : r.toLocaleString()) + '만 원'; };
@@ -1653,13 +1675,15 @@
     const cost = r + l + c + o + p, prof = s - cost, net = prof - v;
     const vr = c / s, fixed = r + l + o + p + v, be = vr < 1 ? fixed / (1 - vr) : null;
     let level, head, line;
-    if (net >= 0) { level = 0; head = '지금은 생활비까지 나와요'; line = `생활비를 빼고도 매달 ${man(net)}이 남아요.`; }
-    else if (!k) { level = 2; head = '매달 모자라요'; line = `생활비까지 따지면 매달 ${man(-net)}이 모자라요. 쓸 수 있는 돈을 넣으면 버틸 기간을 계산해 드려요.`; }
+    let h2;
+    if (net >= 0) { level = 0; head = '지금은 생활비까지 나와요'; h2 = ['지금은', '생활비까지 나와요']; line = `생활비를 빼고도 매달 ${man(net)}이 남아요.`; }
+    else if (!k) { level = 2; head = '매달 모자라요'; h2 = ['매달', `${man(-net)}씩 모자라요`]; line = `쓸 수 있는 돈(예금·비상금)을 넣으면 언제까지 버틸 수 있는지 계산해 드려요.`; }
     else {
       const m = k / -net;
       level = m >= 6 ? 1 : 2;
       head = m >= 12 ? `약 ${Math.floor(m)}개월은 버틸 수 있어요` : m >= 6 ? `약 ${Math.floor(m)}개월 버틸 수 있어요` : `${m < 1 ? '한 달도' : '약 ' + Math.floor(m) + '개월밖에'} 못 버텨요`;
-      line = `매달 ${man(-net)}씩 모자라서, 지금 쓸 수 있는 돈 ${man(k)}은 <b>${ymLater(m)}</b>쯤 바닥나요.` +
+      h2 = m >= 6 ? [`약 ${Math.floor(m)}개월${m >= 12 ? '은' : ''}`, '버틸 수 있어요'] : m < 1 ? ['한 달도', '버티기 어려워요'] : [`약 ${Math.floor(m)}개월밖에`, '못 버텨요'];
+      line = `매달 ${man(-net)}씩 모자라서 <b>${ymLater(m)}</b>쯤 돈이 바닥나요.` +
         (m < 6 ? ' 정리 방법을 먼저 알아보세요. 철거비 같은 지원은 정리 <b>전에</b> 신청해야 받아요.' : m < 12 ? ' 버티는 방법과 정리 방법을 함께 준비해 두세요.' : ' 그동안 매출을 올리거나 비용을 줄일 방법부터 찾아보세요.');
     }
     // 비용 구성 막대
@@ -1682,13 +1706,13 @@
     const kt = SUM ? ntsType(SUM.c) : -1;
     // 국세청은 사업자가 20명 이하인 시·군·업종은 평균 연매출을 공개하지 않는다 → 그 사실을 그대로 안내
     const eul = w => { const c = w.charCodeAt(w.length - 1) - 0xAC00; return c >= 0 && c <= 11171 && c % 28 ? '을' : '를'; };
-    if (!ra && kt >= 0) rev = `<h3 style="margin-top:22px">같은 업종과 비교</h3><p class="cnote">${REV && REV.g && REV.g[SIGUN]
+    if (!ra && kt >= 0) rev = `<p class="cnote">${REV && REV.g && REV.g[SIGUN]
         ? `${SIGUN}의 ${NTS.types[kt]}${eul(NTS.types[kt]) === '을' ? '은' : '는'} 사업자가 20명 이하라서 국세청이 평균 연매출을 공개하지 않아요. 가게 수가 너무 적으면 평균이 특정 가게 매출과 거의 같아지기 때문이에요. 경기도 전체나 가까운 시·군 평균은 국세청 '통계로 보는 생활업종'에서 볼 수 있어요.`
         : `${SIGUN} ${NTS.types[kt]} 평균 연매출은 국세청 '통계로 보는 생활업종'에서 ${SIGUN}${eul(SIGUN)} 고르고 매출을 넣으면 볼 수 있어요.`}</p>
         <a class="go" href="https://tasis.nts.go.kr/websquare/websquare.html?w2xPath=/cm/index.xml" target="_blank" rel="noopener">국세통계포털에서 확인하기 ›</a>`;
     if (ra) {
       const ratio = s * 12 / ra.avg;
-      rev = `<h3 style="margin-top:22px">같은 업종과 비교</h3><div class="crow"><span>${ra.where} ${ra.t} 평균 연매출</span><b>${man(ra.avg)}</b></div>
+      rev = `<div class="crow"><span>${ra.where} ${ra.t} 평균 연매출</span><b>${man(ra.avg)}</b></div>
         <div class="crow"><span>사장님 가게 (월 매출 × 12)</span><b class="${ratio < 0.8 ? 'bad' : ratio >= 1 ? 'good' : ''}">${man(s * 12)}</b></div>
         <p class="cnote">평균의 <b>${Math.round(ratio * 100)}%</b> 수준이에요.${ra.yoy !== null && ra.yoy !== undefined ? ` 이 업종 평균 매출은 전년보다 ${ra.yoy >= 0 ? ra.yoy + '% 늘었어요' : -ra.yoy + '% 줄었어요'}.` : ''}${ra.life ? ` 이 업종은 평균 ${ra.life} 영업해요.` : ''} 정확한 순위는 국세청 '통계로 보는 생활업종'에서 매출을 넣어 확인할 수 있어요.</p>
         <a class="go" href="https://tasis.nts.go.kr/websquare/websquare.html?w2xPath=/cm/index.xml" target="_blank" rel="noopener">국세통계포털에서 내 순위 보기 ›</a>`;
@@ -1700,26 +1724,33 @@
       const out = (cash, m) => cash < 0 ? '이미 모자라요' : m >= 0 ? '1년 넘게 괜찮아요' : (cash / -m >= 12 ? '1년 넘게 괜찮아요' : ymLater(cash / -m) + '쯤');
       const k12 = k + net * 12, c12 = cCash + cNet * 12;
       const cls = n => n < 0 ? 'bad' : 'good';
-      cmp = `<h3 style="margin-top:22px">계속할까, 지금 접을까 <small class="muted" style="font-weight:500;font-size:13px">1년 기준</small></h3>
+      cmp = `<div class="cbox"><h3>계속할까, 지금 접을까 <small class="muted" style="font-weight:500;font-size:13px">1년 기준</small></h3>
         <div class="cmp"><span class="h l"></span><span class="h">계속하면</span><span class="h">지금 접으면</span>
           <span class="l">매달 손에 남는 돈</span><b class="${cls(net)}">${man(net)}</b><b class="${cls(cNet)}">${man(cNet)}</b>
           <span class="l">지금 쓸 수 있는 돈</span><b>${man(k)}</b><b>${man(cCash)}</b>
           <span class="l">1년 뒤 남는 돈</span><b class="${cls(k12)}">${k12 < 0 ? man(k12) + ' (빚)' : man(k12)}</b><b class="${cls(c12)}">${c12 < 0 ? man(c12) + ' (빚)' : man(c12)}</b>
           <span class="l">돈이 바닥나는 때</span><b>${out(k, net)}</b><b>${out(cCash, cNet)}</b></div>
-        <p class="cnote">· '지금 접으면'은 보증금을 돌려받고 철거비를 낸 뒤, 접은 뒤의 수입에서 생활비와 대출 갚는 돈을 낸다고 계산했어요. <b>가게를 접어도 대출은 남아요.</b>${p ? ' 상환 기간을 늘리면 매달 갚는 돈을 줄일 수 있어요 (폐업 플랜의 ‘대출 정리하는 법’).' : ''}<br>
+        <p class="cnote" style="margin:10px 0 0"><b>가게를 접어도 대출은 남아요.</b> 어느 쪽이 맞는지는 앱이 정하지 않아요. 숫자는 판단을 돕는 참고용이에요.</p>
+        <details class="more" style="margin-top:8px"><summary>계산 기준 보기</summary><p class="cnote">· '지금 접으면'은 보증금을 돌려받고 철거비를 낸 뒤, 접은 뒤의 수입에서 생활비와 대출 갚는 돈을 낸다고 계산했어요. ${p ? '상환 기간을 늘리면 매달 갚는 돈을 줄일 수 있어요 (폐업 플랜의 ‘대출 정리하는 법’).' : ''}<br>
         · '계속하면' 쪽은 보증금${b ? ' ' + man(b) : ''}이 가게에 묶여 있어서 넣지 않았어요. 나중에 정리할 때 돌려받지만, 그때는 지원 마감이 지났을 수 있어요.<br>
         · 접는 쪽은 철거비 지원(최대 600만 원)·경기도 재기장려금(200만 원) 같은 지원금을 받으면 더 늘어나요. 조건이 있어서 위 숫자에는 넣지 않았어요.<br>
         · 폐업하면 건강보험료는 공단에 조정 신청을 해야 줄고, 국민연금은 소득이 없으면 납부예외를 신청할 수 있어요.<br>
-        · 어느 쪽이 맞는지는 앱이 정하지 않아요. 숫자는 판단을 돕는 참고용이에요.</p>`;
-    } else if (net < 0) cmp = `<p class="cnote" style="margin-top:14px">위 '가게를 접는다면' 칸(보증금·철거비·접은 뒤 수입)을 채우면 <b>계속할 때와 지금 접을 때</b>를 1년 기준으로 나란히 비교해 드려요.</p>`;
-    box.innerHTML = `<div class="signal ${['ok', 'mid', 'warn'][level]}"><span>계산 결과</span><b>${head}</b><p class="vline">${line}</p></div>
-      <h3 style="margin-top:18px">한 달 돈의 흐름</h3>${bar}
-      ${rows.map(([a, b, cl]) => `<div class="crow"><span>${a}</span><b class="${cl}">${b}</b></div>`).join('')}
-      ${be && be > s ? `<p class="cnote">생활비까지 벌려면 매출이 지금보다 <b>${Math.round((be / s - 1) * 100)}%</b> 늘어야 해요.</p>` : ''}
-      ${net < 0 && k ? `<h3 style="margin-top:22px">6개월 더 버티면</h3><div class="crow"><span>지금 쓸 수 있는 돈</span><b>${man(k)}</b></div><div class="crow"><span>6개월 뒤</span><b class="${k6 < 0 ? 'bad' : ''}">${k6 < 0 ? man(k6) + ' (빚)' : man(k6)}</b></div>` +
-        (DL.length ? `<p class="cnote">그 사이에 끝나는 지원도 있어요: ${DL.map(d => `${d[0]} ${d[1].slice(5).replace('-', '.')}`).join(' · ')}</p>` : '') : ''}
+        </p></details></div>`;
+    } else if (net < 0) cmp = `<p class="cnote" style="margin-top:14px">위 <b>'가게를 접는다면'</b>을 펼쳐 채우면 계속할 때와 지금 접을 때를 1년 기준으로 나란히 비교해 드려요.</p>`;
+    const SG = SIGNS[level];
+    const revSum = ra ? `평균의 ${Math.round(s * 12 / ra.avg * 100)}%` : kt >= 0 ? '평균 비공개' : '';
+    box.innerHTML = `<div class="chead"><div class="vart" style="background:${SG[0]}"><svg viewBox="0 0 64 64" role="img" aria-label="${SG[2]}">${SG[3]}</svg></div><div><h3 style="--hlc:${SG[1]}">${h2[0]}<br><span class="hl">${h2[1]}</span></h3><p>${line}</p></div></div>
+      <div class="vrows" style="margin-top:12px">
+        <div class="r"><span>생활비까지 빼면 매달</span><div><b class="${net < 0 ? 'bad' : 'good'}">${man(net)}</b></div></div>
+        ${net < 0 && k ? `<div class="r"><span>돈이 바닥나는 때</span><div><b class="${k / -net < 6 ? 'bad' : ''}">${ymLater(k / -net)}쯤</b><small>약 ${Math.floor(k / -net)}개월 뒤</small></div></div>` : ''}
+        ${be ? `<div class="r"><span>생활비까지 나오는 매출</span><div><b class="${be > s ? 'bad' : 'good'}">${man(be)}</b>${be > s ? `<small>지금보다 ${Math.round((be / s - 1) * 100)}% 더 팔아야 해요</small>` : '<small>지금 매출로 충분해요</small>'}</div></div>` : ''}
+      </div>
       ${cmp}
-      ${rev}
+      <details class="deep"><summary><span>한 달 돈의 흐름<small>매출 ${man(s)} · 나가는 돈 ${man(cost + v)}</small></span></summary>${bar}
+        ${rows.map(([a, b, cl]) => `<div class="crow"><span>${a}</span><b class="${cl}">${b}</b></div>`).join('')}</details>
+      ${net < 0 && k ? `<details class="deep" style="margin-top:0"><summary><span>6개월 더 버티면<small>6개월 뒤 쓸 수 있는 돈 ${k6 < 0 ? man(k6) + ' (빚)' : man(k6)}</small></span></summary><div class="crow"><span>지금 쓸 수 있는 돈</span><b>${man(k)}</b></div><div class="crow"><span>6개월 뒤</span><b class="${k6 < 0 ? 'bad' : ''}">${k6 < 0 ? man(k6) + ' (빚)' : man(k6)}</b></div>` +
+        (DL.length ? `<p class="cnote">그 사이에 끝나는 지원도 있어요: ${DL.map(d => `${d[0]} ${d[1].slice(5).replace('-', '.')}`).join(' · ')}</p>` : '') + '</details>' : ''}
+      ${rev ? `<details class="deep" style="margin-top:0"><summary><span>같은 업종과 비교<small>${revSum}</small></span></summary>${rev}</details>` : ''}
       <div class="acts" style="margin-top:22px"><h3>다음으로</h3>
         <button type="button" data-a3="${level === 2 ? 'close' : 'stay'}" class="pri">${ic(level === 2 ? 'box' : 'shield', 'aic')}<span><b>${level === 2 ? '손해 없이 정리하는 방법' : '버티는 방법 보기'}</b><small>${level === 2 ? '받을 수 있는 돈과 날짜별 할 일' : '우리 시 지원사업 · 경영 상담'}</small></span><span class="arr">›</span></button>
         <button type="button" data-a3="${level === 2 ? 'stay' : 'close'}">${ic(level === 2 ? 'shield' : 'box', 'aic')}<span><b>${level === 2 ? '그래도 버텨 보고 싶다면' : '정리할 때를 대비하려면'}</b><small>${level === 2 ? '우리 시 지원사업 · 경영 상담' : '받을 수 있는 돈과 날짜별 할 일'}</small></span><span class="arr">›</span></button>
@@ -1732,7 +1763,7 @@
     const raw = i.value.replace(/[^0-9]/g, '').slice(0, 7); CV[i.dataset.f] = Number(raw) || 0;
     i.value = raw ? Number(raw).toLocaleString() : ''; calcOut();
   }));
-  $('cEx').addEventListener('click', () => { Object.assign(CV, { s: 1200, r: 250, l: 250, c: 420, o: 120, p: 60, v: 300, k: 2000, b: 3000, x: 500, w: 230 }); renderCalc(); });
+  $('cEx').addEventListener('click', () => { Object.assign(CV, { s: 1200, r: 250, l: 250, c: 420, o: 120, p: 60, v: 300, k: 2000, b: 3000, x: 500, w: 230 }); $('cFold').open = true; renderCalc(); });
 
   // ---------- 국세청 100대 생활업종: 우리 시 같은 업종 사업자 수와 1년 증감 ----------
   const NTSMAP = {
