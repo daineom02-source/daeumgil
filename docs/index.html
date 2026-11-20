@@ -287,6 +287,11 @@
   .cbar i { display: block; height: 100%; }
   .clegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; color: var(--sub); }
   .clegend b { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+  .cmp { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; font-size: 14px; margin-top: 6px; }
+  .cmp > * { padding: 10px 6px; border-bottom: 1px solid var(--gray); text-align: right; word-break: keep-all; }
+  .cmp > .h { font-weight: 700; color: var(--mute); font-size: 13px; }
+  .cmp > .l { text-align: left; color: var(--sub, #4e5968); padding-left: 0; }
+  .cmp b.bad { color: #e5484d; } .cmp b.good { color: #0ca678; }
   .crow { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--gray); font-size: 15px; }
   .crow b { font-size: 18px; font-weight: 800; } .crow b.bad { color: var(--warn); } .crow b.good { color: var(--ok); }
   .cnote { font-size: 13px; color: var(--sub); margin: 8px 0 0; line-height: 1.6; }
@@ -499,6 +504,7 @@
       <button type="button" data-a2="close"><i class="aic" data-ic="box"></i><span><b>손해 없이 정리하는 방법</b><small>받을 수 있는 돈 · 날짜별 할 일 · 다시 일할 곳</small></span><span class="arr">›</span></button>
       <button type="button" data-a2="calc"><i class="aic" data-ic="calc"></i><span><b>숫자로 따져 보기</b><small>언제까지 버틸 수 있는지 계산</small></span><span class="arr">›</span></button>
       <button type="button" data-a2="move"><i class="aic" data-ic="swap"></i><span><b>업종 바꾸기 · 가게 옮기기</b><small>바꿀 업종과 옮길 동네 3곳씩</small></span><span class="arr">›</span></button>
+      <button type="button" data-a2="sell"><i class="aic" data-ic="store"></i><span><b>권리금 받고 가게 넘기기</b><small>철거 대신 넘기는 순서 · 건물주 · 세금</small></span><span class="arr">›</span></button>
     </div>
     <div id="t-close" class="hidden">
       <div class="tl">
@@ -556,18 +562,23 @@
   <!-- 폐업 플랜 -->
   <section id="s5" class="scr hidden">
     <h2 id="s5t">손해 없이 정리하는 순서예요</h2>
-    <p class="lead" id="s5l">다섯 가지만 알려 주시면 받을 돈과 날짜를 맞춰 드려요.</p>
+    <p class="lead" id="s5l">몇 가지만 알려 주시면 받을 돈, 대출 정리 방법, 날짜를 맞춰 드려요.</p>
     <div class="quiz" id="plan">
       <div class="q"><span id="cdLab">폐업 예정일</span><input type="date" id="cdate" class="dateinp"></div>
       <div class="q"><span>가게 건물</span><div class="chips" data-k="ls"><button data-v="rent">임차(월세·전세)</button><button data-v="own">내 건물</button></div></div>
       <div class="q" data-need="rent"><span>전용면적 (철거비 계산용)</span><input id="parea" class="dateinp" type="number" min="1" inputmode="decimal" placeholder="예: 57 (㎡)"></div>
       <div class="q"><span>노란우산공제에 가입했나요?</span><div class="chips" data-k="yu"><button data-v="y">네</button><button data-v="n">아니요</button><button data-v="u">모르겠어요</button></div></div>
       <div class="q"><span>사장님 본인이 고용보험에 1년 넘게 가입했나요?</span><div class="chips" data-k="ei"><button data-v="y">네</button><button data-v="n">아니요</button><button data-v="u">모르겠어요</button></div></div>
-      <div class="q"><span>사업하며 생긴 빚을 갚기 어려운가요?</span><div class="chips" data-k="dt"><button data-v="y">네</button><button data-v="n">아니요</button></div></div>
+      <div class="q"><span>가게 하면서 받은 대출이 있나요? <small class="muted">여러 개 고를 수 있어요</small></span><div class="chips" data-k="ln" data-multi="1"><button data-v="sb">정책자금 (소진공)</button><button data-v="gs">보증서 대출 (신용보증재단)</button><button data-v="bk">은행 사업자대출</button><button data-v="cd">카드론·현금서비스</button><button data-v="no">없어요</button></div></div>
+      <div class="q hidden" id="qOd"><span>대출 갚는 건 어떤가요?</span><div class="chips" data-k="od"><button data-v="ok">밀리지 않고 갚고 있어요</button><button data-v="hard">아직 안 밀렸지만 힘들어요</button><button data-v="late">이미 밀렸어요</button></div></div>
     </div>
     <div id="mtot"></div>
+    <div class="acts hidden" id="sellCta" style="margin:12px 0 0"><button type="button" data-a2="sell"><i class="aic" data-ic="store"></i><span><b>철거 대신 권리금 받고 넘길 수 있을까요?</b><small>계약 끝나기 6개월 전부터 법이 보호해요 · 넘기는 순서 보기</small></span><span class="arr">›</span></button></div>
     <h3 style="margin-top:22px">받을 수 있는 돈 <small class="muted" style="font-weight:500;font-size:13px">눌러서 신청 방법 보기</small></h3>
     <div id="money"></div>
+    <div id="debtBox" class="hidden"><h3 style="margin-top:22px">대출 정리하는 법 <small class="muted" style="font-weight:500;font-size:13px">폐업 신고 전에 먼저 보세요</small></h3><div id="debt"></div></div>
+    <h3 style="margin-top:22px">폐업 뒤 생활비 챙기기 <small class="muted" style="font-weight:500;font-size:13px">신청해야 줄거나 받아요</small></h3>
+    <div id="life"></div>
     <button type="button" class="btn line" id="icsBtn" style="width:100%;margin:6px 0 4px;display:flex;align-items:center;justify-content:center;gap:6px">휴대폰 캘린더에 일정 넣기</button>
     <p class="cnote" id="icsNote" style="margin:0 0 6px;text-align:center">각 날짜 하루 전에 알림이 가요.</p>
     <details class="deep" id="schedBox"><summary><span id="schedT">전체 일정 보기<small id="schedN"></small></span></summary><div class="tl" id="sched"></div></details>
@@ -594,15 +605,44 @@
       <label><i class="ico" data-ic="building"></i><span>임대료<small>월세 + 관리비</small></span><input data-f="r" inputmode="numeric" placeholder="0"><em>만 원</em></label>
       <label><i class="ico" data-ic="users"></i><span>인건비<small>직원·아르바이트 (사장님 본인 빼고)</small></span><input data-f="l" inputmode="numeric" placeholder="0"><em>만 원</em></label>
       <label><i class="ico" data-ic="box"></i><span>재료비·원가<small>팔기 위해 사는 재료·물건</small></span><input data-f="c" inputmode="numeric" placeholder="0"><em>만 원</em></label>
-      <label><i class="ico" data-ic="receipt"></i><span>그 밖의 비용<small>공과금·카드 수수료·배달 수수료·대출 이자</small></span><input data-f="o" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><i class="ico" data-ic="receipt"></i><span>그 밖의 비용<small>공과금·카드 수수료·배달 수수료</small></span><input data-f="o" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><i class="ico" data-ic="building"></i><span>대출 갚는 돈<small>가게 대출의 원금 + 이자, 매달</small></span><input data-f="p" inputmode="numeric" placeholder="0"><em>만 원</em></label>
       <div class="grp">사장님 살림</div>
       <label><i class="ico" data-ic="home"></i><span>사장님 생활비<small>가게에서 가져가야 하는 돈</small></span><input data-f="v" inputmode="numeric" placeholder="0"><em>만 원</em></label>
       <label><i class="ico" data-ic="wallet"></i><span>지금 쓸 수 있는 돈<small>예금·비상금 (보증금 빼고)</small></span><input data-f="k" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <div class="grp">가게를 접는다면 <small class="muted" style="font-weight:500">채우면 '계속 vs 접기'를 비교해 드려요</small></div>
+      <label><i class="ico" data-ic="wallet"></i><span>돌려받을 보증금<small>계약서상 보증금 (밀린 월세 빼고)</small></span><input data-f="b" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><i class="ico" data-ic="hammer"></i><span>철거·원상복구 비용<small>모르면 견적 전 대략</small></span><input data-f="x" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><i class="ico" data-ic="brief"></i><span>접은 뒤 한 달 수입<small>취업 월급·실업급여 등 (모르면 0)</small></span><input data-f="w" inputmode="numeric" placeholder="0"><em>만 원</em></label>
     </div>
     <button type="button" class="linkbtn sm" id="cEx">예시 숫자로 채워 보기</button>
     <div class="cres" id="cres"></div>
     <p class="src">계산은 입력한 숫자만으로 한 단순 추정이에요. 세금, 계절 변동, 보증금 반환은 넣지 않았어요. 지원 마감일은 2026년 공고 기준이에요.<br>업종 평균 연매출: 국세청 통계로 보는 생활업종(개인사업자 종합소득세 신고 총수입금액, 2024년 귀속).</p>
     <div class="cta"><button class="btn sub" data-home>처음으로</button><button class="btn sumgo">상담용 요약</button></div>
+  </section>
+  <!-- 가게 넘기기 (권리금) -->
+  <section id="s7" class="scr hidden">
+    <h2>권리금 받고 가게 넘기기</h2>
+    <p class="lead">철거하고 나가는 대신, 다음 사장님에게 가게를 넘기고 권리금을 받는 길이에요. 열쇠는 <b>계약이 끝나기 6개월 전</b>이에요.</p>
+    <div class="quiz" id="sellq">
+      <div class="q"><span>임대차 계약이 끝나는 날</span><input type="date" id="sEnd" class="dateinp"></div>
+      <div class="q"><span>백화점·대형마트 안에 있는 매장인가요?</span><div class="chips" data-k="mall"><button data-v="n">아니요</button><button data-v="y">네</button></div></div>
+      <div class="q"><span>밀린 월세가 석 달 치에 이른 적이 있나요?</span><div class="chips" data-k="arr"><button data-v="n">아니요</button><button data-v="y">네</button></div></div>
+    </div>
+    <div id="sWarn"></div>
+    <h3 style="margin-top:22px">권리금 어림잡기 <small class="muted" style="font-weight:500;font-size:13px">협상 전 참고용</small></h3>
+    <div class="money-in" id="sin">
+      <label><i class="ico" data-ic="hammer"></i><span>인테리어·설비에 들인 돈<small>처음 가게를 꾸밀 때 쓴 돈</small></span><input data-sf="f" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><i class="ico" data-ic="clock"></i><span>그 뒤로 쓴 햇수<small>예: 3</small></span><input data-sf="y" inputmode="numeric" placeholder="0"><em>년</em></label>
+      <label><i class="ico" data-ic="coin"></i><span>한 달 순이익<small>가게에서 남는 돈 (사장님 생활비 빼기 전)</small></span><input data-sf="n" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+    </div>
+    <div id="sEst"></div>
+    <h3 style="margin-top:22px">순서대로 하면 돼요</h3>
+    <div class="tl" id="sTl"></div>
+    <div id="sMore"></div>
+    <div class="acts" style="margin-top:18px"><h3>못 넘기게 되면</h3>
+      <button type="button" data-a2="close"><i class="aic" data-ic="box"></i><span><b>손해 없이 정리하는 방법</b><small>철거비 지원은 철거 전에 신청해야 해요 · 같이 준비해 두세요</small></span><span class="arr">›</span></button>
+    </div>
   </section>
 
   <div class="sheet hidden" id="sheet"><div class="dim" id="sheetDim"></div><div class="body"><div class="grab"></div><div id="sumBox"></div></div></div>
@@ -1120,10 +1160,10 @@
   const ic = (n, cls = 'ico') => `<i class="${cls}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${IC[n] || ''}</svg></i>`;
   const fillIcons = (root = document) => root.querySelectorAll('[data-ic]').forEach(el => { el.outerHTML = ic(el.dataset.ic, el.className || 'ico'); });
   fillIcons();
-  const SCR = ['s0', 's1', 's2', 's3', 's4', 's5', 's6'];
+  const SCR = ['s0', 's1', 's2', 's3', 's4', 's5', 's6', 's7'];
   const PATHS = { think: ['s0', 's1', 's2', 's4'], close: ['s0', 's1', 's5'], restart: ['s0', 's1', 's2', 's3'], closed: ['s0', 's1', 's5'] };
   let ORDER = PATHS.think;
-  const TITLE = { s0: '', s1: '가게 정보', s2: '내 상권 리포트', s3: '다시 시작하기', s4: '다음 단계', s5: '폐업 정리 플랜', s6: '숫자로 따져 보기' };
+  const TITLE = { s0: '', s1: '가게 정보', s2: '내 상권 리포트', s3: '다시 시작하기', s4: '다음 단계', s5: '폐업 정리 플랜', s6: '숫자로 따져 보기', s7: '가게 넘기기' };
   let cur = 's0';
   // 폰의 뒤로가기(제스처·버튼)도 앱 안에서 이전 화면으로 가게 기록을 남긴다
   function show(id, fromPop) {
@@ -1439,9 +1479,10 @@
       stay: ['버티는 방법 보기', '우리 시 지원사업 · 경영 상담 · 업종 전환 힌트', 'shield'],
       move: ['업종 바꾸기 · 가게 옮기기', '같은 데이터로 바꿀 업종과 옮길 동네 3곳씩', 'swap'],
       close: ['손해 없이 정리하는 방법', '받을 수 있는 돈과 날짜별 할 일', 'box'],
-      calc: ['숫자로 따져 보기', '매출·비용을 넣으면 언제까지 버틸 수 있는지 계산', 'calc']
+      calc: ['숫자로 따져 보기', '매출·비용을 넣으면 언제까지 버틸 수 있는지 계산', 'calc'],
+      sell: ['권리금 받고 가게 넘기기', '철거 대신 다음 사장님에게 넘기는 순서 · 세금', 'store']
     };
-    const ord = PATH === 'restart' ? ['move', 'calc', 'stay', 'close'] : level === 2 ? ['calc', 'close', 'move', 'stay'] : level === 1 ? ['calc', 'stay', 'move', 'close'] : ['stay', 'calc', 'move', 'close'];
+    const ord = PATH === 'restart' ? ['move', 'calc', 'stay', 'close'] : level === 2 ? ['calc', 'close', 'sell', 'move', 'stay'] : level === 1 ? ['calc', 'stay', 'move', 'close', 'sell'] : ['stay', 'calc', 'move', 'close'];
     $('vAct').innerHTML = `<h3>이렇게 해 보세요</h3>` + ord.map((k, n) => `<button type="button" data-a="${k}" class="${n === 0 ? 'pri' : ''}">${ic(A[k][2], 'aic')}<span><b>${A[k][0]}</b><small>${A[k][1]}</small></span><span class="arr">›</span></button>`).join('');
     $('vAct').querySelectorAll('button').forEach(b => b.onclick = () => goAct(b.dataset.a));
     $('s2next').dataset.a = ord[0]; $('s2next').textContent = A[ord[0]][0];
@@ -1449,13 +1490,81 @@
   }
   function goAct(a) {
     if (a === 'calc') { renderCalc(); show('s6'); return; }
+    if (a === 'sell') { renderSell(); show('s7'); return; }
     if (a === 'stay') { if (PATH !== 'think') setPath('think'); show('s4'); }
     else if (a === 'move') { if (PATH !== 'restart') setPath('restart'); renderRestart(); show('s3'); }
     else { if (PATH !== 'close') setPath('close'); initPlan(); show('s5'); }
   }
 
+  // ---------- 가게 넘기기: 권리금 회수기회 보호(상가임대차법 제10조의4) · 어림셈 · 순서 · 세금 ----------
+  const SP = { mall: '', arr: '' }, SV = { f: 0, y: 0, n: 0 };
+  function renderSell(typing) {
+    if (!typing) {
+      // 계산기에 넣은 숫자가 있으면 한 달 순이익을 미리 채운다 (저장하지 않음)
+      if (!SV.n && CV.s) { const pr = CV.s - (CV.r + CV.l + CV.c + CV.o + CV.p); if (pr > 0) SV.n = pr; }
+      document.querySelectorAll('#sin input').forEach(i => { const v = SV[i.dataset.sf]; i.value = v ? v.toLocaleString() : ''; });
+    }
+    document.querySelectorAll('#sellq .chips').forEach(g => g.querySelectorAll('button').forEach(b => b.classList.toggle('on', SP[g.dataset.k] === b.dataset.v)));
+    const d8 = d => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+    const fD = d => `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`;
+    const gcal = (d, t, x) => { const e = new Date(d); e.setDate(e.getDate() + 1); return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('[다음길] ' + t) + '&dates=' + d8(d) + '/' + d8(e) + '&details=' + encodeURIComponent(x + ' (다음길 · 참고용 날짜)'); };
+    const left = d => Math.round((d - today) / 864e5);
+    const E = $('sEnd').value ? new Date($('sEnd').value + 'T00:00:00') : null;
+    const S6 = E ? new Date(E.getFullYear(), E.getMonth() - 6, Math.min(E.getDate(), new Date(E.getFullYear(), E.getMonth() - 5, 0).getDate())) : null;
+    // 경고: 대규모점포 · 3기 연체 · 보호 기간 위치
+    const W = [];
+    if (SP.mall === 'y') W.push(['bad', '백화점·대형마트 같은 대규모점포 안 매장은 법의 권리금 보호를 받지 못해요. 계약서에 권리금 조항이 있는지 보고, 운영사와 먼저 이야기하세요.']);
+    if (SP.arr === 'y') W.push(['bad', '밀린 월세가 석 달 치에 이른 적이 있으면, 건물주가 새 임차인을 거절해도 책임지지 않을 수 있어요. 밀린 월세부터 정리하고 기록을 남겨 두세요.']);
+    if (E) {
+      const nE = left(E), nS = left(S6);
+      if (nE < 0) W.push(['bad', `계약이 이미 끝났어요. 권리금 보호 기간은 지났지만, 그 기간에 건물주가 방해했다면 <b>${fD(new Date(E.getFullYear() + 3, E.getMonth(), E.getDate()))}</b>까지 손해배상을 청구할 수 있어요.`]);
+      else if (nS > 0) W.push(['mid', `권리금 보호는 <b>${fD(S6)}</b>부터 시작돼요 (D-${nS}). 새 임차인을 건물주에게 소개하는 건 이날 이후에 해야 법의 보호를 받아요. 그 전에는 자료를 모으고 새 임차인을 알아봐 두세요. 계약 기간 중간에 나가려면 법 보호 밖이라 건물주와 합의가 필요해요.`]);
+      else W.push(['good', `지금 <b>권리금 보호 기간</b>이에요. 계약 종료(${fD(E)})까지 ${nE}일 남았어요. 이 안에 새 임차인을 찾아 건물주에게 소개해야 해요.`]);
+    }
+    $('sWarn').innerHTML = W.map(([k, t]) => `<div class="cnote" style="margin-top:10px;padding:12px 14px;border-radius:12px;background:${k === 'bad' ? '#fff0f0' : k === 'good' ? '#ebfbf3' : 'var(--accent-soft)'}">${t}</div>`).join('');
+    // 어림셈
+    const { f, y, n } = SV;
+    const fac = f ? Math.max(0, f * (1 - Math.min(y, 5) / 5)) : 0, biz = n > 0 ? n * 12 : 0, tot = fac + biz;
+    $('sEst').innerHTML = !tot ? '<p class="cnote" style="margin-top:8px">숫자를 넣으면 권리금을 대략 계산해 드려요. 이 화면에서만 계산하고 저장하지 않아요.</p>' :
+      `<div class="crow"><span>시설 권리금 (남은 가치)</span><b>${man(fac)}</b></div>
+       <div class="crow"><span>영업 권리금 (1년 치 순이익)</span><b>${man(biz)}</b></div>
+       <div class="crow"><span>합계 (자리값 빼고)</span><b class="good">${man(tot)}</b></div>
+       <div class="crow"><span>세금 8.8% 떼고 받는 돈</span><b>${man(tot * 0.912)}</b></div>
+       <p class="cnote">· 인테리어·설비는 보통 3~5년 쓴다고 보고 5년 기준으로 깎았어요.<br>· 영업 권리금은 흔히 1년 치 순이익을 기준으로 이야기해요. 매출 자료(카드 매출·부가세 신고서)가 있어야 인정받아요.<br>· 자리값(바닥 권리금)은 상권마다 달라서 넣지 않았어요. 근처 공인중개사에게 시세를 물어보세요.<br>· 실제 금액은 새 임차인과의 협상으로 정해져요.</p>`;
+    // 순서
+    const steps = [
+      ['지금', '권리금 근거 자료 모으기', '최근 1년 카드 매출·부가세 신고서, 시설·집기 목록과 영수증, 가게 사진을 정리해요. 권리금을 인정받는 근거예요.', null],
+      [S6 ? (left(S6) > 0 ? fD(S6) : '지금') : '계약 종료 6개월 전', '권리금 보호 시작 · 새 임차인 찾기', '공인중개사나 점포 거래 서비스에 내놓아요. 이때부터 건물주는 권리금 회수를 방해할 수 없어요.', S6 && left(S6) > 0 ? S6 : null],
+      ['보호 기간 안', '새 임차인과 권리금 계약', '국토교통부 표준권리금계약서를 쓰고, "건물주와 임대차계약이 안 되면 계약금을 돌려준다"는 조건을 꼭 넣어요.', null],
+      ['계약 직후', '건물주에게 새 임차인 소개', '새 임차인의 이름·연락처·업종을 문자나 내용증명으로 보내 날짜를 남겨요. 건물주가 거절하면 이유를 글로 받아 두세요.', null],
+      [E ? fD(E) : '계약 종료일', '계약 종료 · 보증금 돌려받기', '사업을 통째로 넘기면 사업양도, 아니면 폐업 신고를 해요. 원상복구 범위는 새 임차인이 그대로 쓰기로 했다면 건물주와 글로 정리해요.', E],
+      [E ? fD(new Date(E.getFullYear(), E.getMonth() + 1, 25)) : '종료 다음 달 25일', '부가가치세 확정신고', '폐업했다면 폐업한 달의 다음 달 25일까지예요.', E ? new Date(E.getFullYear(), E.getMonth() + 1, 25) : null],
+      [E ? fD(new Date(E.getFullYear() + 1, 4, 31)) : '다음 해 5월', '종합소득세 신고 (권리금 포함)', '권리금은 기타소득이라 다른 소득과 합쳐 신고해요. 미리 떼인 8.8%는 여기서 정산돼요.', E ? new Date(E.getFullYear() + 1, 4, 31) : null]
+    ];
+    $('sTl').innerHTML = '<ol>' + steps.map(([w, t, x, d], k) => `<li data-n="${k + 1}"><b>${t}</b><small>${x}</small><span class="when">${w}${d ? ' · D-' + left(d) : ''}</span>${d && left(d) >= 0 ? `<a class="gcal" href="${gcal(d, t, x)}" target="_blank" rel="noopener">${ic('cal')} 구글 캘린더에 추가</a>` : ''}</li>`).join('') + '</ol>';
+    // 건물주 · 세금 · 상담
+    $('sMore').innerHTML = `
+      <details class="mrow"><summary>${ic('scale')}<span style="flex:1">건물주가 막으면<small class="muted" style="display:block;font-weight:500;font-size:13px">하면 안 되는 4가지 · 손해배상 3년</small></span></summary><div class="bd">
+        계약 종료 6개월 전부터 종료 때까지 건물주는 이런 행동으로 권리금 받는 걸 방해하면 안 돼요.<br>
+        ① 새 임차인에게 권리금을 직접 요구하거나 받기<br>② 새 임차인이 사장님에게 권리금을 못 주게 막기<br>③ 터무니없이 높은 월세·보증금 요구하기<br>④ 정당한 이유 없이 새 임차인과 계약 거절하기<br><br>
+        다만 새 임차인이 월세를 낼 능력이 없거나, 건물주가 1년 6개월 넘게 그 자리를 장사에 쓰지 않으려는 경우 등은 거절할 수 있어요.<br><br>
+        방해를 받았다면 <b>새 임차인이 주기로 한 권리금과 계약 종료 당시 권리금 중 낮은 금액</b>까지 손해배상을 청구할 수 있어요. <b>계약이 끝난 날부터 3년 안</b>에 해야 해요. 소송 전에 상가건물임대차분쟁조정위원회에서 무료로 조정받을 수 있어요.<br>
+        <a class="go" href="https://www.klac.or.kr" target="_blank" rel="noopener">대한법률구조공단 ›</a> <a class="go tel" href="tel:132">132 ›</a></div></details>
+      <details class="mrow"><summary>${ic('receipt')}<span style="flex:1">권리금 세금<small class="muted" style="display:block;font-weight:500;font-size:13px">8.8% 떼고 받아요 · 원천징수영수증 챙기기</small></span></summary><div class="bd">
+        영업 권리금은 <b>기타소득</b>이에요. 받은 돈의 60%를 경비로 인정해서 나머지 40%에만 세금이 붙어요. 새 임차인이 <b>8.8%를 떼고</b> 주고, 그 돈을 세무서에 내요. <b>원천징수영수증</b>을 꼭 받아 두세요.<br><br>
+        다음 해 5월 종합소득세 때 다른 소득과 합쳐서 더 내거나 돌려받아요.<br><br>
+        사업을 통째로 넘기는 <b>포괄양도</b>면 부가가치세가 붙지 않아요. 시설·집기 값을 따로 받으면 세금계산서를 끊어야 할 수 있어요. 금액이 크면 넘기기 전에 세무 상담을 받으세요.<br>
+        <a class="go tel" href="tel:126">국세청 126 ›</a></div></details>`;
+  }
+  document.querySelectorAll('#sellq .chips').forEach(g => g.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; SP[g.dataset.k] = b.dataset.v; renderSell(); }));
+  $('sEnd').addEventListener('change', renderSell);
+  document.querySelectorAll('#sin input').forEach(i => i.addEventListener('input', () => {
+    const raw = i.value.replace(/[^0-9]/g, '').slice(0, i.dataset.sf === 'y' ? 2 : 7); SV[i.dataset.sf] = Number(raw) || 0;
+    i.value = raw ? Number(raw).toLocaleString() : ''; renderSell(true);
+  }));
+
   // ---------- 숫자로 따져 보기: 월 손익 · 버틸 기간 · 손익분기 매출 · 업종 평균 연매출 비교 ----------
-  const CV = { s: 0, r: 0, l: 0, c: 0, o: 0, v: 0, k: 0 };
+  const CV = { s: 0, r: 0, l: 0, c: 0, o: 0, p: 0, v: 0, k: 0, b: 0, x: 0, w: 0 };
   const man = v => { v = Math.round(v); const a = Math.abs(v), e = Math.floor(a / 10000), r = a % 10000; return (v < 0 ? '-' : '') + (e ? e + '억' + (r ? ' ' + r.toLocaleString() : '') : r.toLocaleString()) + '만 원'; };
   const ymLater = m => { const d = new Date(today); d.setMonth(d.getMonth() + Math.floor(m)); return `${d.getFullYear()}년 ${d.getMonth() + 1}월`; };
   function revAvg() {
@@ -1469,7 +1578,7 @@
     calcOut();
   }
   function calcOut() {
-    const { s, r, l, c, o, v, k } = CV, box = $('cres');
+    const { s, r, l, c, o, p, v, k, b, x, w } = CV, box = $('cres');
     const ra = revAvg();
     if (!s) {
       const k0 = SUM ? ntsType(SUM.c) : -1, t0 = k0 >= 0 ? NTS.types[k0] : '';
@@ -1478,8 +1587,8 @@
         : t0 && REV && REV.g && REV.g[SIGUN] ? `<div class="cnote">참고: ${SIGUN}의 ${t0}${bat(t0) ? '은' : '는'} 사업자가 20명 이하라서 국세청이 평균 연매출을 공개하지 않아요. 그래서 평균과 비교는 할 수 없지만, 위에 숫자를 넣으면 버틸 기간은 계산할 수 있어요.</div>` : '';
       CALC = null; return;
     }
-    const cost = r + l + c + o, prof = s - cost, net = prof - v;
-    const vr = c / s, fixed = r + l + o + v, be = vr < 1 ? fixed / (1 - vr) : null;
+    const cost = r + l + c + o + p, prof = s - cost, net = prof - v;
+    const vr = c / s, fixed = r + l + o + p + v, be = vr < 1 ? fixed / (1 - vr) : null;
     let level, head, line;
     if (net >= 0) { level = 0; head = '지금은 생활비까지 나와요'; line = `생활비를 빼고도 매달 ${man(net)}이 남아요.`; }
     else if (!k) { level = 2; head = '매달 모자라요'; line = `생활비까지 따지면 매달 ${man(-net)}이 모자라요. 쓸 수 있는 돈을 넣으면 버틸 기간을 계산해 드려요.`; }
@@ -1491,7 +1600,7 @@
         (m < 6 ? ' 정리 방법을 먼저 알아보세요. 철거비 같은 지원은 정리 <b>전에</b> 신청해야 받아요.' : m < 12 ? ' 버티는 방법과 정리 방법을 함께 준비해 두세요.' : ' 그동안 매출을 올리거나 비용을 줄일 방법부터 찾아보세요.');
     }
     // 비용 구성 막대
-    const parts = [['임대료', r, '#3182f6'], ['인건비', l, '#6b5bd2'], ['재료비·원가', c, '#e08a00'], ['그 밖의 비용', o, '#8b95a1'], ['사장님 생활비', v, '#0ca678']].filter(p => p[1] > 0);
+    const parts = [['임대료', r, '#3182f6'], ['인건비', l, '#6b5bd2'], ['재료비·원가', c, '#e08a00'], ['그 밖의 비용', o, '#8b95a1'], ['대출 갚는 돈', p, '#d6336c'], ['사장님 생활비', v, '#0ca678']].filter(p => p[1] > 0);
     const tot = Math.max(s, cost + v);
     const bar = `<div class="cbar">${parts.map(p => `<i style="width:${p[1] / tot * 100}%;background:${p[2]}"></i>`).join('')}</div>
       <div class="clegend">${parts.map(p => `<span><b style="background:${p[2]}"></b>${p[0]} ${Math.round(p[1] / s * 100)}%</span>`).join('')}</div>
@@ -1521,12 +1630,32 @@
         <p class="cnote">평균의 <b>${Math.round(ratio * 100)}%</b> 수준이에요.${ra.yoy !== null && ra.yoy !== undefined ? ` 이 업종 평균 매출은 전년보다 ${ra.yoy >= 0 ? ra.yoy + '% 늘었어요' : -ra.yoy + '% 줄었어요'}.` : ''}${ra.life ? ` 이 업종은 평균 ${ra.life} 영업해요.` : ''} 정확한 순위는 국세청 '통계로 보는 생활업종'에서 매출을 넣어 확인할 수 있어요.</p>
         <a class="go" href="https://tasis.nts.go.kr/websquare/websquare.html?w2xPath=/cm/index.xml" target="_blank" rel="noopener">국세통계포털에서 내 순위 보기 ›</a>`;
     }
+    // 계속 vs 지금 접기 (1년 기준): 판단은 사장님 몫, 앱은 숫자만 나란히 보여 준다
+    let cmp = '';
+    if (b || x || w) {
+      const cNet = w - v - p, cCash = k + b - x;
+      const out = (cash, m) => cash < 0 ? '이미 모자라요' : m >= 0 ? '1년 넘게 괜찮아요' : (cash / -m >= 12 ? '1년 넘게 괜찮아요' : ymLater(cash / -m) + '쯤');
+      const k12 = k + net * 12, c12 = cCash + cNet * 12;
+      const cls = n => n < 0 ? 'bad' : 'good';
+      cmp = `<h3 style="margin-top:22px">계속할까, 지금 접을까 <small class="muted" style="font-weight:500;font-size:13px">1년 기준</small></h3>
+        <div class="cmp"><span class="h l"></span><span class="h">계속하면</span><span class="h">지금 접으면</span>
+          <span class="l">매달 손에 남는 돈</span><b class="${cls(net)}">${man(net)}</b><b class="${cls(cNet)}">${man(cNet)}</b>
+          <span class="l">지금 쓸 수 있는 돈</span><b>${man(k)}</b><b>${man(cCash)}</b>
+          <span class="l">1년 뒤 남는 돈</span><b class="${cls(k12)}">${k12 < 0 ? man(k12) + ' (빚)' : man(k12)}</b><b class="${cls(c12)}">${c12 < 0 ? man(c12) + ' (빚)' : man(c12)}</b>
+          <span class="l">돈이 바닥나는 때</span><b>${out(k, net)}</b><b>${out(cCash, cNet)}</b></div>
+        <p class="cnote">· '지금 접으면'은 보증금을 돌려받고 철거비를 낸 뒤, 접은 뒤의 수입에서 생활비와 대출 갚는 돈을 낸다고 계산했어요. <b>가게를 접어도 대출은 남아요.</b>${p ? ' 상환 기간을 늘리면 매달 갚는 돈을 줄일 수 있어요 (폐업 플랜의 ‘대출 정리하는 법’).' : ''}<br>
+        · '계속하면' 쪽은 보증금${b ? ' ' + man(b) : ''}이 가게에 묶여 있어서 넣지 않았어요. 나중에 정리할 때 돌려받지만, 그때는 지원 마감이 지났을 수 있어요.<br>
+        · 접는 쪽은 철거비 지원(최대 600만 원)·경기도 재기장려금(200만 원) 같은 지원금을 받으면 더 늘어나요. 조건이 있어서 위 숫자에는 넣지 않았어요.<br>
+        · 폐업하면 건강보험료는 공단에 조정 신청을 해야 줄고, 국민연금은 소득이 없으면 납부예외를 신청할 수 있어요.<br>
+        · 어느 쪽이 맞는지는 앱이 정하지 않아요. 숫자는 판단을 돕는 참고용이에요.</p>`;
+    } else if (net < 0) cmp = `<p class="cnote" style="margin-top:14px">위 '가게를 접는다면' 칸(보증금·철거비·접은 뒤 수입)을 채우면 <b>계속할 때와 지금 접을 때</b>를 1년 기준으로 나란히 비교해 드려요.</p>`;
     box.innerHTML = `<div class="signal ${['ok', 'mid', 'warn'][level]}"><span>계산 결과</span><b>${head}</b><p class="vline">${line}</p></div>
       <h3 style="margin-top:18px">한 달 돈의 흐름</h3>${bar}
       ${rows.map(([a, b, cl]) => `<div class="crow"><span>${a}</span><b class="${cl}">${b}</b></div>`).join('')}
       ${be && be > s ? `<p class="cnote">생활비까지 벌려면 매출이 지금보다 <b>${Math.round((be / s - 1) * 100)}%</b> 늘어야 해요.</p>` : ''}
       ${net < 0 && k ? `<h3 style="margin-top:22px">6개월 더 버티면</h3><div class="crow"><span>지금 쓸 수 있는 돈</span><b>${man(k)}</b></div><div class="crow"><span>6개월 뒤</span><b class="${k6 < 0 ? 'bad' : ''}">${k6 < 0 ? man(k6) + ' (빚)' : man(k6)}</b></div>` +
         (DL.length ? `<p class="cnote">그 사이에 끝나는 지원도 있어요: ${DL.map(d => `${d[0]} ${d[1].slice(5).replace('-', '.')}`).join(' · ')}</p>` : '') : ''}
+      ${cmp}
       ${rev}
       <div class="acts" style="margin-top:22px"><h3>다음으로</h3>
         <button type="button" data-a3="${level === 2 ? 'close' : 'stay'}" class="pri">${ic(level === 2 ? 'box' : 'shield', 'aic')}<span><b>${level === 2 ? '손해 없이 정리하는 방법' : '버티는 방법 보기'}</b><small>${level === 2 ? '받을 수 있는 돈과 날짜별 할 일' : '우리 시 지원사업 · 경영 상담'}</small></span><span class="arr">›</span></button>
@@ -1540,7 +1669,7 @@
     const raw = i.value.replace(/[^0-9]/g, '').slice(0, 7); CV[i.dataset.f] = Number(raw) || 0;
     i.value = raw ? Number(raw).toLocaleString() : ''; calcOut();
   }));
-  $('cEx').addEventListener('click', () => { Object.assign(CV, { s: 1200, r: 250, l: 250, c: 420, o: 180, v: 300, k: 2000 }); renderCalc(); });
+  $('cEx').addEventListener('click', () => { Object.assign(CV, { s: 1200, r: 250, l: 250, c: 420, o: 120, p: 60, v: 300, k: 2000, b: 3000, x: 500, w: 230 }); renderCalc(); });
 
   // ---------- 국세청 100대 생활업종: 우리 시 같은 업종 사업자 수와 1년 증감 ----------
   const NTSMAP = {
@@ -1690,14 +1819,14 @@
   }
 
   // ---------- 폐업 플랜: 받을 돈과 내 일정표 ----------
-  const P = { ls: '', yu: '', ei: '', dt: '' };
+  const P = { ls: '', yu: '', ei: '', dt: '', ln: '', od: '' };
   const PLAN = { text: {} };
   const fmtD = d => `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`;
   const addD = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
   function initPlan() {
     const closed = PATH === 'closed';
     $('s5t').textContent = closed ? '폐업 후 놓친 것부터 챙겨요' : '손해 없이 정리하는 순서예요';
-    $('s5l').textContent = closed ? '폐업한 날과 몇 가지를 알려 주시면, 아직 받을 수 있는 돈과 남은 기한을 맞춰 드려요.' : '다섯 가지만 알려 주시면 받을 돈과 날짜를 맞춰 드려요.';
+    $('s5l').textContent = closed ? '폐업한 날과 몇 가지를 알려 주시면, 아직 받을 수 있는 돈과 남은 기한을 맞춰 드려요.' : '몇 가지만 알려 주시면 받을 돈, 대출 정리 방법, 날짜를 맞춰 드려요.';
     $('cdLab').textContent = closed ? '폐업한 날' : '폐업 예정일';
     if (!$('cdate').value || $('cdate').dataset.p !== PATH) {
       $('cdate').value = (closed ? addD(today, -45) : addD(today, 60)).toISOString().slice(0, 10); $('cdate').dataset.p = PATH;
@@ -1746,8 +1875,13 @@
       : OS === 'android' ? '아래 다운로드 알림(또는 내 파일 → 다운로드)에서 파일을 누르고 "삼성 캘린더"를 고른 뒤 저장하세요.'
       : '내려받은 파일을 열면 컴퓨터의 캘린더(아웃룩 등)에 들어가요. 휴대폰에서 누르면 휴대폰 캘린더에 바로 넣을 수 있어요.';
   };
-  document.querySelectorAll('#plan .chips').forEach(g => g.querySelectorAll('button').forEach(b => b.classList.toggle('on', P[g.dataset.k] === b.dataset.v)));
+  document.querySelectorAll('#plan .chips').forEach(g => g.querySelectorAll('button').forEach(b => b.classList.toggle('on', g.dataset.multi ? (P[g.dataset.k] || '').split(',').includes(b.dataset.v) : P[g.dataset.k] === b.dataset.v)));
+    const LN = (P.ln || '').split(',').filter(v => v && v !== 'no'), hasLn = LN.length > 0;
+    $('qOd').classList.toggle('hidden', !hasLn);
+    if (!hasLn) P.od = '';
+    P.dt = hasLn && (P.od === 'hard' || P.od === 'late') ? 'y' : P.ln ? 'n' : P.dt;
     document.querySelectorAll('#plan [data-need]').forEach(q => q.classList.toggle('hidden', P.ls !== 'rent'));
+    $('sellCta').classList.toggle('hidden', !(P.ls === 'rent' && !closed));
     const D = new Date(($('cdate').value || today.toISOString().slice(0, 10)) + 'T00:00:00');
     const after23 = D >= new Date('2023-01-01T00:00:00');
     const m2 = parseFloat($('parea').value);
@@ -1764,8 +1898,8 @@
         d: P.yu === 'u' ? '가입했는지 먼저 확인해 보세요. 가입했다면 폐업을 이유로 그동안 낸 돈과 이자를 한 번에 받아요.' : '<b>해지하지 말고 \'폐업\'을 이유로 청구</b>하세요. 그동안 낸 돈과 이자를 한 번에 받고, 압류되지 않아요. 해지로 처리하면 세금이 붙을 수 있어요.', go: ['https://www.8899.or.kr', '노란우산'] },
       { n: '자영업자 실업급여', a: 0, amt: '구직급여', ok: P.ei === 'y' || P.ei === 'u', off: '가입 1년 이상만',
         d: `${P.ei === 'u' ? '가입 여부를 근로복지공단에서 먼저 확인하세요. ' : ''}매출 감소 같은 <b>불가피한 폐업 사유</b>가 인정돼야 받아요. 부가세 신고서·카드 매출 자료를 미리 챙기세요.`, go: ['https://www.work24.go.kr', '고용24'] },
-      { n: '새출발기금 채무조정', a: 0, amt: '원금 감면', ok: P.dt === 'y', off: '빚이 없으면 해당 없어요',
-        d: '폐업했거나 연체가 있는 소상공인의 빚을 줄이고 상환 기간을 늘려 줘요. 신청은 한 번뿐이니 채무와 재산을 정리하고 신청하세요.', extra: dday('2026-12-31'), go: ['https://www.newstartfund.or.kr', '새출발기금 신청'] },
+      { n: '새출발기금 채무조정', a: 0, amt: '원금 감면', ok: P.dt === 'y', off: P.ln && P.ln !== 'no' ? '대출을 갚기 힘들거나 밀렸을 때 신청해요' : '빚이 없으면 해당 없어요',
+        d: '2020년 4월~2025년 6월에 사업한 소상공인의 빚을 조정해 줘요. 3개월(90일) 넘게 밀렸다면 원금 일부를 깎아 줄 수 있고, 아직 안 밀렸지만 위험하면 이자와 기간을 조정해 줘요. 폐업했어도 신청할 수 있어요. 신청 마감은 <b>2026년 12월 31일</b>이에요 (연장이 논의 중이니 공식 누리집을 확인하세요).', extra: dday('2026-12-31'), go: ['https://www.newstartfund.or.kr', '새출발기금 신청'] },
       { n: '사업정리 컨설팅·법률 자문', a: 0, amt: '무료', ok: after23, off: '2023년 이후 폐업만',
         d: '세무·부동산·심리 등 전문가 1:1 컨설팅과 폐업 세금 신고 대행, 임대차·노무 법률 자문을 받아요.', go: ['https://www.sbiz.or.kr/nhrp/cnsl/bsnsArngCnslInfo.do', '희망리턴패키지'] },
       { n: '무료 법률·세무·노무 상담', a: 0, amt: '무료', ok: left(new Date('2026-11-30T00:00:00')) >= 0, off: '2026년 접수 마감',
@@ -1779,6 +1913,50 @@
     const MIC = n => /철거/.test(n) ? 'hammer' : /전직/.test(n) ? 'brief' : /노란우산/.test(n) ? 'umbrella' : /실업/.test(n) ? 'idcard' : /새출발/.test(n) ? 'renew' : /컨설팅/.test(n) ? 'chat' : /상담/.test(n) ? 'scale' : 'coin';
     $('money').innerHTML = yes.map(i => `<details class="mrow"><summary>${ic(MIC(i.n))}${i.n}<span class="amt">${i.a ? i.a.toLocaleString() + '만 원' : i.amt}</span></summary><div class="bd">${i.d}${i.extra ? '<br>' + i.extra : ''}<br>${link(i)}</div></details>`).join('') +
       (no.length ? `<details class="mrow off"><summary>${ic('coin')}해당 안 되는 지원 ${no.length}가지</summary><div class="bd">${no.map(i => `${i.n} — ${i.off}`).join('<br>')}</div></details>` : '');
+    // 대출 정리하는 법: 고른 대출 종류마다 폐업하면 어떻게 되는지 + 상환을 늘리는 제도 + 연체 상황별 안내
+    {
+      const LN = ['sb', 'gs', 'bk', 'cd'].filter(v => (P.ln || '').split(',').includes(v));
+      $('debtBox').classList.toggle('hidden', !LN.length);
+      const late = P.od === 'late', hard = P.od === 'hard';
+      const D_ = {
+        sb: { ic: 'building', n: '정책자금 (소진공 직접대출)', t: '폐업 전에 소진공에 먼저 물어보기',
+          d: `폐업하면 남은 대출을 한 번에 갚으라는 요구를 받을 수 있어요. 다만 정부는 그동안 <b>이자를 밀리지 않고 갚아 온 폐업자</b>에게는 한 번에 갚는 것을 미뤄 주고 원래 일정대로 나눠 갚게 해 왔어요. 폐업 신고 전에 꼭 확인하세요.<br><br><b>폐업 뒤 직장에 취업하면</b> 상환 기간을 최대 7년 늘릴 수 있어요. 2023년 이후 받은 직접대출이고, 2025년 이후 폐업한 뒤 취업한 경우예요. 1년 넘게 다니면 금리도 깎아 줘요.<br><small class="muted">은행에서 보증서를 받아 빌린 정책자금(대리대출)은 아래 '보증서 대출'을 보세요.</small>`,
+          go: [['https://ols.sbiz.or.kr', '소상공인정책자금'], ['tel:1533-0100', '1533-0100']] },
+        gs: { ic: 'shield', n: '보증서 대출 (경기신용보증재단)', t: '폐업 후 최대 15년 나눠 갚기',
+          d: `폐업한 사장님이 보증서 대출을 <b>밀리지 않고 갚고 있다면</b>, 처음 2년은 이자만 내고 13년 동안 나눠 갚는 대출로 바꿔 주는 특례보증이 있어요. 1억 원 이하는 금리가 낮고, 보증료는 정부가 대신 내줘요. 2020년 4월~2025년 6월에 사업한 이력이 있어야 하고, <b>폐업 신고 후</b> 경기신용보증재단 영업점에서 신청해요. 지금도 접수하는지, 조건은 어떤지 영업점에 먼저 확인하세요.`,
+          go: [['https://www.gcgf.or.kr', '경기신용보증재단']] },
+        bk: { ic: 'wallet', n: '은행 사업자대출', t: '은행권 폐업자 지원 프로그램',
+          d: `폐업할 예정이거나 이미 폐업한 사장님의 사업자대출을 <b>금리가 낮고 오래 나눠 갚는 가계대출</b>로 바꿔 줘요. 처음 2년은 이자만 내고, 1억 원 이하 신용대출은 최장 30년까지 나눠 갚을 수 있어요. <b>폐업 전에도</b> 신청할 수 있어요. 지금 정상적으로 갚고 있어야 하고, 2024년 12월 23일 이후에 받은 대출은 빠져요. 2025년 4월부터 3년 동안 운영해요. 거래하는 은행 창구에서 '폐업자 지원 프로그램'을 물어보세요.`,
+          go: [] },
+        cd: { ic: 'receipt', n: '카드론·현금서비스', t: '여러 곳 빚을 한 번에 조정',
+          d: `금리가 높아서 먼저 정리하는 게 좋아요. 여러 금융회사에 흩어진 빚은 <b>신용회복위원회</b>에서 한 번에 상담하고 이자·기간·원금을 조정받을 수 있어요. 새출발기금도 협약한 카드사의 카드론은 조정 대상이에요.`,
+          go: [['https://www.cccs.or.kr', '신용회복위원회'], ['tel:1600-5500', '1600-5500']] }
+      };
+      const gl = g => g.map(([u, l]) => `<a class="go${u.startsWith('tel') ? ' tel' : ''}" href="${u}"${u.startsWith('http') ? ' target="_blank" rel="noopener"' : ''}>${l} ›</a>`).join(' ');
+      const head = !P.od ? '' : late
+        ? `<div class="cnote" style="margin-bottom:10px"><b>이미 밀렸다면</b> 아래 상환 기간을 늘리는 제도는 '정상적으로 갚는 중'이어야 해서 대상에서 빠질 수 있어요. 그럴 때는 <b>새출발기금</b>(3개월 넘게 밀렸으면 원금 일부 감면, 2026년 12월 31일 마감)이나 <b>신용회복위원회</b>(1600-5500) 상담이 먼저예요. 세금 체납은 채무조정 대상이 아니에요.</div>`
+        : hard
+          ? `<div class="cnote" style="margin-bottom:10px"><b>아직 안 밀렸다면 지금이 기회예요.</b> 아래 제도들은 대부분 '정상적으로 갚는 중'일 때만 받을 수 있어요. 연체가 생기기 전에 상환 기간부터 늘려 두세요. 그래도 어렵다면 새출발기금이나 신용회복위원회에서 이자·기간 조정을 상담할 수 있어요.</div>`
+          : `<div class="cnote" style="margin-bottom:10px"><b>밀리지 않고 갚는 게 제일 중요해요.</b> 아래 제도들은 대부분 '정상적으로 갚는 중'이어야 받을 수 있어요. 폐업 신고 전에 대출받은 곳에 '폐업하면 어떻게 되나요?'를 먼저 물어보세요.</div>`;
+      $('debt').innerHTML = head + LN.map(k => D_[k]).map(x => `<details class="mrow"><summary>${ic(x.ic)}<span style="flex:1">${x.n}<small class="muted" style="display:block;font-weight:500;font-size:13px">${x.t}</small></span></summary><div class="bd">${x.d}${x.go.length ? '<br>' + gl(x.go) : ''}</div></details>`).join('') +
+        `<p class="cnote" style="margin-top:4px">정부 기관이나 은행은 대출 바꾸기를 문자·전화로 먼저 권하지 않아요. 링크가 온 문자는 누르지 말고, 위 공식 창구에서만 신청하세요.</p>`;
+    }
+    // 폐업 뒤 생활비: 건강보험료 조정 · 국민연금 납부예외 · (실업급여가 없으면) 국민취업지원제도
+    {
+      const L = [
+        { ic: 'shield', n: '건강보험료 조정 신청', t: '안 하면 지난 소득대로 계속 나와요',
+          d: `지역가입자 건강보험료는 이미 신고된 지난 소득을 기준으로 매겨져서, 가게를 접어도 저절로 줄지 않아요. 폐업 신고를 한 뒤 공단에 <b>보험료 조정</b>을 신청하면 다음 달부터 가게 소득을 빼고 다시 계산해요. 폐업 신고를 했다면 서류 없이 'The건강보험' 앱이나 누리집에서 신청할 수 있어요. 다음 해 11월에 실제 소득으로 정산해서 더 내거나 돌려받을 수 있어요. 가족의 직장 건강보험에 피부양자로 들어갈 수 있는지도 물어보세요.`,
+          go: [['https://www.nhis.or.kr', '국민건강보험공단'], ['tel:1577-1000', '1577-1000']] },
+        { ic: 'umbrella', n: '국민연금 납부예외', t: '소득이 없으면 미룰 수 있어요',
+          d: `폐업해서 소득이 없으면 <b>납부예외</b>를 신청해 보험료를 미룰 수 있어요. 그냥 안 내고 두면 밀린 보험료가 돼요. 납부예외 기간은 가입기간에서 빠지지만, 나중에 형편이 나아지면 추후납부로 채울 수 있어요. 2026년부터는 월 소득 80만 원 미만인 지역가입자는 보험료 절반을 지원받을 수 있어요.`,
+          go: [['https://www.nps.or.kr', '국민연금공단'], ['tel:1355', '1355']] }
+      ];
+      if (P.ei !== 'y') L.push({ ic: 'brief', n: '국민취업지원제도', t: '실업급여를 못 받는다면',
+          d: `고용센터에서 취업 상담과 훈련을 받으면서 <b>최대 6개월 동안 구직촉진수당</b>을 받을 수 있어요. 폐업한 자영업자도 신청할 수 있지만 가구 소득·재산 기준이 있어요. 실업급여를 받는 동안에는 함께 받을 수 없어요.`,
+          go: [['https://www.work24.go.kr', '고용24'], ['tel:1350', '1350']] });
+      const gl = g => g.map(([u, l]) => `<a class="go${u.startsWith('tel') ? ' tel' : ''}" href="${u}"${u.startsWith('http') ? ' target="_blank" rel="noopener"' : ''}>${l} ›</a>`).join(' ');
+      $('life').innerHTML = L.map(x => `<details class="mrow"><summary>${ic(x.ic)}<span style="flex:1">${x.n}<small class="muted" style="display:block;font-weight:500;font-size:13px">${x.t}</small></span></summary><div class="bd">${x.d}<br>${gl(x.go)}</div></details>`).join('');
+    }
     // 내 일정표
     const vat = new Date(D.getFullYear(), D.getMonth() + 1, 25), inc = new Date(D.getFullYear() + 1, 4, 31);
     const ev = [];
@@ -1790,11 +1968,18 @@
     }
     ev.push([D, '통합 폐업신고', '시·군·구청이나 세무서 한 곳에서 영업 인허가와 사업자등록 폐업을 같이 신고해요. 폐업사실증명원을 떼 두세요.']);
     ev.push([D, '4대보험 정리', '직원이 있다면 상실 신고, 사업장 탈퇴 신고를 해요.']);
+    ev.push([closed ? today : addD(D, 1), '건강보험료 조정 신청', '폐업 신고 후 \'The건강보험\' 앱에서 신청하면 다음 달부터 가게 소득을 빼고 계산해요.']);
+    ev.push([closed ? today : addD(D, 1), '국민연금 납부예외 신청', '소득이 없으면 신청해서 보험료를 미뤄요. 그냥 두면 밀린 보험료가 돼요.']);
     ev.push([vat, '부가가치세 확정신고', '폐업한 달의 다음 달 25일까지예요. 팔지 않은 재고와 설비에도 세금이 붙을 수 있어요.']);
     if (P.yu !== 'n') ev.push([addD(D, 1), '노란우산 공제금 청구', '폐업사실증명원을 내고 \'폐업\' 사유로 청구해요.']);
     if (P.ei !== 'n') ev.push([addD(D, 1), '실업급여 수급자격 신청', '가까운 고용센터에 폐업 사유 증빙을 내요.']);
     ev.push([addD(D, 1), '취업 교육 신청 → 전직장려수당', '2026년 교육 신청은 12.10까지예요. 아래 \'다시 일할 곳\'을 보세요.']);
-    if (P.dt === 'y') ev.push([new Date('2026-12-31T00:00:00'), '새출발기금 신청 마감', '빚 부담이 크다면 마감 전에 신청을 검토하세요.']);
+    {
+      const LN = (P.ln || '').split(',').filter(v => v && v !== 'no');
+      if (LN.length) ev.push([closed ? today : (addD(D, -30) < today ? today : addD(D, -30)), '대출 상환 방법 정하기', `${LN.includes('sb') ? '소진공(1533-0100)에 폐업하면 한 번에 갚아야 하는지 묻고, ' : ''}${LN.includes('bk') ? '거래 은행에 폐업자 지원 프로그램을 신청하고, ' : ''}연체가 생기기 전에 상환 기간부터 늘려 두세요.`]);
+      if (LN.includes('gs')) ev.push([closed ? today : addD(D, 1), '보증서 대출 장기 분할상환 신청', '폐업사실증명원을 들고 경기신용보증재단 영업점에서 15년 분할상환 특례보증을 물어보세요.']);
+    }
+    if (P.dt === 'y') ev.push([new Date('2026-12-31T00:00:00'), '새출발기금 신청 마감', '연장이 논의 중이지만 확정 전이에요. 빚 부담이 크다면 마감 전에 신청을 검토하세요.']);
     ev.push([inc, '종합소득세 확정신고', '폐업한 다음 해 5월 31일까지 그해 소득을 신고해요.']);
     ev.sort((a, b) => a[0] - b[0]);
     $('schedT').firstChild.textContent = closed ? '남은 일정 전체 보기' : '폐업 일정표 전체 보기';
@@ -1816,7 +2001,7 @@
       [P.ls === 'rent' && !closed, '철거 전·후 사진', '같은 위치에서 찍어 두세요 · 철거비 지원 정산에 써요'],
       [P.yu !== 'n', '노란우산 공제금 청구서 · 신분증', '\'폐업\' 사유로 청구해요 (해지 아님)'],
       [P.ei !== 'n', '매출 감소 자료 (카드 매출 내역 등)', '자영업자 실업급여는 불가피한 폐업 사유를 증빙해야 해요'],
-      [P.dt === 'y', '대출·카드빚 내역', '새출발기금이나 채무조정 상담 때 금융기관별로 정리해 가요'],
+      [P.dt === 'y' || (P.ln && P.ln !== 'no'), '대출 내역 (기관·잔액·금리·만기)', '은행 앱이나 대출 약정서에서 확인 · 상환 방법을 바꾸거나 채무조정 상담할 때 기관별로 정리해 가요'],
       [1, '사실증명 (총사업자등록내역)', '전직장려수당 신청 때 내요 · 홈택스 발급']
     ].filter(d => d[0]);
     const done = PLAN.done || (PLAN.done = {});
@@ -1832,7 +2017,17 @@
       sched: ev.filter(e => left(e[0]) >= 0).slice(0, 4).map(e => `${fmtD(e[0])} ${e[1]}`).join(' / ')
     };
   }
-  document.querySelectorAll('#plan .chips').forEach(g => g.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; P[g.dataset.k] = b.dataset.v; renderPlan(); }));
+  document.querySelectorAll('#plan .chips').forEach(g => g.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return; const k = g.dataset.k, v = b.dataset.v;
+    if (g.dataset.multi) {
+      // 여러 개 고르기: '없어요'는 다른 것과 같이 고를 수 없다
+      let set = new Set((P[k] || '').split(',').filter(Boolean));
+      if (v === 'no') set = set.has('no') ? new Set() : new Set(['no']);
+      else { set.delete('no'); set.has(v) ? set.delete(v) : set.add(v); }
+      P[k] = [...set].join(',');
+    } else P[k] = v;
+    renderPlan();
+  }));
   $('cdate').addEventListener('change', renderPlan); $('parea').addEventListener('input', renderPlan);
 
   function drawRadiusL(c) {
