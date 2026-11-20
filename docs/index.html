@@ -122,6 +122,7 @@
   .signal b { display: block; font-size: 40px; font-weight: 800; letter-spacing: -1px; line-height: 1.2; margin: 2px 0; }
   .signal #sigNote { font-size: 14px; }
   .signal .vline { margin: 8px 0 0; font-size: 15px; font-weight: 500; color: var(--ink); line-height: 1.55; }
+  .signal .vline b { display: inline; font-size: inherit; font-weight: 800; letter-spacing: 0; color: inherit; line-height: inherit; margin: 0; }
   .vt { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 14px; }
   .vt div { background: var(--gray); border-radius: 14px; padding: 12px 6px 10px; text-align: center; }
   .vt b { display: block; font-size: 21px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.25; }
@@ -273,6 +274,22 @@
   .money .amt { float: right; color: var(--accent); font-size: 15px; font-weight: 800; }
   .money li.off { color: var(--mute); background: var(--gray); border-color: var(--gray); }
   .money li.off .amt { color: var(--mute); font-weight: 500; font-size: 13px; }
+  /* 숫자로 따져 보기 */
+  .money-in { display: grid; gap: 10px; margin: 6px 0 4px; }
+  .money-in label { display: flex; align-items: center; gap: 10px; background: var(--gray); border-radius: 14px; padding: 6px 14px 6px 16px; font-size: 15px; font-weight: 600; }
+  .money-in label span { flex: 1; } .money-in label small { display: block; font-size: 12px; font-weight: 400; color: var(--sub); }
+  .money-in input { width: 110px; border: 0; background: #fff; border-radius: 10px; padding: 10px 10px; font: inherit; font-size: 17px; font-weight: 700; text-align: right; color: var(--ink); }
+  .money-in em { font-style: normal; font-size: 14px; color: var(--sub); width: 34px; }
+  .money-in .grp { font-size: 13px; font-weight: 700; color: var(--sub); margin: 10px 2px -2px; }
+  .linkbtn.sm { margin: 8px 0 0; padding: 6px; font-size: 14px; }
+  .cres { margin-top: 20px; }
+  .cbar { display: flex; height: 26px; border-radius: 8px; overflow: hidden; background: var(--gray); margin: 10px 0 6px; }
+  .cbar i { display: block; height: 100%; }
+  .clegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; color: var(--sub); }
+  .clegend b { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+  .crow { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--gray); font-size: 15px; }
+  .crow b { font-size: 18px; font-weight: 800; } .crow b.bad { color: var(--warn); } .crow b.good { color: var(--ok); }
+  .cnote { font-size: 13px; color: var(--sub); margin: 8px 0 0; line-height: 1.6; }
   .mrow { border: 1px solid var(--line); border-radius: 14px; margin-bottom: 8px; background: #fff; }
   .mrow > summary { display: flex; align-items: center; gap: 10px; padding: 14px 16px; list-style: none; cursor: pointer; font-weight: 700; font-size: 16px; }
   .mrow > summary::-webkit-details-marker { display: none; }
@@ -442,6 +459,7 @@
     </div>
     <div class="acts" style="margin-top:18px"><h3>다른 길도 보고 싶다면</h3>
       <button type="button" data-a2="close"><span><b>손해 없이 정리하는 방법</b><small>받을 수 있는 돈 · 날짜별 할 일 · 다시 일할 곳</small></span><span class="arr">›</span></button>
+      <button type="button" data-a2="calc"><span><b>숫자로 따져 보기</b><small>언제까지 버틸 수 있는지 계산</small></span><span class="arr">›</span></button>
       <button type="button" data-a2="move"><span><b>업종 바꾸기 · 가게 옮기기</b><small>바꿀 업종과 옮길 동네 3곳씩</small></span><span class="arr">›</span></button>
     </div>
     <div id="t-close" class="hidden">
@@ -524,6 +542,28 @@
     <div class="cta"><button class="btn sub" data-home>처음으로</button><button class="btn sumgo">상담용 요약</button></div>
   </section>
 
+  <!-- 숫자로 따져 보기 -->
+  <section id="s6" class="scr hidden">
+    <h2>언제까지 버틸 수 있을까요?</h2>
+    <p class="lead">한 달 기준 숫자를 대략 넣어 주세요. 이 화면에서만 계산하고 어디에도 저장하지 않아요.</p>
+    <div class="money-in" id="cin">
+      <div class="grp">들어오는 돈</div>
+      <label><span>월 평균 매출<small>카드·현금·배달 모두 합쳐서</small></span><input data-f="s" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <div class="grp">나가는 돈</div>
+      <label><span>임대료<small>월세 + 관리비</small></span><input data-f="r" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><span>인건비<small>직원·아르바이트 (사장님 본인 빼고)</small></span><input data-f="l" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><span>재료비·원가<small>팔기 위해 사는 재료·물건</small></span><input data-f="c" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><span>그 밖의 비용<small>공과금·카드 수수료·배달 수수료·대출 이자</small></span><input data-f="o" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <div class="grp">사장님 살림</div>
+      <label><span>사장님 생활비<small>가게에서 가져가야 하는 돈</small></span><input data-f="v" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><span>지금 쓸 수 있는 돈<small>예금·비상금 (보증금 빼고)</small></span><input data-f="k" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+    </div>
+    <button type="button" class="linkbtn sm" id="cEx">예시 숫자로 채워 보기</button>
+    <div class="cres" id="cres"></div>
+    <p class="src">계산은 입력한 숫자만으로 한 단순 추정이에요. 세금, 계절 변동, 보증금 반환은 넣지 않았어요. 지원 마감일은 2026년 공고 기준이에요.<br>업종 평균 연매출: 국세청 통계로 보는 생활업종(개인사업자 종합소득세 신고 총수입금액, 2024년 귀속).</p>
+    <div class="cta"><button class="btn sub" data-home>처음으로</button><button class="btn sumgo">상담용 요약</button></div>
+  </section>
+
   <div class="sheet hidden" id="sheet"><div class="dim" id="sheetDim"></div><div class="body"><div class="grab"></div><div id="sumBox"></div></div></div>
 </div>
 
@@ -541,13 +581,14 @@
     fetch('data/poly.json').then(r => r.json()).catch(() => []),
     fetch('data/gg/lic/meta.json').then(r => r.json()).catch(() => null),
     fetch('data/gg/fr/meta.json').then(r => r.json()).catch(() => null),
-    fetch('data/gg/nts.json').then(r => r.json()).catch(() => null)
+    fetch('data/gg/nts.json').then(r => r.json()).catch(() => null),
+    fetch('data/gg/rev.json').then(r => r.json()).catch(() => null)
   ]); } catch (err) {
     const m = $('loadMsg'); m.style.color = 'var(--warn)';
     m.innerHTML = '정보를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.<br><button class="btn line" style="margin-top:8px;height:44px" onclick="location.reload()">다시 시도하기</button>';
     return;
   }
-  let [cats, IDX, CHGALL, SUP, JC, POLY, LMETA, FMETA, NTS] = loaded;
+  let [cats, IDX, CHGALL, SUP, JC, POLY, LMETA, FMETA, NTS, REV] = loaded;
   let PICKED = false, MANUAL = false, VN = null, VL = null, VF = null, LIC = null, NAMES = null, NAMES_FILE = '', PATH = 'think', FRB = new Map(); // 점포 번호 → 브랜드 번호
   let city, N, catCount = {}, catList = [], CHG = {}, SIGUN = '';
   const svgNS = 'http://www.w3.org/2000/svg';
@@ -1010,10 +1051,10 @@
 
   // 단계 이동
   // 화면 이동
-  const SCR = ['s0', 's1', 's2', 's3', 's4', 's5'];
+  const SCR = ['s0', 's1', 's2', 's3', 's4', 's5', 's6'];
   const PATHS = { think: ['s0', 's1', 's2', 's4'], close: ['s0', 's1', 's5'], restart: ['s0', 's1', 's2', 's3'], closed: ['s0', 's1', 's5'] };
   let ORDER = PATHS.think;
-  const TITLE = { s0: '', s1: '가게 정보', s2: '내 상권 리포트', s3: '다시 시작하기', s4: '다음 단계', s5: '폐업 정리 플랜' };
+  const TITLE = { s0: '', s1: '가게 정보', s2: '내 상권 리포트', s3: '다시 시작하기', s4: '다음 단계', s5: '폐업 정리 플랜', s6: '숫자로 따져 보기' };
   let cur = 's0';
   // 폰의 뒤로가기(제스처·버튼)도 앱 안에서 이전 화면으로 가게 기록을 남긴다
   function show(id, fromPop) {
@@ -1021,7 +1062,7 @@
     SCR.forEach(s => $(s).classList.toggle('hidden', s !== id));
     cur = id; const k = ORDER.indexOf(id);
     if (id === 's5' && PATH === 'closed') TITLE.s5 = '폐업 후 챙길 것'; else TITLE.s5 = '폐업 정리 플랜';
-    $('prog').style.width = (k / (ORDER.length - 1) * 100) + '%';
+    $('prog').style.width = ((k < 0 ? ORDER.length - 1 : k) / (ORDER.length - 1) * 100) + '%';
     $('backBtn').disabled = k === 0; $('ttl').textContent = TITLE[id];
     window.scrollTo({ top: 0 });
     if (MODE !== 'svg') setTimeout(() => { if (id === 's1') fitPick(); if (id === 's2') fitRad(); }, 30);
@@ -1099,6 +1140,7 @@
       `상황: 업종 변경·이전 검토 · ${s.sigun} ${s.dong} · ${s.name}`,
       `지금 상권: ${s.signal} (반경 500m ${s.mine}곳, 시 평균의 ${s.ratio.toFixed(1)}배)${s.life ? ' · ' + s.life : ''}`,
       s.nts ? `같은 업종 사장님 수: ${s.nts}` : '',
+      CALC ? `숫자로 본 가게: ${CALC.text}` : '',
       s.fr ? `프랜차이즈: ${s.fr}` : '',
       `바꿀 업종 후보: ${RS.biz.join(', ') || '없음'}`,
       `옮길 동네 후보: ${RS.move.join(', ') || '없음'}`,
@@ -1112,6 +1154,7 @@
       `- 상권 변화: ${s.ch ? s.dong + ' ' + s.ch.type + ' (2025년 3분기)' : '자료 없음'}`,
       s.life ? `- 얼마나 버텼나: ${s.life}` : '',
       s.nts ? `- 같은 업종 사장님 수: ${s.nts}` : '',
+      CALC ? `- 숫자로 본 가게: ${CALC.text}` : '',
       s.fr ? `- 프랜차이즈: ${s.fr}` : '',
       QRES ? `받을 수 있는 지원: ${QRES.text}` : '',
       `버티기: 희망리턴 재기사업화(경영개선) · 업종 전환 힌트 ${s.alts.join(', ')}`,
@@ -1326,19 +1369,102 @@
     const A = {
       stay: ['버티는 방법 보기', '우리 시 지원사업 · 경영 상담 · 업종 전환 힌트'],
       move: ['업종 바꾸기 · 가게 옮기기', '같은 데이터로 바꿀 업종과 옮길 동네 3곳씩'],
-      close: ['손해 없이 정리하는 방법', '받을 수 있는 돈과 날짜별 할 일']
+      close: ['손해 없이 정리하는 방법', '받을 수 있는 돈과 날짜별 할 일'],
+      calc: ['숫자로 따져 보기', '매출·비용을 넣으면 언제까지 버틸 수 있는지 계산']
     };
-    const ord = PATH === 'restart' ? ['move', 'stay', 'close'] : level === 2 ? ['close', 'move', 'stay'] : level === 1 ? ['stay', 'move', 'close'] : ['stay', 'move', 'close'];
+    const ord = PATH === 'restart' ? ['move', 'calc', 'stay', 'close'] : level === 2 ? ['calc', 'close', 'move', 'stay'] : level === 1 ? ['calc', 'stay', 'move', 'close'] : ['stay', 'calc', 'move', 'close'];
     $('vAct').innerHTML = `<h3>이렇게 해 보세요</h3>` + ord.map((k, n) => `<button type="button" data-a="${k}" class="${n === 0 ? 'pri' : ''}"><span><b>${A[k][0]}</b><small>${A[k][1]}</small></span><span class="arr">›</span></button>`).join('');
     $('vAct').querySelectorAll('button').forEach(b => b.onclick = () => goAct(b.dataset.a));
     $('s2next').dataset.a = ord[0]; $('s2next').textContent = A[ord[0]][0];
     $('deep').open = false;
   }
   function goAct(a) {
+    if (a === 'calc') { renderCalc(); show('s6'); return; }
     if (a === 'stay') { if (PATH !== 'think') setPath('think'); show('s4'); }
     else if (a === 'move') { if (PATH !== 'restart') setPath('restart'); renderRestart(); show('s3'); }
     else { if (PATH !== 'close') setPath('close'); initPlan(); show('s5'); }
   }
+
+  // ---------- 숫자로 따져 보기: 월 손익 · 버틸 기간 · 손익분기 매출 · 업종 평균 연매출 비교 ----------
+  const CV = { s: 0, r: 0, l: 0, c: 0, o: 0, v: 0, k: 0 };
+  const man = v => { v = Math.round(v); const a = Math.abs(v), e = Math.floor(a / 10000), r = a % 10000; return (v < 0 ? '-' : '') + (e ? e + '억' + (r ? ' ' + r.toLocaleString() : '') : r.toLocaleString()) + '만 원'; };
+  const ymLater = m => { const d = new Date(today); d.setMonth(d.getMonth() + Math.floor(m)); return `${d.getFullYear()}년 ${d.getMonth() + 1}월`; };
+  function revAvg() {
+    if (!REV || !SUM) return null;
+    const k = ntsType(SUM.c); if (k < 0) return null;
+    const t = NTS.types[k], g = REV.g && REV.g[SIGUN] && REV.g[SIGUN][t];
+    return g ? { t, avg: g[0], yoy: g[1], where: SIGUN, life: REV.life && REV.life[t] } : null;
+  }
+  function renderCalc() {
+    document.querySelectorAll('#cin input').forEach(i => { const v = CV[i.dataset.f]; i.value = v ? v.toLocaleString() : ''; });
+    calcOut();
+  }
+  function calcOut() {
+    const { s, r, l, c, o, v, k } = CV, box = $('cres');
+    const ra = revAvg();
+    if (!s) {
+      box.innerHTML = ra ? `<div class="cnote">참고: ${ra.where} ${ra.t} 평균 연매출은 <b>${man(ra.avg)}</b>이에요 (한 달 약 ${man(ra.avg / 12)}).</div>` : '';
+      CALC = null; return;
+    }
+    const cost = r + l + c + o, prof = s - cost, net = prof - v;
+    const vr = c / s, fixed = r + l + o + v, be = vr < 1 ? fixed / (1 - vr) : null;
+    let level, head, line;
+    if (net >= 0) { level = 0; head = '지금은 생활비까지 나와요'; line = `생활비를 빼고도 매달 ${man(net)}이 남아요.`; }
+    else if (!k) { level = 2; head = '매달 모자라요'; line = `생활비까지 따지면 매달 ${man(-net)}이 모자라요. 쓸 수 있는 돈을 넣으면 버틸 기간을 계산해 드려요.`; }
+    else {
+      const m = k / -net;
+      level = m >= 6 ? 1 : 2;
+      head = m >= 12 ? `약 ${Math.floor(m)}개월은 버틸 수 있어요` : m >= 6 ? `약 ${Math.floor(m)}개월 버틸 수 있어요` : `${m < 1 ? '한 달도' : '약 ' + Math.floor(m) + '개월밖에'} 못 버텨요`;
+      line = `매달 ${man(-net)}씩 모자라서, 지금 쓸 수 있는 돈 ${man(k)}은 <b>${ymLater(m)}</b>쯤 바닥나요.` +
+        (m < 6 ? ' 정리 방법을 먼저 알아보세요. 철거비 같은 지원은 정리 <b>전에</b> 신청해야 받아요.' : m < 12 ? ' 버티는 방법과 정리 방법을 함께 준비해 두세요.' : ' 그동안 매출을 올리거나 비용을 줄일 방법부터 찾아보세요.');
+    }
+    // 비용 구성 막대
+    const parts = [['임대료', r, '#3182f6'], ['인건비', l, '#6b5bd2'], ['재료비·원가', c, '#e08a00'], ['그 밖의 비용', o, '#8b95a1'], ['사장님 생활비', v, '#0ca678']].filter(p => p[1] > 0);
+    const tot = Math.max(s, cost + v);
+    const bar = `<div class="cbar">${parts.map(p => `<i style="width:${p[1] / tot * 100}%;background:${p[2]}"></i>`).join('')}</div>
+      <div class="clegend">${parts.map(p => `<span><b style="background:${p[2]}"></b>${p[0]} ${Math.round(p[1] / s * 100)}%</span>`).join('')}</div>
+      <p class="cnote">막대 길이는 ${cost + v > s ? '나가는 돈 합계(매출보다 많아요)' : '매출'} 기준이고, 퍼센트는 매출 대비예요.</p>`;
+    // 6개월 뒤
+    const k6 = k + net * 6;
+    const DL = [['무료 법률·세무·노무 상담 접수', '2026-11-30'], ['취업 교육 신청(전직장려수당)', '2026-12-10'], ['경기도 재기장려금(선착순)', '2026-12-31'], ['새출발기금 신청', '2026-12-31']]
+      .filter(d => { const n = ddayLeft(d[1]); return n >= 0 && n <= 183; });
+    const rows = [
+      ['한 달 매출', man(s), ''], ['한 달 비용', man(cost), ''],
+      ['가게에서 남는 돈', man(prof), prof < 0 ? 'bad' : 'good'],
+      ['생활비까지 빼면', man(net), net < 0 ? 'bad' : 'good']
+    ];
+    if (be) rows.push(['생활비까지 나오는 매출', man(be), be > s ? 'bad' : 'good']);
+    let rev = '';
+    const kt = SUM ? ntsType(SUM.c) : -1;
+    if (!ra && kt >= 0) rev = `<h3 style="margin-top:22px">같은 업종과 비교</h3><p class="cnote">${SIGUN} ${NTS.types[kt]} 평균 연매출은 아직 앱에 넣지 못했어요. 국세청 '통계로 보는 생활업종'에서 ${SIGUN}를 고르고 매출을 넣으면 평균과 순위를 바로 볼 수 있어요.</p>
+        <a class="go" href="https://tasis.nts.go.kr/websquare/websquare.html?w2xPath=/cm/index.xml" target="_blank" rel="noopener">국세통계포털에서 확인하기 ›</a>`;
+    if (ra) {
+      const ratio = s * 12 / ra.avg;
+      rev = `<h3 style="margin-top:22px">같은 업종과 비교</h3><div class="crow"><span>${ra.where} ${ra.t} 평균 연매출</span><b>${man(ra.avg)}</b></div>
+        <div class="crow"><span>사장님 가게 (월 매출 × 12)</span><b class="${ratio < 0.8 ? 'bad' : ratio >= 1 ? 'good' : ''}">${man(s * 12)}</b></div>
+        <p class="cnote">평균의 <b>${Math.round(ratio * 100)}%</b> 수준이에요.${ra.yoy !== null && ra.yoy !== undefined ? ` 이 업종 평균 매출은 전년보다 ${ra.yoy >= 0 ? ra.yoy + '% 늘었어요' : -ra.yoy + '% 줄었어요'}.` : ''}${ra.life ? ` 이 업종은 평균 ${ra.life} 영업해요.` : ''} 정확한 순위는 국세청 '통계로 보는 생활업종'에서 매출을 넣어 확인할 수 있어요.</p>
+        <a class="go" href="https://tasis.nts.go.kr/websquare/websquare.html?w2xPath=/cm/index.xml" target="_blank" rel="noopener">국세통계포털에서 내 순위 보기 ›</a>`;
+    }
+    box.innerHTML = `<div class="signal ${['ok', 'mid', 'warn'][level]}"><span>계산 결과</span><b>${head}</b><p class="vline">${line}</p></div>
+      <h3 style="margin-top:18px">한 달 돈의 흐름</h3>${bar}
+      ${rows.map(([a, b, cl]) => `<div class="crow"><span>${a}</span><b class="${cl}">${b}</b></div>`).join('')}
+      ${be && be > s ? `<p class="cnote">생활비까지 벌려면 매출이 지금보다 <b>${Math.round((be / s - 1) * 100)}%</b> 늘어야 해요.</p>` : ''}
+      ${net < 0 && k ? `<h3 style="margin-top:22px">6개월 더 버티면</h3><div class="crow"><span>지금 쓸 수 있는 돈</span><b>${man(k)}</b></div><div class="crow"><span>6개월 뒤</span><b class="${k6 < 0 ? 'bad' : ''}">${k6 < 0 ? man(k6) + ' (빚)' : man(k6)}</b></div>` +
+        (DL.length ? `<p class="cnote">그 사이에 끝나는 지원도 있어요: ${DL.map(d => `${d[0]} ${d[1].slice(5).replace('-', '.')}`).join(' · ')}</p>` : '') : ''}
+      ${rev}
+      <div class="acts" style="margin-top:22px"><h3>다음으로</h3>
+        <button type="button" data-a3="${level === 2 ? 'close' : 'stay'}" class="pri"><span><b>${level === 2 ? '손해 없이 정리하는 방법' : '버티는 방법 보기'}</b><small>${level === 2 ? '받을 수 있는 돈과 날짜별 할 일' : '우리 시 지원사업 · 경영 상담'}</small></span><span class="arr">›</span></button>
+        <button type="button" data-a3="${level === 2 ? 'stay' : 'close'}"><span><b>${level === 2 ? '그래도 버텨 보고 싶다면' : '정리할 때를 대비하려면'}</b><small>${level === 2 ? '우리 시 지원사업 · 경영 상담' : '받을 수 있는 돈과 날짜별 할 일'}</small></span><span class="arr">›</span></button>
+      </div>`;
+    box.querySelectorAll('[data-a3]').forEach(b => b.onclick = () => goAct(b.dataset.a3));
+    CALC = { text: `월 매출 ${man(s)} · 비용 ${man(cost)} · 생활비 뺀 월 ${man(net)}${net < 0 && k ? ` · 약 ${Math.floor(k / -net)}개월 버팀(${ymLater(k / -net)})` : ''}${ra ? ` · ${ra.where} ${ra.t} 평균의 ${Math.round(s * 12 / ra.avg * 100)}%` : ''}` };
+  }
+  let CALC = null;
+  document.querySelectorAll('#cin input').forEach(i => i.addEventListener('input', () => {
+    const raw = i.value.replace(/[^0-9]/g, '').slice(0, 7); CV[i.dataset.f] = Number(raw) || 0;
+    i.value = raw ? Number(raw).toLocaleString() : ''; calcOut();
+  }));
+  $('cEx').addEventListener('click', () => { Object.assign(CV, { s: 1200, r: 250, l: 250, c: 420, o: 180, v: 300, k: 2000 }); renderCalc(); });
 
   // ---------- 국세청 100대 생활업종: 우리 시 같은 업종 사업자 수와 1년 증감 ----------
   const NTSMAP = {
