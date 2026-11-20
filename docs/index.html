@@ -411,13 +411,13 @@
 
   <!-- 다음 단계 -->
   <section id="s4" class="scr hidden">
-    <h2>어떤 길을 생각하세요?</h2>
-    <p class="lead">상황에 맞는 지원을 모았어요. 2027년 공고에서 요건이 바뀔 수 있어요.</p>
+    <h2>버티는 방법을 모았어요</h2>
+    <p class="lead">계속 운영하는 사장님이 받을 수 있는 지원이에요. 2027년 공고에서 요건이 바뀔 수 있어요.</p>
     <div class="reco" id="reco"></div>
     <div class="quiz" id="quiz">
       <h3>나는 얼마나 받을 수 있을까?</h3>
-      <p class="muted" style="margin:0">두세 가지만 누르면 받을 수 있는 지원을 계산해 드려요.</p>
-      <div class="q"><span>가게 상황</span><div class="chips" data-k="st">
+      <p class="muted" style="margin:0">두 가지만 누르면 계산해 드려요.</p>
+      <div class="q hidden" id="qSt"><span>가게 상황</span><div class="chips" data-k="st">
         <button data-v="run">계속 운영 중</button><button data-v="plan">폐업 예정</button><button data-v="closed">2023년 이후 폐업</button><button data-v="old">2022년 이전 폐업</button></div></div>
       <div class="q" data-show="plan,closed"><span>가게 건물</span><div class="chips" data-k="ls">
         <button data-v="rent">임차(월세·전세)</button><button data-v="own">내 건물</button></div></div>
@@ -427,7 +427,7 @@
         <button data-v="before">2024년 이전</button><button data-v="after">2025년 이후</button></div></div>
       <div id="qres"></div>
     </div>
-    <div class="tabs" id="tabs">
+    <div class="tabs hidden" id="tabs">
       <button data-t="stay" class="on">버티기</button>
       <button data-t="close">정리하기</button>
       <button data-t="work">다시 일하기</button>
@@ -439,6 +439,10 @@
         <li id="stayTip">업종 전환 힌트<small id="stayTipText"></small><ul class="hint3" id="altList"></ul><small>주변에 적다는 뜻이지 수요가 많다는 뜻은 아니에요.</small></li>
         <li>경영 상담부터 받아 보세요<small>소상공인 통합콜센터 1533-0100에서 상담 창구를 안내받을 수 있어요.</small><a class="go tel" href="tel:1533-0100">전화 1533-0100</a></li>
       </ol>
+    </div>
+    <div class="acts" style="margin-top:18px"><h3>다른 길도 보고 싶다면</h3>
+      <button type="button" data-a2="close"><span><b>손해 없이 정리하는 방법</b><small>받을 수 있는 돈 · 날짜별 할 일 · 다시 일할 곳</small></span><span class="arr">›</span></button>
+      <button type="button" data-a2="move"><span><b>업종 바꾸기 · 가게 옮기기</b><small>바꿀 업종과 옮길 동네 3곳씩</small></span><span class="arr">›</span></button>
     </div>
     <div id="t-close" class="hidden">
       <div class="tl">
@@ -720,7 +724,7 @@
     const per = x => /^\d{4}-\d{2}-\d{2}$/.test(x.end) ? `~${x.end.slice(5).replace('-', '.')}` : x.end;
     $('supItem').innerHTML = list.length
       ? `${SIGUN} 소상공인 지원사업<small>중기부 지원사업 공고 목록(2026.10.19)에서 ${SIGUN} 공고만 골랐어요.</small><ul class="hint3">${list.map(x => `<li>${x.title} · ${per(x)}</li>`).join('')}</ul><a class="go" href="https://www.bizinfo.go.kr" target="_blank" rel="noopener">기업마당에서 공고 보기 ›</a>`
-      : `${SIGUN} 소상공인 지원사업<small>공고 목록(2026.10.19)에 ${SIGUN} 이름이 붙은 소상공인 공고가 없어요. 경기도 공통 사업은 '정리하기'에 있어요.</small>`;
+      : `${SIGUN} 소상공인 지원사업<small>공고 목록(2026.10.19)에 ${SIGUN} 이름이 붙은 소상공인 공고가 없어요. 경기도 공통 사업은 아래 '손해 없이 정리하는 방법'에 있어요.</small>`;
   }
 
   async function loadCity(name) {
@@ -1196,7 +1200,7 @@
 
     // 버티기 카드: 반경 안 점포가 적은 동종 업종 힌트
     $('stayTipText').textContent = dense
-      ? `주변에 ${name}이 많아요. 같은 ${cats[c][0]} 업종 안에서 주변 경쟁이 적은 업종을 상담 때 함께 살펴보세요.`
+      ? `주변에 ${name}${ga(name)} 많아요. 같은 ${cats[c][0]} 업종 안에서 주변 경쟁이 적은 업종을 상담 때 함께 살펴보세요.`
       : `주변 경쟁은 평균 수준이에요. 비용 구조와 운영 방식을 먼저 점검해 보세요.`;
 
     // 업종 전환 힌트: 비슷한 업종 묶음 안에서 '반경 안 비중 ÷ 시 전체 비중'이 낮은 업종
@@ -1223,14 +1227,14 @@
     const RK = { stay: '버티기', close: '정리하기', work: '다시 일하기' };
     const rec = hits === 2 ? 'close' : 'stay';
     const why = hits === 2
-      ? `상권 신호가 <b>주의</b>예요. 경쟁이 시 평균의 ${ratio.toFixed(1)}배이고 동네 상권도 줄고 있어요. <b>정리하기</b>부터 확인해 보세요. 철거비 같은 지원은 가게를 정리하기 <b>전에</b> 신청해야 받을 수 있어요. 그다음 <b>다시 일하기</b>에서 교육을 이어서 보세요.`
+      ? `상권 신호가 <b>주의</b>예요. 버틸 방법도 있지만, 아래 <b>정리 방법</b>도 꼭 함께 보세요. 철거비 같은 지원은 정리하기 <b>전에</b> 신청해야 받아요.`
       : hits === 1
-        ? `상권 신호가 <b>보통</b>이에요. ${dense ? `주변 경쟁이 시 평균의 ${ratio.toFixed(1)}배로 많아요` : '동네 상권이 줄고 있어요'}. <b>버티기</b>에서 지원사업과 업종 전환 힌트를 먼저 보시고, 매출이 계속 줄면 <b>정리하기</b>도 함께 살펴보세요.`
-        : `상권 신호가 <b>양호</b>예요. <b>버티기</b>에서 우리 시 지원사업과 경영 상담을 먼저 활용해 보세요.`;
+        ? `상권 신호가 <b>보통</b>이에요. ${dense ? `주변 경쟁이 시 평균의 ${ratio.toFixed(1)}배로 많아요` : '동네 상권이 줄고 있어요'}. 아래 지원으로 버텨 보시고, 매출이 계속 줄면 정리 방법도 미리 알아 두세요.`
+        : `상권 신호가 <b>양호</b>예요. 우리 시 지원사업과 경영 상담부터 활용해 보세요.`;
     $('reco').className = 'reco' + (hits === 2 ? ' warn' : '');
     $('reco').innerHTML = why;
     document.querySelectorAll('#tabs button').forEach(x => { x.textContent = RK[x.dataset.t]; if (x.dataset.t === rec) x.insertAdjacentHTML('beforeend', '<span class="rk">추천</span>'); });
-    setTab(rec);
+    setTab('stay');
     // 이 근처 같은 업종이 얼마나 버텼나 (인허가 기록)
     const lifeTxt = renderLife(c, name);
     const ntsTxt = renderNts(c, name);
@@ -1618,9 +1622,10 @@
     ['stay', 'close', 'work'].forEach(k => $('t-' + k).classList.toggle('hidden', k !== t));
   }
   document.querySelectorAll('#tabs button').forEach(b => b.addEventListener('click', () => setTab(b.dataset.t)));
+  document.querySelectorAll('[data-a2]').forEach(b => b.addEventListener('click', () => goAct(b.dataset.a2)));
 
   // 받을 수 있는 지원 계산
-  const Q = { st: '', ls: '', dr: '', op: '' };
+  const Q = { st: 'run', ls: '', dr: '', op: '' };
   let QRES = null;
   function ddayLeft(end) { return Math.round((new Date(end + 'T00:00:00') - today) / 864e5); }
   function renderQuiz() {
@@ -1634,7 +1639,7 @@
     const demol = m2 > 0 ? Math.min(Math.ceil(Math.round(m2 / 3.3058 * 10) / 10) * 20, 600) : 600;
     const items = [
       { n: '점포 철거비', a: demol, ok: closing && Q.ls === 'rent', no: Q.st === 'run' ? '폐업을 정하면 대상' : Q.st === 'old' ? '2023년 이후 폐업만' : '임차 점포만' },
-      { n: '재기사업화 사업화자금', a: 2000, ok: Q.st === 'run' && Q.dr === 'y' && Q.op === 'before', no: Q.st !== 'run' ? '운영 중인 가게만' : Q.op === 'after' ? '2024년 이전 개업만' : '매출 10% 감소 시' },
+      { n: '재기사업화 사업화자금(2027년 공고)', a: 2000, ok: Q.st === 'run' && Q.dr === 'y' && Q.op === 'before', no: Q.st !== 'run' ? '운영 중인 가게만' : Q.op === 'after' ? '2024년 이전 개업만' : '매출 10% 감소 시' },
       { n: '전직장려수당', a: 100, ok: closing, no: Q.st === 'old' ? '2023년 이후 폐업만' : '폐업(예정) 시' },
       { n: '사업정리 컨설팅·법률·채무 조정', a: 0, ok: closing, no: Q.st === 'old' ? '2023년 이후 폐업만' : '폐업(예정) 시' },
       { n: '경기도 사업정리 지원', a: 0, ok: closing, no: '폐업(예정) 시' },
@@ -1644,8 +1649,8 @@
     const yes = items.filter(i => i.ok), money = yes.reduce((t, i) => t + i.a, 0), free = yes.filter(i => !i.a).length;
     const fmt = v => v.toLocaleString() + '만 원';
     box.innerHTML = `<div class="qres"><div class="tot">받을 수 있는 지원금<b>${money ? '최대 ' + fmt(money) : '지원금 대상 아님'}</b>무료 지원 ${free}가지 함께</div>
-      <ul>${items.map(i => `<li class="${i.ok ? '' : 'no'}"><span>${i.n}</span><em>${i.ok ? (i.a ? fmt(i.a) : '무료') : i.no}</em></li>`).join('')}</ul>
-      <small>${m2 > 0 ? `철거비는 입력한 ${m2}㎡ 기준이에요.` : "철거비는 한도 600만 원 기준이에요. '정리하기'에서 면적을 넣으면 다시 계산돼요."} 2026년 공고 기준 예상치이며, 실제 지원은 심사로 정해져요.</small></div>`;
+      <ul>${items.filter(i => Q.st !== 'run' || i.ok || i.a === 2000 || i.n.startsWith('재기사업화')).map(i => `<li class="${i.ok ? '' : 'no'}"><span>${i.n}</span><em>${i.ok ? (i.a ? fmt(i.a) : '무료') : i.no}</em></li>`).join('')}</ul>
+      <small>${Q.st === 'run' ? '' : m2 > 0 ? `철거비는 입력한 ${m2}㎡ 기준이에요.` : '철거비는 한도 600만 원 기준이에요.'} 2026년 공고 기준 예상치이며, 실제 지원은 심사로 정해져요.</small></div>`;
     QRES = { text: `${money ? '최대 ' + fmt(money) : '지원금 대상 아님'} + 무료 지원 ${free}가지 (${yes.map(i => i.n + (i.a ? ' ' + fmt(i.a) : '')).join(', ')})` };
   }
   document.querySelectorAll('#quiz .chips').forEach(g => g.addEventListener('click', e => {
