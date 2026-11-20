@@ -222,6 +222,7 @@
   .go.tel { background: var(--accent-soft); color: var(--accent) !important; }
   .reco { border-radius: 16px; padding: 14px 16px; margin: 0 0 12px; font-size: 14px; line-height: 1.6; background: var(--accent-soft); color: var(--ink); }
   .reco b { color: var(--accent); }
+  .reco.sg { display: flex; gap: 12px; align-items: flex-start; } .reco.sg svg { width: 34px; height: 34px; flex-shrink: 0; margin-top: 2px; } .reco.sg b { color: var(--rc); }
   .reco.warn { background: var(--warn-soft); } .reco.warn b { color: var(--warn); }
   .tabs button .rk { display: inline-block; margin-left: 4px; font-size: 11px; font-weight: 800; color: #fff; background: var(--accent); border-radius: 6px; padding: 1px 5px; vertical-align: 2px; }
   .quiz { border: 1px solid var(--line); border-radius: 18px; padding: 18px; margin: 0 0 14px; }
@@ -691,6 +692,8 @@
     <div id="sEst"></div>
     <h3 style="margin-top:22px">순서대로 하면 돼요</h3>
     <div class="tl" id="sTl"></div>
+    <button type="button" class="btn line" id="sIcs" style="width:100%;margin:2px 0 4px;display:flex;align-items:center;justify-content:center;gap:6px">휴대폰 캘린더에 일정 넣기</button>
+    <p class="cnote" id="sIcsNote" style="margin:0 0 6px;text-align:center">계약 종료일을 넣으면 날짜가 있는 일정을 한 번에 넣어요. 각 날짜 하루 전에 알림이 가요.</p>
     <div id="sMore"></div>
     <div class="acts" style="margin-top:18px"><h3>못 넘기게 되면</h3>
       <button type="button" data-a2="close"><i class="aic" data-ic="box"></i><span><b>손해 없이 정리하는 방법</b><small>철거비 지원은 철거 전에 신청해야 해요 · 같이 준비해 두세요</small></span><span class="arr">›</span></button>
@@ -1566,6 +1569,18 @@
     $('vAct').querySelectorAll('button').forEach(b => b.onclick = () => goAct(b.dataset.a));
     $('s2next').dataset.a = ord[0]; $('s2next').textContent = A[ord[0]][0];
     $('deep').open = false;
+    // '버티는 방법' 화면 맨 위 안내도 리포트와 같은 단계·표지판·색으로 맞춘다
+    const SG = SIGNS[level];
+    const reason = dense ? `주변에 같은 업종이 시 평균의 ${ratio.toFixed(1)}배로 많아요` : shrink ? '동네 상권이 줄고 있어요' : (bad[0] || '').replace(/<[^>]+>/g, '');
+    const recoTxt = [
+      `상권 리포트 결과 <b>아직 해 볼 만해요</b>. 우리 시 지원사업과 경영 상담부터 활용해 보세요.`,
+      `상권 리포트 결과 <b>대비가 필요해요</b>.${reason ? ' ' + reason + '.' : ''} 아래 지원으로 버텨 보시고, 매출이 계속 줄면 정리 방법도 미리 알아 두세요.`,
+      `상권 리포트 결과 <b>위험 신호가 많아요</b>. 버틸 방법도 있지만, 아래 <b>정리 방법</b>도 꼭 함께 보세요. 철거비 같은 지원은 정리하기 <b>전에</b> 신청해야 받아요.`][level];
+    $('reco').className = 'reco sg'; $('reco').style.background = SG[0]; $('reco').style.setProperty('--rc', SG[1]);
+    $('reco').innerHTML = `<svg viewBox="0 0 64 64" role="img" aria-label="${SG[2]}">${SG[3]}</svg><span>${recoTxt}</span>`;
+    document.querySelectorAll('#tabs .rk').forEach(x => x.remove());
+    const recT = level === 2 ? 'close' : 'stay';
+    document.querySelectorAll('#tabs button').forEach(x => { if (x.dataset.t === recT) x.insertAdjacentHTML('beforeend', '<span class="rk">추천</span>'); });
   }
   function goAct(a) {
     if (cur === 's2' || cur === 's6' || cur === 's4' || VIA) VIA = true;
@@ -1576,6 +1591,38 @@
     else { if (PATH !== 'close') setPath('close'); initPlan(); show('s5'); }
   }
 
+  // ---------- 휴대폰 캘린더에 넣기 (공용): 남은 일정을 .ics 파일로 내려받게 한다 ----------
+  const CAL_OS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'ios' : /Android/.test(navigator.userAgent) ? 'android' : 'pc';
+  // 아이폰에서 사파리가 아닌 앱(크롬·카카오톡·네이버 등) 안에서는 캘린더 화면이 뜨지 않는다
+  const IOS_INAPP = CAL_OS === 'ios' && /CriOS|FxiOS|EdgiOS|KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\/|DaumApps|whale/i.test(navigator.userAgent);
+  const calLabel = () => CAL_OS === 'ios' ? '아이폰 캘린더에 일정 넣기' : CAL_OS === 'android' ? '휴대폰 캘린더에 일정 넣기 (삼성 캘린더)' : '캘린더 파일로 일정 받기';
+  function icsSave(evAll, calName, fileName, note, tag) {
+    const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const ev = evAll.filter(e => e[0] && e[0] >= t0);
+    if (!ev.length) { note.textContent = '남은 일정이 없어요.'; return; }
+    const d8 = d => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+    const esc = t => String(t).replace(/<[^>]+>/g, '').replace(/\\/g, '\\\\').replace(/[,;]/g, m => '\\' + m).replace(/\n/g, ' ');
+    const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+    const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//daeumgil//plan//KO', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:' + calName];
+    ev.forEach(([d, t, x], i) => {
+      const e = new Date(d); e.setDate(e.getDate() + 1);
+      L.push('BEGIN:VEVENT', `UID:daeumgil-${fileName.length}-${d8(d)}-${i}@daeumgil`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${d8(d)}`, `DTEND;VALUE=DATE:${d8(e)}`,
+        `SUMMARY:[다음길] ${esc(t)}`, `DESCRIPTION:${esc(x)} (${tag} · 참고용 날짜예요. 기관 공고를 확인하세요.)`,
+        'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${esc(t)}`, 'TRIGGER:-PT15H', 'END:VALARM', 'END:VEVENT');
+    });
+    L.push('END:VCALENDAR');
+    // 한 줄이 75바이트를 넘으면 접는다 (캘린더 표준 RFC 5545)
+    const enc = new TextEncoder(), fold = line => { const out = []; let cur = '', n = 0; for (const ch of line) { const b = enc.encode(ch).length; if (n + b > (out.length ? 74 : 75)) { out.push(cur); cur = ''; n = 0; } cur += ch; n += b; } out.push(cur); return out.join('\r\n '); };
+    const ics = L.map(fold).join('\r\n') + '\r\n';
+    if (IOS_INAPP) { note.textContent = '지금 앱 안의 브라우저라 아이폰 캘린더가 열리지 않아요. 오른쪽 아래(또는 위) 메뉴에서 "Safari로 열기"를 누른 뒤 다시 눌러 주세요.'; return; }
+    const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+    const a = document.createElement('a'); a.href = url; a.download = fileName + '.ics';
+    document.body.appendChild(a); a.click(); setTimeout(() => a.remove(), 1500);
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    note.textContent = CAL_OS === 'ios' ? `"다운로드" 창이 뜨면 다운로드를 누르세요. 그다음 주소창의 ⬇︎(다운로드) 버튼 → "${fileName}" 파일을 누르면 캘린더 화면이 떠요. 오른쪽 위 "모두 추가"를 누르면 끝이에요.`
+      : CAL_OS === 'android' ? '아래 다운로드 알림(또는 내 파일 → 다운로드)에서 파일을 누르고 "삼성 캘린더"를 고른 뒤 저장하세요.'
+      : '내려받은 파일을 열면 컴퓨터의 캘린더(아웃룩 등)에 들어가요. 휴대폰에서 누르면 휴대폰 캘린더에 바로 넣을 수 있어요.';
+  }
   // ---------- 가게 넘기기: 권리금 회수기회 보호(상가임대차법 제10조의4) · 어림셈 · 순서 · 세금 ----------
   const SP = { mall: '', arr: '' }, SV = { f: 0, y: 0, n: 0 };
   function renderSell(typing) {
@@ -1621,7 +1668,11 @@
       [E ? fD(new Date(E.getFullYear(), E.getMonth() + 1, 25)) : '종료 다음 달 25일', '부가가치세 확정신고', '폐업했다면 폐업한 달의 다음 달 25일까지예요.', E ? new Date(E.getFullYear(), E.getMonth() + 1, 25) : null],
       [E ? fD(new Date(E.getFullYear() + 1, 4, 31)) : '다음 해 5월', '종합소득세 신고 (권리금 포함)', '권리금은 기타소득이라 다른 소득과 합쳐 신고해요. 미리 떼인 8.8%는 여기서 정산돼요.', E ? new Date(E.getFullYear() + 1, 4, 31) : null]
     ];
-    $('sTl').innerHTML = '<ol>' + steps.map(([w, t, x, d], k) => `<li data-n="${k + 1}"><b>${t}</b><small>${x}</small><span class="when">${w}${d ? ' · D-' + left(d) : ''}</span>${d && left(d) >= 0 ? `<a class="gcal" href="${gcal(d, t, x)}" target="_blank" rel="noopener">${ic('cal')} 구글 캘린더에 추가</a>` : ''}</li>`).join('') + '</ol>';
+    const sEv = steps.filter(x => x[3] && left(x[3]) >= 0).map(([, t, x, d]) => [d, t, x]);
+    $('sIcs').innerHTML = `${ic('cal')} ${calLabel()}`; $('sIcs').disabled = !sEv.length;
+    $('sIcsNote').textContent = sEv.length ? `날짜가 정해진 일정 ${sEv.length}가지를 넣고, 각 날짜 하루 전에 알림이 가요.` : '계약 끝나는 날을 넣으면 날짜가 있는 일정을 한 번에 넣을 수 있어요.';
+    $('sIcs').onclick = () => icsSave(sEv, '다음길 가게 넘기기', '다음길_가게넘기기', $('sIcsNote'), '다음길 가게 넘기기');
+    $('sTl').innerHTML = '<ol>' + steps.map(([w, t, x, d], k) => `<li data-n="${k + 1}"><b>${t}</b><small>${x}</small><span class="when">${w}${d ? ' · D-' + left(d) : ''}</span></li>`).join('') + '</ol>';
     // 건물주 · 세금 · 상담
     $('sMore').innerHTML = `
       <details class="mrow"><summary>${ic('scale')}<span style="flex:1">건물주가 막으면<small class="muted" style="display:block;font-weight:500;font-size:13px">하면 안 되는 4가지 · 손해배상 3년</small></span></summary><div class="bd">
@@ -1670,6 +1721,7 @@
       const bat = w => { const c = w.charCodeAt(w.length - 1) - 0xAC00; return c >= 0 && c <= 11171 && c % 28 > 0; };
       box.innerHTML = ra ? `<div class="cnote">참고: ${ra.where} ${ra.t} 평균 연매출은 <b>${man(ra.avg)}</b>이에요 (한 달 약 ${man(ra.avg / 12)}).</div>`
         : t0 && REV && REV.g && REV.g[SIGUN] ? `<div class="cnote">참고: ${SIGUN}의 ${t0}${bat(t0) ? '은' : '는'} 사업자가 20명 이하라서 국세청이 평균 연매출을 공개하지 않아요. 그래서 평균과 비교는 할 수 없지만, 위에 숫자를 넣으면 버틸 기간은 계산할 수 있어요.</div>` : '';
+      box.innerHTML += `<div class="chead" style="margin-top:14px"><div class="vart" style="background:#e8f3ff"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 8v38M18 32l14 14 14-14" stroke="#3182f6" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 56h36" stroke="#ffb020" stroke-width="5" stroke-linecap="round"/></svg></div><div><h3 style="--hlc:var(--accent)">숫자를 넣으면<br><span class="hl">여기에 결과가 나와요</span></h3><p>월 매출과 비용, 지금 쓸 수 있는 돈을 넣으면 '약 몇 개월 버틸 수 있어요'를 바로 계산해요. 위 '예시 숫자로 채워 보기'로 먼저 볼 수도 있어요.</p></div></div>`;
       CALC = null; return;
     }
     const cost = r + l + c + o + p, prof = s - cost, net = prof - v;
@@ -1933,42 +1985,9 @@
   const d8g = d => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
   const gcal = (d, t, x) => { const e = new Date(d); e.setDate(e.getDate() + 1);
     return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('[다음길] ' + t) + '&dates=' + d8g(d) + '/' + d8g(e) + '&details=' + encodeURIComponent(String(x).replace(/<[^>]+>/g, '') + ' (다음길 폐업 정리 플랜 · 참고용 날짜)'); };
-  const OS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'ios' : /Android/.test(navigator.userAgent) ? 'android' : 'pc';
-  $('icsBtn').innerHTML = `${ic('cal')} ${OS === 'ios' ? '아이폰 캘린더에 일정 넣기' : OS === 'android' ? '휴대폰 캘린더에 일정 넣기 (삼성 캘린더)' : '캘린더 파일로 일정 받기'}`;
-  // 휴대폰 캘린더에 넣기: 남은 일정을 .ics 파일로 만들어 내려받게 한다 (아이폰·안드로이드 캘린더가 열어요)
-  // 아이폰에서 사파리가 아닌 앱(크롬·카카오톡·네이버 등) 안에서는 캘린더 화면이 뜨지 않는다
-  const IOS_INAPP = OS === 'ios' && /CriOS|FxiOS|EdgiOS|KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\/|DaumApps|whale/i.test(navigator.userAgent);
+  $('icsBtn').innerHTML = `${ic('cal')} ${calLabel()}`;
   // onclick으로 한 번만 연결 (renderPlan이 여러 번 불려도 중복 실행되지 않게)
-  $('icsBtn').onclick = () => {
-    const ev = (PLAN.ev || []).filter(e => e[0] >= new Date(today.getFullYear(), today.getMonth(), today.getDate()));
-    if (!ev.length) return;
-    const d8 = d => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
-    const esc = t => String(t).replace(/<[^>]+>/g, '').replace(/\\/g, '\\\\').replace(/[,;]/g, m => '\\' + m).replace(/\n/g, ' ');
-    const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
-    const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//daeumgil//closing-plan//KO', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:다음길 폐업 일정'];
-    ev.forEach(([d, t, x], i) => {
-      const e = new Date(d); e.setDate(e.getDate() + 1);
-      L.push('BEGIN:VEVENT', `UID:daeumgil-${d8(d)}-${i}@daeumgil`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${d8(d)}`, `DTEND;VALUE=DATE:${d8(e)}`,
-        `SUMMARY:[다음길] ${esc(t)}`, `DESCRIPTION:${esc(x)} (다음길 폐업 정리 플랜 · 참고용 날짜예요. 기관 공고를 확인하세요.)`,
-        'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${esc(t)}`, 'TRIGGER:-PT15H', 'END:VALARM', 'END:VEVENT');
-    });
-    L.push('END:VCALENDAR');
-    // 한 줄이 75바이트를 넘으면 접는다 (캘린더 표준 RFC 5545)
-    const enc = new TextEncoder(), fold = line => { const out = []; let cur = '', n = 0; for (const ch of line) { const b = enc.encode(ch).length; if (n + b > (out.length ? 74 : 75)) { out.push(cur); cur = ''; n = 0; } cur += ch; n += b; } out.push(cur); return out.join('\r\n '); };
-    const ics = L.map(fold).join('\r\n') + '\r\n';
-    if (OS === 'ios') {
-      if (IOS_INAPP) { $('icsNote').textContent = '지금 앱 안의 브라우저라 아이폰 캘린더가 열리지 않아요. 오른쪽 아래(또는 위) 메뉴에서 "Safari로 열기"를 누른 뒤 다시 눌러 주세요. 아래 일정마다 있는 "구글 캘린더에 추가"는 여기서도 돼요.'; return; }
-    }
-    const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
-    {
-      const a = document.createElement('a'); a.href = url; a.download = '다음길_폐업일정.ics';
-      document.body.appendChild(a); a.click(); setTimeout(() => a.remove(), 1500);
-    }
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-    $('icsNote').textContent = OS === 'ios' ? '"다운로드" 창이 뜨면 다운로드를 누르세요. 그다음 주소창의 ⬇︎(다운로드) 버튼 → "다음길_폐업일정" 파일을 누르면 캘린더 화면이 떠요. 오른쪽 위 "모두 추가"를 누르면 끝이에요.'
-      : OS === 'android' ? '아래 다운로드 알림(또는 내 파일 → 다운로드)에서 파일을 누르고 "삼성 캘린더"를 고른 뒤 저장하세요.'
-      : '내려받은 파일을 열면 컴퓨터의 캘린더(아웃룩 등)에 들어가요. 휴대폰에서 누르면 휴대폰 캘린더에 바로 넣을 수 있어요.';
-  };
+  $('icsBtn').onclick = () => icsSave(PLAN.ev || [], '다음길 폐업 일정', '다음길_폐업일정', $('icsNote'), '다음길 폐업 정리 플랜');
   document.querySelectorAll('#plan .chips').forEach(g => g.querySelectorAll('button').forEach(b => b.classList.toggle('on', g.dataset.multi ? (P[g.dataset.k] || '').split(',').includes(b.dataset.v) : P[g.dataset.k] === b.dataset.v)));
     const LN = (P.ln || '').split(',').filter(v => v && v !== 'no'), hasLn = LN.length > 0;
     $('qOd').classList.toggle('hidden', !hasLn);
@@ -2083,7 +2102,7 @@
     $('mtot').innerHTML = `<div class="mtot">${ic('coin')}${closed ? '아직 받을 수 있는 지원금' : '받을 수 있는 지원금'}<b>${money ? '최대 ' + money.toLocaleString() + '만 원' : '확정 금액 없음'}</b>${others ? `+ 공제금·실업급여·채무 감면 등 ${others}가지` : ''}` +
       (up.length ? `<ol class="todo">${up.map(([d, t, , k]) => `<li><span>${t}</span><em>${left(d) === 0 ? '오늘' : dd(d)}</em></li>`).join('')}</ol>` : '') + `</div>`;
     $('sched').innerHTML = `<ol>` +
-      ev.map(([d, t, x, k], n) => { const past = left(d) < 0; return `<li data-n="${n + 1}" class="${past ? 'past' : k === 'now' ? 'now' : ''}"><b>${t}</b><small>${x}</small><span class="when">${left(d) === 0 && k ? '지금' : fmtD(d)} · ${past ? '지남' : dd(d)}</span>${past ? '' : `<a class="gcal" href="${gcal(d, t, x)}" target="_blank" rel="noopener">${ic('cal')} 구글 캘린더에 추가</a>`}</li>`; }).join('') + '</ol>';
+      ev.map(([d, t, x, k], n) => { const past = left(d) < 0; return `<li data-n="${n + 1}" class="${past ? 'past' : k === 'now' ? 'now' : ''}"><b>${t}</b><small>${x}</small><span class="when">${left(d) === 0 && k ? '지금' : fmtD(d)} · ${past ? '지남' : dd(d)}</span></li>`; }).join('') + '</ol>';
     PLAN.ev = ev;
     // 챙길 서류 (상황에 맞는 것만)
     const DOCS = [
