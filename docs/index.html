@@ -1728,10 +1728,6 @@
     const ics = L.map(fold).join('\r\n') + '\r\n';
     if (OS === 'ios') {
       if (IOS_INAPP) { $('icsNote').textContent = '지금 앱 안의 브라우저라 아이폰 캘린더가 열리지 않아요. 오른쪽 아래(또는 위) 메뉴에서 "Safari로 열기"를 누른 뒤 다시 눌러 주세요. 아래 일정마다 있는 "구글 캘린더에 추가"는 여기서도 돼요.'; return; }
-      // 아이폰 사파리: blob 주소는 캘린더가 받지 않아서 data 주소로 연다 → '모두 추가' 화면이 떠요
-      location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
-      $('icsNote').textContent = '캘린더 화면이 뜨면 오른쪽 위 "모두 추가"를 누르세요. 화면이 안 뜨면 아래 일정마다 있는 "구글 캘린더에 추가"를 이용하세요.';
-      return;
     }
     const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
     {
@@ -1739,7 +1735,8 @@
       document.body.appendChild(a); a.click(); setTimeout(() => a.remove(), 1500);
     }
     setTimeout(() => URL.revokeObjectURL(url), 60000);
-    $('icsNote').textContent = OS === 'android' ? '아래 다운로드 알림(또는 내 파일 → 다운로드)에서 파일을 누르고 "삼성 캘린더"를 고른 뒤 저장하세요.'
+    $('icsNote').textContent = OS === 'ios' ? '"다운로드" 창이 뜨면 다운로드를 누르세요. 그다음 주소창의 ⬇︎(다운로드) 버튼 → "다음길_폐업일정" 파일을 누르면 캘린더 화면이 떠요. 오른쪽 위 "모두 추가"를 누르면 끝이에요.'
+      : OS === 'android' ? '아래 다운로드 알림(또는 내 파일 → 다운로드)에서 파일을 누르고 "삼성 캘린더"를 고른 뒤 저장하세요.'
       : '내려받은 파일을 열면 컴퓨터의 캘린더(아웃룩 등)에 들어가요. 휴대폰에서 누르면 휴대폰 캘린더에 바로 넣을 수 있어요.';
   };
   document.querySelectorAll('#plan .chips').forEach(g => g.querySelectorAll('button').forEach(b => b.classList.toggle('on', P[g.dataset.k] === b.dataset.v)));
