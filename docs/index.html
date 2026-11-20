@@ -1505,7 +1505,11 @@
     if (be) rows.push(['생활비까지 나오는 매출', man(be), be > s ? 'bad' : 'good']);
     let rev = '';
     const kt = SUM ? ntsType(SUM.c) : -1;
-    if (!ra && kt >= 0) rev = `<h3 style="margin-top:22px">같은 업종과 비교</h3><p class="cnote">${SIGUN} ${NTS.types[kt]} 평균 연매출은 아직 앱에 넣지 못했어요. 국세청 '통계로 보는 생활업종'에서 ${SIGUN}를 고르고 매출을 넣으면 평균과 순위를 바로 볼 수 있어요.</p>
+    // 국세청은 사업자가 20명 이하인 시·군·업종은 평균 연매출을 공개하지 않는다 → 그 사실을 그대로 안내
+    const eul = w => { const c = w.charCodeAt(w.length - 1) - 0xAC00; return c >= 0 && c <= 11171 && c % 28 ? '을' : '를'; };
+    if (!ra && kt >= 0) rev = `<h3 style="margin-top:22px">같은 업종과 비교</h3><p class="cnote">${REV && REV.g && REV.g[SIGUN]
+        ? `${SIGUN}의 ${NTS.types[kt]}${eul(NTS.types[kt]) === '을' ? '은' : '는'} 사업자가 20명 이하라서 국세청이 평균 연매출을 공개하지 않아요. 가게 수가 너무 적으면 평균이 특정 가게 매출과 거의 같아지기 때문이에요. 경기도 전체나 가까운 시·군 평균은 국세청 '통계로 보는 생활업종'에서 볼 수 있어요.`
+        : `${SIGUN} ${NTS.types[kt]} 평균 연매출은 국세청 '통계로 보는 생활업종'에서 ${SIGUN}${eul(SIGUN)} 고르고 매출을 넣으면 볼 수 있어요.`}</p>
         <a class="go" href="https://tasis.nts.go.kr/websquare/websquare.html?w2xPath=/cm/index.xml" target="_blank" rel="noopener">국세통계포털에서 확인하기 ›</a>`;
     if (ra) {
       const ratio = s * 12 / ra.avg;
