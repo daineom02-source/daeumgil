@@ -277,8 +277,8 @@
   /* 숫자로 따져 보기 */
   .money-in { display: grid; gap: 10px; margin: 6px 0 4px; }
   .money-in label { display: flex; align-items: center; gap: 10px; background: var(--gray); border-radius: 14px; padding: 6px 14px 6px 16px; font-size: 15px; font-weight: 600; }
-  .money-in label span { flex: 1; } .money-in label small { display: block; font-size: 12px; font-weight: 400; color: var(--sub); }
-  .money-in input { width: 110px; border: 0; background: #fff; border-radius: 10px; padding: 10px 10px; font: inherit; font-size: 17px; font-weight: 700; text-align: right; color: var(--ink); }
+  .money-in label span { flex: 1; min-width: 0; } .money-in label small { display: block; font-size: 12px; font-weight: 400; color: var(--sub); word-break: keep-all; line-height: 1.4; }
+  .money-in input { width: 92px; border: 0; background: #fff; border-radius: 10px; padding: 10px 10px; font: inherit; font-size: 17px; font-weight: 700; text-align: right; color: var(--ink); }
   .money-in em { font-style: normal; font-size: 14px; color: var(--sub); width: 34px; }
   .money-in .grp { font-size: 13px; font-weight: 700; color: var(--sub); margin: 10px 2px -2px; }
   .linkbtn.sm { margin: 8px 0 0; padding: 6px; font-size: 14px; }
@@ -295,6 +295,20 @@
   .docl input { flex: none; width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--accent); }
   .docl small { display: block; font-size: 13px; font-weight: 400; color: var(--sub); }
   .docl input:checked + span { color: var(--mute); text-decoration: line-through; }
+  /* 아이콘 */
+  .ico { display: inline-grid; place-items: center; width: 20px; height: 20px; flex: none; box-sizing: border-box; }
+  .ico svg { width: 100%; height: 100%; }
+  .aic { flex: none; width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; background: var(--gray); color: var(--accent); }
+  .aic svg { width: 23px; height: 23px; }
+  .acts button.pri .aic { background: #fff; }
+  .vt .ico { display: grid; width: 26px; height: 26px; padding: 4px; margin: 0 auto 6px; border-radius: 9px; background: #fff; color: var(--sub); }
+  .mrow > summary .ico { width: 34px; height: 34px; padding: 7px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); }
+  .mrow.off > summary .ico { background: var(--gray); color: var(--mute); }
+  .money-in label .ico { width: 34px; height: 34px; padding: 7px; border-radius: 10px; background: #fff; color: var(--accent); }
+  .mtot .ico { width: 18px; height: 18px; vertical-align: -3px; margin-right: 4px; }
+  .heroart { display: block; width: 100%; height: auto; margin: 4px 0 14px; padding: 6px 0 0; }
+  .heroart text { stroke: none; }
+  .acts button small, .sit small, .mrow .bd, .vt span { word-break: keep-all; }
   .mrow { border: 1px solid var(--line); border-radius: 14px; margin-bottom: 8px; background: #fff; }
   .mrow > summary { display: flex; align-items: center; gap: 10px; padding: 14px 16px; list-style: none; cursor: pointer; font-weight: 700; font-size: 16px; }
   .mrow > summary::-webkit-details-marker { display: none; }
@@ -327,6 +341,23 @@
   <!-- 인트로 -->
   <section id="s0" class="scr">
     <div class="logo"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#3182F6"/><path d="M150 400 C150 300 200 250 270 230 L330 212" fill="none" stroke="#fff" stroke-width="56" stroke-linecap="round"/><path d="M290 150 L372 200 L318 280" fill="none" stroke="#fff" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/><circle cx="150" cy="400" r="34" fill="#BFDBFF"/></svg>다음길</div>
+    <svg class="heroart" viewBox="0 0 330 150" role="img" aria-label="가게와 갈림길 그림">
+      <rect x="0" y="128" width="330" height="22" rx="11" fill="#f2f4f6"/>
+      <path d="M150 140 C190 120 230 118 300 96" stroke="#c9dcfb" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M150 140 C200 136 250 140 318 140" stroke="#e5ecf6" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <rect x="28" y="52" width="122" height="80" rx="6" fill="#fff" stroke="#d1d6db" stroke-width="2"/>
+      <path d="M22 52 L34 30 H144 L156 52 Z" fill="#3182f6"/>
+      <path d="M48 30 L42 52 M70 30 L67 52 M92 30 L92 52 M114 30 L117 52 M136 30 L142 52" stroke="#fff" stroke-width="5" opacity=".9"/>
+      <path d="M22 52 Q31 62 40 52 Q49 62 58 52 Q67 62 76 52 Q85 62 94 52 Q103 62 112 52 Q121 62 130 52 Q139 62 148 52 Q152 58 156 52" fill="#3182f6"/>
+      <rect x="42" y="74" width="44" height="32" rx="4" fill="#e8f3ff" stroke="#b5d2fb" stroke-width="2"/>
+      <rect x="98" y="72" width="36" height="58" rx="3" fill="#ffe8c2" stroke="#f0b65a" stroke-width="2"/>
+      <circle cx="127" cy="102" r="2.5" fill="#e08a00"/>
+      <rect x="47" y="96" width="10" height="10" rx="2" fill="#0ca678"/><rect x="61" y="92" width="10" height="14" rx="2" fill="#20c997"/>
+      <rect x="248" y="64" width="6" height="66" rx="3" fill="#8b95a1"/>
+      <path d="M254 68 h50 l10 10 -10 10 h-50 z" fill="#3182f6"/><text x="276" y="83" font-size="11" font-weight="800" fill="#fff" text-anchor="middle" font-family="sans-serif">다음</text>
+      <path d="M248 96 h-46 l-10 10 10 10 h46 z" fill="#efedff"/><text x="224" y="111" font-size="10.5" font-weight="700" fill="#6b5bd2" text-anchor="middle" font-family="sans-serif">정리</text>
+      <circle cx="292" cy="30" r="13" fill="#ffd43b" opacity=".85"/>
+    </svg>
     <h1 class="hero">사장님, 다음 길을 같이 찾아요</h1>
     <p class="lead">지금 상황을 고르시면, 그 상황에 맞는 것만 골라 보여 드려요.</p>
     <div class="sit" id="sit">
@@ -463,9 +494,9 @@
       </ol>
     </div>
     <div class="acts" style="margin-top:18px"><h3>다른 길도 보고 싶다면</h3>
-      <button type="button" data-a2="close"><span><b>손해 없이 정리하는 방법</b><small>받을 수 있는 돈 · 날짜별 할 일 · 다시 일할 곳</small></span><span class="arr">›</span></button>
-      <button type="button" data-a2="calc"><span><b>숫자로 따져 보기</b><small>언제까지 버틸 수 있는지 계산</small></span><span class="arr">›</span></button>
-      <button type="button" data-a2="move"><span><b>업종 바꾸기 · 가게 옮기기</b><small>바꿀 업종과 옮길 동네 3곳씩</small></span><span class="arr">›</span></button>
+      <button type="button" data-a2="close"><i class="aic" data-ic="box"></i><span><b>손해 없이 정리하는 방법</b><small>받을 수 있는 돈 · 날짜별 할 일 · 다시 일할 곳</small></span><span class="arr">›</span></button>
+      <button type="button" data-a2="calc"><i class="aic" data-ic="calc"></i><span><b>숫자로 따져 보기</b><small>언제까지 버틸 수 있는지 계산</small></span><span class="arr">›</span></button>
+      <button type="button" data-a2="move"><i class="aic" data-ic="swap"></i><span><b>업종 바꾸기 · 가게 옮기기</b><small>바꿀 업종과 옮길 동네 3곳씩</small></span><span class="arr">›</span></button>
     </div>
     <div id="t-close" class="hidden">
       <div class="tl">
@@ -556,15 +587,15 @@
     <p class="lead">한 달 기준 숫자를 대략 넣어 주세요. 이 화면에서만 계산하고 어디에도 저장하지 않아요.</p>
     <div class="money-in" id="cin">
       <div class="grp">들어오는 돈</div>
-      <label><span>월 평균 매출<small>카드·현금·배달 모두 합쳐서</small></span><input data-f="s" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><i class="ico" data-ic="coin"></i><span>월 평균 매출<small>카드·현금·배달 모두 합쳐서</small></span><input data-f="s" inputmode="numeric" placeholder="0"><em>만 원</em></label>
       <div class="grp">나가는 돈</div>
-      <label><span>임대료<small>월세 + 관리비</small></span><input data-f="r" inputmode="numeric" placeholder="0"><em>만 원</em></label>
-      <label><span>인건비<small>직원·아르바이트 (사장님 본인 빼고)</small></span><input data-f="l" inputmode="numeric" placeholder="0"><em>만 원</em></label>
-      <label><span>재료비·원가<small>팔기 위해 사는 재료·물건</small></span><input data-f="c" inputmode="numeric" placeholder="0"><em>만 원</em></label>
-      <label><span>그 밖의 비용<small>공과금·카드 수수료·배달 수수료·대출 이자</small></span><input data-f="o" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><i class="ico" data-ic="building"></i><span>임대료<small>월세 + 관리비</small></span><input data-f="r" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><i class="ico" data-ic="users"></i><span>인건비<small>직원·아르바이트 (사장님 본인 빼고)</small></span><input data-f="l" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><i class="ico" data-ic="box"></i><span>재료비·원가<small>팔기 위해 사는 재료·물건</small></span><input data-f="c" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><i class="ico" data-ic="receipt"></i><span>그 밖의 비용<small>공과금·카드 수수료·배달 수수료·대출 이자</small></span><input data-f="o" inputmode="numeric" placeholder="0"><em>만 원</em></label>
       <div class="grp">사장님 살림</div>
-      <label><span>사장님 생활비<small>가게에서 가져가야 하는 돈</small></span><input data-f="v" inputmode="numeric" placeholder="0"><em>만 원</em></label>
-      <label><span>지금 쓸 수 있는 돈<small>예금·비상금 (보증금 빼고)</small></span><input data-f="k" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><i class="ico" data-ic="home"></i><span>사장님 생활비<small>가게에서 가져가야 하는 돈</small></span><input data-f="v" inputmode="numeric" placeholder="0"><em>만 원</em></label>
+      <label><i class="ico" data-ic="wallet"></i><span>지금 쓸 수 있는 돈<small>예금·비상금 (보증금 빼고)</small></span><input data-f="k" inputmode="numeric" placeholder="0"><em>만 원</em></label>
     </div>
     <button type="button" class="linkbtn sm" id="cEx">예시 숫자로 채워 보기</button>
     <div class="cres" id="cres"></div>
@@ -1059,6 +1090,34 @@
 
   // 단계 이동
   // 화면 이동
+  // ---------- 아이콘 (선 아이콘, 글자 색을 따라감) ----------
+  const IC = {
+    store: '<path d="M3 10l1.5-5h15L21 10"/><path d="M4 10v10h16V10"/><path d="M3 10h18"/><path d="M9.5 20v-5h5v5"/>',
+    users: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.6.2 4.5 1.9 4.5 4.8"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/>',
+    map: '<path d="M12 21s-7-6.1-7-11a7 7 0 0114 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+    shield: '<path d="M12 3l8 3v6c0 4.9-3.4 8.1-8 9-4.6-.9-8-4.1-8-9V6z"/><path d="M8.8 12.2l2.2 2.2 4.3-4.4"/>',
+    swap: '<path d="M4 8h14l-3.5-3.5"/><path d="M20 16H6l3.5 3.5"/>',
+    box: '<path d="M3 7.5l9-4.5 9 4.5-9 4.5z"/><path d="M3 7.5v9l9 4.5 9-4.5v-9"/><path d="M12 12v9"/>',
+    calc: '<rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/>',
+    coin: '<circle cx="12" cy="12" r="9"/><path d="M14.8 9.4c-.5-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.8-2.8 2s1.2 1.6 2.8 2 2.8.9 2.8 2.1-1.2 1.9-2.8 1.9c-1.3 0-2.4-.5-2.9-1.4"/><path d="M12 6.5v1.5M12 16v1.5"/>',
+    building: '<path d="M4 21V5.5L12 3v18"/><path d="M12 9h8v12"/><path d="M7.5 8h1.5M7.5 12h1.5M7.5 16h1.5M15 13h2M15 17h2M2.5 21h19"/>',
+    receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+    home: '<path d="M3 11l9-7 9 7"/><path d="M5 9.8V20h14V9.8"/><path d="M10 20v-5.5h4V20"/>',
+    wallet: '<rect x="3" y="6" width="18" height="14" rx="2.5"/><path d="M16 11.5h5v4h-5a2 2 0 010-4z"/><path d="M3 9.5h13"/>',
+    hammer: '<path d="M13.5 4.5l6 6-2.8 2.8-6-6z"/><path d="M11 7l-7.6 7.6a1.8 1.8 0 000 2.5l.5.5a1.8 1.8 0 002.5 0L14 10"/>',
+    brief: '<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0110.5 4h3A1.5 1.5 0 0115 5.5V7"/><path d="M3 12.5h18"/>',
+    umbrella: '<path d="M3 12a9 9 0 0118 0z"/><path d="M12 12v6.5a2 2 0 01-4 0"/><path d="M12 3v.5"/>',
+    idcard: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-1.3 1.6-2 3-2s2.5.7 3 2"/><path d="M15 10h3M15 14h3"/>',
+    renew: '<path d="M20 11a8 8 0 00-14.6-4.5"/><path d="M4 4v3h3"/><path d="M4 13a8 8 0 0014.6 4.5"/><path d="M20 20v-3h-3"/>',
+    chat: '<path d="M4 5h16v11H9.5L4 20z"/><path d="M8 9.5h8M8 12.5h5"/>',
+    scale: '<path d="M12 4v16M6 20h12M5 7h14"/><path d="M5 7l-2.5 5.5h5z"/><path d="M19 7l-2.5 5.5h5z"/>',
+    star: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.8 6.8 19.6l1-5.8-4.3-4.1 5.9-.9z"/>',
+    cal: '<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/>'
+  };
+  const ic = (n, cls = 'ico') => `<i class="${cls}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${IC[n] || ''}</svg></i>`;
+  const fillIcons = (root = document) => root.querySelectorAll('[data-ic]').forEach(el => { el.outerHTML = ic(el.dataset.ic, el.className || 'ico'); });
+  fillIcons();
   const SCR = ['s0', 's1', 's2', 's3', 's4', 's5', 's6'];
   const PATHS = { think: ['s0', 's1', 's2', 's4'], close: ['s0', 's1', 's5'], restart: ['s0', 's1', 's2', 's3'], closed: ['s0', 's1', 's5'] };
   let ORDER = PATHS.think;
@@ -1362,12 +1421,12 @@
       `위험 신호가 ${bad.length}가지 보여요. 버티는 방법과 함께, 매출이 계속 줄 때를 대비해 정리 방법도 미리 알아 두세요.`,
       `위험 신호가 ${bad.length}가지예요. 정리하거나 업종·자리를 바꾸는 방법을 먼저 보시길 권해요. 철거비 같은 지원은 정리하기 전에 신청해야 받아요.`][level];
     // 핵심 숫자 3개
-    const t1 = `<div><b class="${dense ? 'bad' : 'good'}">${mine}곳</b><span>반경 500m ${name}<br>시 평균의 ${ratio.toFixed(1)}배</span></div>`;
-    const t2 = VN ? `<div><b class="${VN.r < -0.03 ? 'bad' : VN.r > 0.03 ? 'good' : ''}">${sgn(VN.r)}</b><span>${SIGUN} 사장님 수<br>1년 변화</span></div>`
-      : `<div><b class="${shrink ? 'bad' : ch && ch.type === '상권확장' ? 'good' : ''}">${ch ? ch.type : '-'}</b><span>동네 상권<br>변화</span></div>`;
-    const t3 = VL && VL.s !== null ? `<div><b class="${VL.low ? 'bad' : VL.high ? 'good' : ''}">${pct(VL.s)}</b><span>3년 넘게<br>버틴 가게</span></div>`
-      : VF ? `<div><b class="${VF.hi ? 'bad' : ''}">${Math.round(VF.p * 100)}%</b><span>주변 같은 업종 중<br>프랜차이즈</span></div>`
-      : `<div><b class="${shrink ? 'bad' : ''}">${ch ? ch.type : '-'}</b><span>동네 상권<br>변화</span></div>`;
+    const t1 = `<div>${ic('store')}<b class="${dense ? 'bad' : 'good'}">${mine}곳</b><span>반경 500m ${name}<br>시 평균의 ${ratio.toFixed(1)}배</span></div>`;
+    const t2 = VN ? `<div>${ic('users')}<b class="${VN.r < -0.03 ? 'bad' : VN.r > 0.03 ? 'good' : ''}">${sgn(VN.r)}</b><span>${SIGUN} 사장님 수<br>1년 변화</span></div>`
+      : `<div>${ic('map')}<b class="${shrink ? 'bad' : ch && ch.type === '상권확장' ? 'good' : ''}">${ch ? ch.type : '-'}</b><span>동네 상권<br>변화</span></div>`;
+    const t3 = VL && VL.s !== null ? `<div>${ic('clock')}<b class="${VL.low ? 'bad' : VL.high ? 'good' : ''}">${pct(VL.s)}</b><span>3년 넘게<br>버틴 가게</span></div>`
+      : VF ? `<div>${ic('star')}<b class="${VF.hi ? 'bad' : ''}">${Math.round(VF.p * 100)}%</b><span>주변 같은 업종 중<br>프랜차이즈</span></div>`
+      : `<div>${ic('map')}<b class="${shrink ? 'bad' : ''}">${ch ? ch.type : '-'}</b><span>동네 상권<br>변화</span></div>`;
     $('vTiles').innerHTML = t1 + t2 + t3;
     $('vWhy').innerHTML = bad.map(x => `<li class="bad">${x}</li>`).concat(good.map(x => `<li class="good">${x}</li>`), mid.slice(0, 1).map(x => `<li class="mid">${x}</li>`)).slice(0, 5).join('');
     const nInd = 2 + (VN ? 1 : 0) + (VL ? 1 : 0) + (VF ? 1 : 0);
@@ -1375,13 +1434,13 @@
     $('deepNote').textContent = `지표 ${nInd}가지 · 행정동별 점포 수`;
     // 다음 행동
     const A = {
-      stay: ['버티는 방법 보기', '우리 시 지원사업 · 경영 상담 · 업종 전환 힌트'],
-      move: ['업종 바꾸기 · 가게 옮기기', '같은 데이터로 바꿀 업종과 옮길 동네 3곳씩'],
-      close: ['손해 없이 정리하는 방법', '받을 수 있는 돈과 날짜별 할 일'],
-      calc: ['숫자로 따져 보기', '매출·비용을 넣으면 언제까지 버틸 수 있는지 계산']
+      stay: ['버티는 방법 보기', '우리 시 지원사업 · 경영 상담 · 업종 전환 힌트', 'shield'],
+      move: ['업종 바꾸기 · 가게 옮기기', '같은 데이터로 바꿀 업종과 옮길 동네 3곳씩', 'swap'],
+      close: ['손해 없이 정리하는 방법', '받을 수 있는 돈과 날짜별 할 일', 'box'],
+      calc: ['숫자로 따져 보기', '매출·비용을 넣으면 언제까지 버틸 수 있는지 계산', 'calc']
     };
     const ord = PATH === 'restart' ? ['move', 'calc', 'stay', 'close'] : level === 2 ? ['calc', 'close', 'move', 'stay'] : level === 1 ? ['calc', 'stay', 'move', 'close'] : ['stay', 'calc', 'move', 'close'];
-    $('vAct').innerHTML = `<h3>이렇게 해 보세요</h3>` + ord.map((k, n) => `<button type="button" data-a="${k}" class="${n === 0 ? 'pri' : ''}"><span><b>${A[k][0]}</b><small>${A[k][1]}</small></span><span class="arr">›</span></button>`).join('');
+    $('vAct').innerHTML = `<h3>이렇게 해 보세요</h3>` + ord.map((k, n) => `<button type="button" data-a="${k}" class="${n === 0 ? 'pri' : ''}">${ic(A[k][2], 'aic')}<span><b>${A[k][0]}</b><small>${A[k][1]}</small></span><span class="arr">›</span></button>`).join('');
     $('vAct').querySelectorAll('button').forEach(b => b.onclick = () => goAct(b.dataset.a));
     $('s2next').dataset.a = ord[0]; $('s2next').textContent = A[ord[0]][0];
     $('deep').open = false;
@@ -1461,8 +1520,8 @@
         (DL.length ? `<p class="cnote">그 사이에 끝나는 지원도 있어요: ${DL.map(d => `${d[0]} ${d[1].slice(5).replace('-', '.')}`).join(' · ')}</p>` : '') : ''}
       ${rev}
       <div class="acts" style="margin-top:22px"><h3>다음으로</h3>
-        <button type="button" data-a3="${level === 2 ? 'close' : 'stay'}" class="pri"><span><b>${level === 2 ? '손해 없이 정리하는 방법' : '버티는 방법 보기'}</b><small>${level === 2 ? '받을 수 있는 돈과 날짜별 할 일' : '우리 시 지원사업 · 경영 상담'}</small></span><span class="arr">›</span></button>
-        <button type="button" data-a3="${level === 2 ? 'stay' : 'close'}"><span><b>${level === 2 ? '그래도 버텨 보고 싶다면' : '정리할 때를 대비하려면'}</b><small>${level === 2 ? '우리 시 지원사업 · 경영 상담' : '받을 수 있는 돈과 날짜별 할 일'}</small></span><span class="arr">›</span></button>
+        <button type="button" data-a3="${level === 2 ? 'close' : 'stay'}" class="pri">${ic(level === 2 ? 'box' : 'shield', 'aic')}<span><b>${level === 2 ? '손해 없이 정리하는 방법' : '버티는 방법 보기'}</b><small>${level === 2 ? '받을 수 있는 돈과 날짜별 할 일' : '우리 시 지원사업 · 경영 상담'}</small></span><span class="arr">›</span></button>
+        <button type="button" data-a3="${level === 2 ? 'stay' : 'close'}">${ic(level === 2 ? 'shield' : 'box', 'aic')}<span><b>${level === 2 ? '그래도 버텨 보고 싶다면' : '정리할 때를 대비하려면'}</b><small>${level === 2 ? '우리 시 지원사업 · 경영 상담' : '받을 수 있는 돈과 날짜별 할 일'}</small></span><span class="arr">›</span></button>
       </div>`;
     box.querySelectorAll('[data-a3]').forEach(b => b.onclick = () => goAct(b.dataset.a3));
     CALC = { text: `월 매출 ${man(s)} · 비용 ${man(cost)} · 생활비 뺀 월 ${man(net)}${net < 0 && k ? ` · 약 ${Math.floor(k / -net)}개월 버팀(${ymLater(k / -net)})` : ''}${ra ? ` · ${ra.where} ${ra.t} 평균의 ${Math.round(s * 12 / ra.avg * 100)}%` : ''}` };
@@ -1690,8 +1749,9 @@
     const yes = items.filter(i => i.ok), money = yes.reduce((t, i) => t + i.a, 0), others = yes.filter(i => !i.a).length;
     const link = i => `<a class="go${i.go[0].startsWith('tel') ? ' tel' : ''}" href="${i.go[0]}"${i.go[0].startsWith('http') ? ' target="_blank" rel="noopener"' : ''}>${i.go[1]} ›</a>`;
     const no = items.filter(i => !i.ok);
-    $('money').innerHTML = yes.map(i => `<details class="mrow"><summary>${i.n}<span class="amt">${i.a ? i.a.toLocaleString() + '만 원' : i.amt}</span></summary><div class="bd">${i.d}${i.extra ? '<br>' + i.extra : ''}<br>${link(i)}</div></details>`).join('') +
-      (no.length ? `<details class="mrow off"><summary>해당 안 되는 지원 ${no.length}가지</summary><div class="bd">${no.map(i => `${i.n} — ${i.off}`).join('<br>')}</div></details>` : '');
+    const MIC = n => /철거/.test(n) ? 'hammer' : /전직/.test(n) ? 'brief' : /노란우산/.test(n) ? 'umbrella' : /실업/.test(n) ? 'idcard' : /새출발/.test(n) ? 'renew' : /컨설팅/.test(n) ? 'chat' : /상담/.test(n) ? 'scale' : 'coin';
+    $('money').innerHTML = yes.map(i => `<details class="mrow"><summary>${ic(MIC(i.n))}${i.n}<span class="amt">${i.a ? i.a.toLocaleString() + '만 원' : i.amt}</span></summary><div class="bd">${i.d}${i.extra ? '<br>' + i.extra : ''}<br>${link(i)}</div></details>`).join('') +
+      (no.length ? `<details class="mrow off"><summary>${ic('coin')}해당 안 되는 지원 ${no.length}가지</summary><div class="bd">${no.map(i => `${i.n} — ${i.off}`).join('<br>')}</div></details>` : '');
     // 내 일정표
     const vat = new Date(D.getFullYear(), D.getMonth() + 1, 25), inc = new Date(D.getFullYear() + 1, 4, 31);
     const ev = [];
@@ -1714,7 +1774,7 @@
     $('schedN').textContent = `${ev.length}가지 · 날짜순${closed ? ' · 지난 일은 했는지 확인만' : ''}`;
     // 맨 위 요약: 받을 돈 + 지금 할 일 3가지
     const up = ev.filter(e => left(e[0]) >= 0).slice(0, 3);
-    $('mtot').innerHTML = `<div class="mtot">${closed ? '아직 받을 수 있는 지원금' : '받을 수 있는 지원금'}<b>${money ? '최대 ' + money.toLocaleString() + '만 원' : '확정 금액 없음'}</b>${others ? `+ 공제금·실업급여·채무 감면 등 ${others}가지` : ''}` +
+    $('mtot').innerHTML = `<div class="mtot">${ic('coin')}${closed ? '아직 받을 수 있는 지원금' : '받을 수 있는 지원금'}<b>${money ? '최대 ' + money.toLocaleString() + '만 원' : '확정 금액 없음'}</b>${others ? `+ 공제금·실업급여·채무 감면 등 ${others}가지` : ''}` +
       (up.length ? `<ol class="todo">${up.map(([d, t, , k]) => `<li><span>${t}</span><em>${left(d) === 0 ? '오늘' : dd(d)}</em></li>`).join('')}</ol>` : '') + `</div>`;
     $('sched').innerHTML = `<ol>` +
       ev.map(([d, t, x, k], n) => { const past = left(d) < 0; return `<li data-n="${n + 1}" class="${past ? 'past' : k === 'now' ? 'now' : ''}"><b>${t}</b><small>${x}</small><span class="when">${left(d) === 0 && k ? '지금' : fmtD(d)} · ${past ? '지남' : dd(d)}</span></li>`; }).join('') + '</ol>';
