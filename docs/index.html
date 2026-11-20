@@ -290,6 +290,11 @@
   .crow { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--gray); font-size: 15px; }
   .crow b { font-size: 18px; font-weight: 800; } .crow b.bad { color: var(--warn); } .crow b.good { color: var(--ok); }
   .cnote { font-size: 13px; color: var(--sub); margin: 8px 0 0; line-height: 1.6; }
+  .docl { list-style: none; margin: 0 0 8px; padding: 0; }
+  .docl li label { display: flex; gap: 12px; align-items: flex-start; padding: 10px 2px; border-bottom: 1px solid var(--gray); cursor: pointer; font-size: 15px; font-weight: 600; line-height: 1.5; }
+  .docl input { flex: none; width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--accent); }
+  .docl small { display: block; font-size: 13px; font-weight: 400; color: var(--sub); }
+  .docl input:checked + span { color: var(--mute); text-decoration: line-through; }
   .mrow { border: 1px solid var(--line); border-radius: 14px; margin-bottom: 8px; background: #fff; }
   .mrow > summary { display: flex; align-items: center; gap: 10px; padding: 14px 16px; list-style: none; cursor: pointer; font-weight: 700; font-size: 16px; }
   .mrow > summary::-webkit-details-marker { display: none; }
@@ -530,7 +535,10 @@
     <div id="mtot"></div>
     <h3 style="margin-top:22px">받을 수 있는 돈 <small class="muted" style="font-weight:500;font-size:13px">눌러서 신청 방법 보기</small></h3>
     <div id="money"></div>
+    <button type="button" class="btn line" id="icsBtn" style="width:100%;margin:6px 0 4px">📅 남은 일정을 휴대폰 캘린더에 넣기</button>
+    <p class="cnote" id="icsNote" style="margin:0 0 6px;text-align:center">각 날짜 하루 전에 알림이 가요.</p>
     <details class="deep" id="schedBox"><summary><span id="schedT">전체 일정 보기<small id="schedN"></small></span></summary><div class="tl" id="sched"></div></details>
+    <details class="deep" id="docBox"><summary><span>챙길 서류<small id="docN"></small></span></summary><div id="docs"></div></details>
     <details class="deep"><summary><span>다시 일할 곳<small>취업 교육 · 폴리텍 · 일자리센터</small></span></summary>
     <ol class="check" style="margin-top:0">
       <li>희망리턴패키지 특화취업지원<small>온라인 기초교육 → 심화교육(1:1 상담 포함)을 마치면 전직장려수당 60만 원, 취업해 60일 이상 다니면 40만 원을 더 받아요. 2023.1.1 이후 폐업자가 대상이에요.</small><span class="dday" data-end="2026-12-10" data-label="교육 신청"></span><br><a class="go" href="https://www.sbiz24.kr/#/pbanc" target="_blank" rel="noopener">소상공인24에서 교육 신청 ›</a><a class="go tel" href="https://www.sbiz.or.kr/nhrp/edc/edcCgjbAbout.do" target="_blank" rel="noopener">수당 자세히 ›</a></li>
@@ -1630,7 +1638,29 @@
   }
   function renderPlan() {
     const closed = PATH === 'closed';
-    document.querySelectorAll('#plan .chips').forEach(g => g.querySelectorAll('button').forEach(b => b.classList.toggle('on', P[g.dataset.k] === b.dataset.v)));
+    // 휴대폰 캘린더에 넣기: 남은 일정을 .ics 파일로 만들어 내려받게 한다 (아이폰·안드로이드 캘린더가 열어요)
+  $('icsBtn').addEventListener('click', () => {
+    const ev = (PLAN.ev || []).filter(e => e[0] >= new Date(today.getFullYear(), today.getMonth(), today.getDate()));
+    if (!ev.length) return;
+    const d8 = d => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+    const esc = t => String(t).replace(/<[^>]+>/g, '').replace(/\\/g, '\\\\').replace(/[,;]/g, m => '\\' + m).replace(/\n/g, ' ');
+    const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+    const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//daeumgil//closing-plan//KO', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:다음길 폐업 일정'];
+    ev.forEach(([d, t, x], i) => {
+      const e = new Date(d); e.setDate(e.getDate() + 1);
+      L.push('BEGIN:VEVENT', `UID:daeumgil-${d8(d)}-${i}@daeumgil`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${d8(d)}`, `DTEND;VALUE=DATE:${d8(e)}`,
+        `SUMMARY:[다음길] ${esc(t)}`, `DESCRIPTION:${esc(x)} (다음길 폐업 정리 플랜 · 참고용 날짜예요. 기관 공고를 확인하세요.)`,
+        'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${esc(t)}`, 'TRIGGER:-PT15H', 'END:VALARM', 'END:VEVENT');
+    });
+    L.push('END:VCALENDAR');
+    // 한 줄이 75바이트를 넘으면 접는다 (캘린더 표준 RFC 5545)
+    const enc = new TextEncoder(), fold = line => { const out = []; let cur = '', n = 0; for (const ch of line) { const b = enc.encode(ch).length; if (n + b > (out.length ? 74 : 75)) { out.push(cur); cur = ''; n = 0; } cur += ch; n += b; } out.push(cur); return out.join('\r\n '); };
+    const blob = new Blob([L.map(fold).join('\r\n') + '\r\n'], { type: 'text/calendar;charset=utf-8' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = '다음길_폐업일정.ics';
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    $('icsNote').textContent = '파일을 열면 캘린더에 추가돼요. 아이폰은 "모두 추가", 안드로이드는 캘린더 앱을 고르세요.';
+  });
+  document.querySelectorAll('#plan .chips').forEach(g => g.querySelectorAll('button').forEach(b => b.classList.toggle('on', P[g.dataset.k] === b.dataset.v)));
     document.querySelectorAll('#plan [data-need]').forEach(q => q.classList.toggle('hidden', P.ls !== 'rent'));
     const D = new Date(($('cdate').value || today.toISOString().slice(0, 10)) + 'T00:00:00');
     const after23 = D >= new Date('2023-01-01T00:00:00');
@@ -1688,6 +1718,27 @@
       (up.length ? `<ol class="todo">${up.map(([d, t, , k]) => `<li><span>${t}</span><em>${left(d) === 0 ? '오늘' : dd(d)}</em></li>`).join('')}</ol>` : '') + `</div>`;
     $('sched').innerHTML = `<ol>` +
       ev.map(([d, t, x, k], n) => { const past = left(d) < 0; return `<li data-n="${n + 1}" class="${past ? 'past' : k === 'now' ? 'now' : ''}"><b>${t}</b><small>${x}</small><span class="when">${left(d) === 0 && k ? '지금' : fmtD(d)} · ${past ? '지남' : dd(d)}</span></li>`; }).join('') + '</ol>';
+    PLAN.ev = ev;
+    // 챙길 서류 (상황에 맞는 것만)
+    const DOCS = [
+      [1, '폐업사실증명원', '폐업신고 후 홈택스나 세무서에서 발급 · 거의 모든 지원 신청에 필요해요'],
+      [1, '부가가치세 신고서 (최근 1년)', '홈택스 → 전자신고결과조회 · 지원 대상 업종 확인과 매출 감소 증빙에 써요'],
+      [1, '본인 명의 통장 사본', '지원금·공제금 받을 계좌'],
+      [P.ls === 'rent', '임대차계약서', '철거비 지원과 원상복구 범위 확인에 필요해요'],
+      [P.ls === 'rent' && !closed, '철거 견적서 · 세금계산서', '철거 공사 전에 지원부터 신청하고, 공사 후 세금계산서를 받아 두세요'],
+      [P.ls === 'rent' && !closed, '철거 전·후 사진', '같은 위치에서 찍어 두세요 · 철거비 지원 정산에 써요'],
+      [P.yu !== 'n', '노란우산 공제금 청구서 · 신분증', '\'폐업\' 사유로 청구해요 (해지 아님)'],
+      [P.ei !== 'n', '매출 감소 자료 (카드 매출 내역 등)', '자영업자 실업급여는 불가피한 폐업 사유를 증빙해야 해요'],
+      [P.dt === 'y', '대출·카드빚 내역', '새출발기금이나 채무조정 상담 때 금융기관별로 정리해 가요'],
+      [1, '사실증명 (총사업자등록내역)', '전직장려수당 신청 때 내요 · 홈택스 발급']
+    ].filter(d => d[0]);
+    const done = PLAN.done || (PLAN.done = {});
+    $('docs').innerHTML = `<ul class="docl">${DOCS.map(([, n, t]) => `<li><label><input type="checkbox" data-d="${n}"${done[n] ? ' checked' : ''}><span>${n}<small>${t}</small></span></label></li>`).join('')}</ul>`;
+    $('docs').querySelectorAll('input').forEach(i => i.onchange = () => { done[i.dataset.d] = i.checked; docCount(); });
+    const docCount = () => { const n = DOCS.filter(d => done[d[1]]).length; $('docN').textContent = `${DOCS.length}가지 중 ${n}가지 준비 · 체크는 이 화면에서만 기억해요`; };
+    docCount();
+    const upN = ev.filter(e => left(e[0]) >= 0).length;
+    $('icsBtn').disabled = !upN; $('icsNote').textContent = upN ? `남은 일정 ${upN}가지를 넣고, 각 날짜 하루 전에 알림이 가요.` : '남은 일정이 없어요.';
     PLAN.text = {
       date: fmtD(D),
       money: `${money ? '최대 ' + money.toLocaleString() + '만 원' : '확정 지원금 없음'} + ${yes.filter(i => !i.a).map(i => i.n).join(', ')}`,
