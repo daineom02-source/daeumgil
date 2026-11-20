@@ -1472,7 +1472,10 @@
     const { s, r, l, c, o, v, k } = CV, box = $('cres');
     const ra = revAvg();
     if (!s) {
-      box.innerHTML = ra ? `<div class="cnote">참고: ${ra.where} ${ra.t} 평균 연매출은 <b>${man(ra.avg)}</b>이에요 (한 달 약 ${man(ra.avg / 12)}).</div>` : '';
+      const k0 = SUM ? ntsType(SUM.c) : -1, t0 = k0 >= 0 ? NTS.types[k0] : '';
+      const bat = w => { const c = w.charCodeAt(w.length - 1) - 0xAC00; return c >= 0 && c <= 11171 && c % 28 > 0; };
+      box.innerHTML = ra ? `<div class="cnote">참고: ${ra.where} ${ra.t} 평균 연매출은 <b>${man(ra.avg)}</b>이에요 (한 달 약 ${man(ra.avg / 12)}).</div>`
+        : t0 && REV && REV.g && REV.g[SIGUN] ? `<div class="cnote">참고: ${SIGUN}의 ${t0}${bat(t0) ? '은' : '는'} 사업자가 20명 이하라서 국세청이 평균 연매출을 공개하지 않아요. 그래서 평균과 비교는 할 수 없지만, 위에 숫자를 넣으면 버틸 기간은 계산할 수 있어요.</div>` : '';
       CALC = null; return;
     }
     const cost = r + l + c + o, prof = s - cost, net = prof - v;
