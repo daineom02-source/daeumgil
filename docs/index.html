@@ -1552,7 +1552,7 @@
       `<div class="bar${i === myDong ? ' me' : ''}"><span>${city.dongs[i]}</span><i style="width:${Math.max(2, v / mx * 100)}%"></i><em>${v}</em></div>`).join('');
 
     // 신호
-    const dense = ratio >= 1.5;
+    const dense = Math.round(ratio * 10) / 10 >= 1.5; // 화면에 보이는 배수(소수 첫째 자리)와 같은 기준
     $('denTag').textContent = dense ? '해당' : '해당 없음';
     $('denTag').className = 'tag ' + (dense ? 'y' : 'n');
     $('denText').textContent = `내 가게 주변 ${mine}곳, 시 평균 ${avg.toFixed(1)}곳으로 평균의 ${ratio.toFixed(1)}배예요. ${SIGUN} ${name} 가운데 주변 경쟁이 많은 쪽 상위 ${pct}%예요.`;
@@ -1668,7 +1668,7 @@
   function renderVerdict(o) {
     const { name, mine, ratio, dense, ch, shrink, hits, dn } = o;
     const bad = [], good = [], mid = [];
-    if (dense) bad.push(`주변에 같은 ${name}${ga(name)} 시 평균의 ${ratio.toFixed(1)}배로 많아요`); else good.push(`주변 ${name} 경쟁은 시 평균${ratio < 0.8 ? '보다 적은' : ' 수준인'} 편이에요`);
+    if (dense) bad.push(`주변에 같은 ${name}${ga(name)} 시 평균의 ${ratio.toFixed(1)}배로 많아요`); else if (Math.round(ratio * 10) / 10 > 1) mid.push(`주변 ${name}${ga(name)} 시 평균보다 조금 많아요 (${ratio.toFixed(1)}배)`); else good.push(`주변 ${name} 경쟁은 시 평균${ratio < 0.8 ? '보다 적은' : ' 수준인'} 편이에요`);
     if (shrink) bad.push(`${dn} 상권이 줄고 있어요 (상권축소)`); else if (ch && ch.type === '상권확장') good.push(`${dn} 상권이 커지고 있어요 (상권확장)`); else if (ch) mid.push(`${dn} 상권은 '${ch.type}'이에요`);
     if (VN) { if (VN.r < -0.03) bad.push(`${SIGUN} ${VN.t} 사장님이 1년 새 ${Math.abs(VN.r * 100).toFixed(1)}% 줄었어요`); else if (VN.r > 0.03) good.push(`${SIGUN} ${VN.t} 사장님이 1년 새 ${(VN.r * 100).toFixed(1)}% 늘었어요`); else mid.push(`${SIGUN} ${VN.t} 사장님 수는 1년 동안 비슷해요`); }
     if (VL && VL.s !== null) { if (VL.low) bad.push(`이 근처는 3년 넘게 버틴 가게가 ${pct(VL.s)}로 시 평균보다 적어요`); else if (VL.high) good.push(`이 근처는 3년 넘게 버틴 가게가 ${pct(VL.s)}로 시 평균보다 많아요`); }
@@ -1692,7 +1692,7 @@
       `위험 신호가 ${bad.length}가지예요. 정리하거나 업종·자리를 바꾸는 방법을 먼저 보시길 권해요. 철거비 같은 지원은 정리하기 전에 신청해야 받아요.`][level];
     // 핵심 숫자 3개
     const row = (l, v, c, sm) => `<div class="r"><span>${l}</span><div><b class="${c}">${v}</b>${sm ? `<small>${sm}</small>` : ''}</div></div>`;
-    const t1 = row(`반경 500m 같은 업종`, `${mine}곳`, dense ? 'bad' : 'good', `시 평균의 ${ratio.toFixed(1)}배`);
+    const t1 = row(`반경 500m 같은 업종`, `${mine}곳`, dense ? 'bad' : Math.round(ratio * 10) / 10 < 1 ? 'good' : '', `시 평균의 ${ratio.toFixed(1)}배`);
     const t2 = VN ? row(`${SIGUN} 사장님 수 1년 변화`, sgn(VN.r), VN.r < -0.03 ? 'bad' : VN.r > 0.03 ? 'good' : '', '')
       : row('동네 상권 변화', ch ? ch.type : '-', shrink ? 'bad' : ch && ch.type === '상권확장' ? 'good' : '', '');
     const t3 = VL && VL.s !== null ? row('3년 넘게 버틴 가게', pct(VL.s), VL.low ? 'bad' : VL.high ? 'good' : '', VL.low ? '시 평균보다 낮아요' : VL.high ? '시 평균보다 높아요' : '')
