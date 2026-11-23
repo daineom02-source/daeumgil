@@ -2116,7 +2116,8 @@
   }
   function renderRestart() {
     const c = SUM.c, name = SUM.name, myD = Number($('dong').value);
-    $('s3l').textContent = `지금 ${SUM.dong} ${name} 자리는 상권 신호 '${SUM.signal}'이에요. 같은 데이터로 바꿀 만한 업종과 옮길 만한 동네를 골랐어요.`;
+    { const w = SUM.word || SUM.signal, k = w.charCodeAt(w.length - 1) - 0xAC00, ye = k >= 0 && k <= 11171 && k % 28 ? '이에요' : '예요';
+      $('s3l').textContent = `지금 ${SUM.dong} ${name} 자리는 상권 신호가 '${w}'${ye}${SUM.sig ? ` (${SUM.sig})` : ''}. 같은 데이터로 바꿀 만한 업종과 옮길 만한 동네를 골랐어요.`; }
     // 업종 바꾸기: 같은 분야 안에서 반경 안 비중이 낮고, 오래 버티는 업종
     const big = HINT_KEY(c), inR = {}, inCity = {}; let rTot = 0, cTot = 0;
     for (let i = 0; i < N; i++) {
