@@ -273,6 +273,7 @@
   .sum h3 { font-size: 20px; font-weight: 800; margin: 4px 0 2px; } .sum .meta { color: var(--mute); font-size: 13px; margin-bottom: 8px; }
   .sum dl { margin: 0; } .sum dt { font-weight: 700; font-size: 13px; margin-top: 14px; color: var(--accent); } .sum dd { margin: 3px 0 0; font-size: 15px; }
   .sum .btn { width: 100%; margin-top: 18px; }
+  .imgprev { margin-top: 12px; text-align: center; font-size: 14px; color: var(--sub); } .imgprev p { margin: 0 0 8px; } .imgprev img { width: 100%; border: 1px solid var(--line); border-radius: 12px; -webkit-touch-callout: default; }
   .copied { display: block; text-align: center; color: var(--ok); font-size: 14px; margin-top: 8px; }
   /* 상황 선택 */
   .sit { display: grid; gap: 10px; margin: 18px 0 16px; }
@@ -1360,15 +1361,77 @@
       `※ 참고용 정보예요. 신청 전 각 기관 공고를 확인하세요.`
     ].filter(Boolean).join('\n');
   }
+  // 상담용 요약 → PNG (화면 캡처 대신 직접 그려서 폰·PC 어디서나 같은 모양)
+  async function sumImage(lines) {
+    try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (e) {}
+    const W = 1080, P = 72, MW = W - P * 2, FF = "'Noto Sans KR', -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+    const C = { ink: '#191f28', sub: '#6b7684', mute: '#8b95a1', acc: '#3182f6', line: '#e5e8eb', soft: '#f2f4f6' };
+    const cv = document.createElement('canvas'), x = cv.getContext('2d');
+    const wrap = (t, font, mw) => { x.font = font; const out = []; let cur = '';
+      for (const w of t.split(' ')) { const cand = cur ? cur + ' ' + w : w;
+        if (x.measureText(cand).width <= mw) { cur = cand; continue; }
+        if (cur) out.push(cur); cur = '';
+        if (x.measureText(w).width <= mw) { cur = w; continue; }
+        for (const ch of w) { if (x.measureText(cur + ch).width > mw) { out.push(cur); cur = ''; } cur += ch; } }
+      if (cur) out.push(cur); return out; };
+    const items = [];
+    lines.slice(1).forEach(l => { const i = l.indexOf(': ');
+      if (l.startsWith('※')) items.push({ k: 'note', v: l });
+      else if (l.startsWith('-')) items.push({ k: 'sub', v: l.replace(/^-\s*/, '') });
+      else if (i > 0) items.push({ k: 'row', t: l.slice(0, i), v: l.slice(i + 2) });
+      else items.push({ k: 'sub', v: l }); });
+    const F = { dt: `700 30px ${FF}`, dd: `500 36px ${FF}`, sub: `400 32px ${FF}`, note: `400 28px ${FF}` };
+    const draw = real => { let y = P;
+      const txt = (t, font, col, yy, xx) => { if (real) { x.font = font; x.fillStyle = col; x.fillText(t, xx || P, yy); } };
+      if (real) { x.fillStyle = '#fff'; x.fillRect(0, 0, W, cv.height); x.fillStyle = C.acc; x.fillRect(0, 0, W, 14);
+        x.save(); x.translate(P, y); x.scale(56 / 512, 56 / 512);
+        x.fillStyle = '#3182F6'; x.beginPath(); x.roundRect ? x.roundRect(0, 0, 512, 512, 112) : x.rect(0, 0, 512, 512); x.fill();
+        x.strokeStyle = '#fff'; x.lineWidth = 56; x.lineCap = 'round'; x.lineJoin = 'round';
+        x.stroke(new Path2D('M150 400 C150 300 200 250 270 230 L330 212')); x.stroke(new Path2D('M290 150 L372 200 L318 280'));
+        x.fillStyle = '#BFDBFF'; x.beginPath(); x.arc(150, 400, 34, 0, Math.PI * 2); x.fill(); x.restore(); }
+      x.textBaseline = 'alphabetic';
+      txt('다음길', `800 34px ${FF}`, C.acc, y + 40, P + 72); y += 56 + 52;
+      txt('상담용 요약', `800 60px ${FF}`, C.ink, y + 50); y += 50 + 26;
+      txt(`${lines[0].replace('[다음길 상담 요약] ', '')} 작성 · 상담 창구에서 이 화면을 보여 주세요`, `400 28px ${FF}`, C.mute, y + 24); y += 24 + 34;
+      if (real) { x.fillStyle = C.line; x.fillRect(P, y, MW, 2); } y += 2;
+      items.forEach(it => {
+        if (it.k === 'row') { y += 34; txt(it.t, F.dt, C.acc, y + 26); y += 26 + 14;
+          wrap(it.v, F.dd, MW).forEach(l => { txt(l, F.dd, C.ink, y + 34); y += 50; }); }
+        else if (it.k === 'sub') { y += 8; wrap(it.v, F.sub, MW - 34).forEach((l, j) => { if (!j && real) { x.fillStyle = C.sub; x.beginPath(); x.arc(P + 10, y + 20, 5, 0, Math.PI * 2); x.fill(); } txt(l, F.sub, C.ink, y + 31, P + 34); y += 46; }); }
+        else { y += 40; const ls = wrap(it.v, F.note, MW - 48); if (real) { x.fillStyle = C.soft; x.beginPath(); const h = ls.length * 42 + 36; x.roundRect ? x.roundRect(P, y, MW, h, 20) : x.rect(P, y, MW, h); x.fill(); }
+          y += 18; ls.forEach(l => { txt(l, F.note, C.sub, y + 29, P + 24); y += 42; }); y += 18; } });
+      y += 48; if (real) { x.fillStyle = C.line; x.fillRect(P, y, MW, 2); } y += 2 + 28;
+      txt('다음길 · 경기도 소상공인 다음 길 찾기', `700 26px ${FF}`, C.sub, y + 22);
+      txt('daineom02-source.github.io/daeumgil', `400 26px ${FF}`, C.mute, y + 22 + 38); y += 22 + 38 + P - 20;
+      return y; };
+    const H = Math.ceil(draw(false)); cv.width = W; cv.height = H; draw(true); return cv;
+  }
   document.querySelectorAll('.sumgo').forEach(b => b.addEventListener('click', () => openSum()));
   function openSum() {
     if (!SUM) return;
     const lines = sumText().split('\n');
     $('sumBox').innerHTML = `<div class="sum"><h3>상담용 요약</h3><div class="meta">${lines[0].replace('[다음길 상담 요약] ', '')} 작성 · 상담 창구에서 이 화면을 보여 주세요</div><dl>${lines.slice(1).map(l => {
       const i = l.indexOf(': '); return i > 0 && !l.startsWith('-') && !l.startsWith('※') ? `<dt>${l.slice(0, i)}</dt><dd>${l.slice(i + 2)}</dd>` : `<dd>${l}</dd>`; }).join('')}</dl>
-      <button class="btn" id="copyBtn">요약 글 복사</button><button class="btn line sharebtn" id="shareBtn">결과 링크 보내기</button><span id="copied" class="copied"></span></div>`;
+      <button class="btn" id="copyBtn">요약 글 복사</button><button class="btn line sharebtn" id="imgBtn">이미지로 저장</button><button class="btn line sharebtn" id="shareBtn">결과 링크 보내기</button><span id="copied" class="copied"></span><div id="imgPrev" class="imgprev hidden"></div></div>`;
     $('sheet').classList.remove('hidden');
     try { history.pushState({ scr: cur, p: PATH, sheet: 1 }, ''); } catch (e) {}
+    // 이미지는 시트를 열 때 미리 만들어 둔다 (공유 창은 누른 직후에만 열려서)
+    let IMG = null; const t8 = new Date(), imgName = `다음길_상담요약_${t8.getFullYear()}${String(t8.getMonth() + 1).padStart(2, '0')}${String(t8.getDate()).padStart(2, '0')}.png`;
+    sumImage(lines).then(c => c.toBlob(b => { IMG = b; }, 'image/png')).catch(() => {});
+    $('imgBtn').addEventListener('click', async () => {
+      const note = $('copied');
+      if (!IMG) { note.textContent = '이미지를 만드는 중이에요. 잠시 뒤 다시 눌러 주세요.'; return; }
+      const file = new File([IMG], imgName, { type: 'image/png' });
+      const prev = () => { const u = URL.createObjectURL(IMG); $('imgPrev').innerHTML = `<p>이미지를 길게 눌러 <b>'사진 앱에 저장'</b> 또는 <b>'이미지 저장'</b>을 고르세요.</p><img src="${u}" alt="상담용 요약 이미지">`; $('imgPrev').classList.remove('hidden'); note.textContent = ''; $('imgPrev').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); };
+      if (CAL_OS !== 'pc' && !IOS_INAPP && navigator.canShare && navigator.share) {
+        try { if (navigator.canShare({ files: [file] })) { await navigator.share({ files: [file] }); note.textContent = CAL_OS === 'ios' ? "'이미지 저장'을 골랐다면 사진 앱에 들어가 있어요." : '저장하거나 카톡으로 바로 보낼 수 있어요.'; return; } }
+        catch (e) { if (e.name === 'AbortError') return; }
+      }
+      if (CAL_OS !== 'pc') { prev(); return; }
+      const u = URL.createObjectURL(IMG), a = document.createElement('a'); a.href = u; a.download = imgName;
+      document.body.appendChild(a); a.click(); setTimeout(() => a.remove(), 1500); setTimeout(() => URL.revokeObjectURL(u), 60000);
+      note.textContent = '이미지를 내려받았어요. 상담 갈 때 보여 주거나 출력하세요.';
+    });
     $('copyBtn').addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(sumText()); $('copied').textContent = '복사했어요. 문자나 카톡에 붙여 넣으세요.'; }
       catch (e) { $('copied').textContent = '복사가 막혀 있어요. 화면을 캡처해 주세요.'; }
