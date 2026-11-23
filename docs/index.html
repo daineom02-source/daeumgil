@@ -1335,7 +1335,7 @@
       `※ 참고용 정보예요. 신청 전 각 기관 공고와 신고 기한을 확인하세요.`].filter(Boolean).join('\n');
     if (PATH === 'restart') return [head,
       `상황: 업종 변경·이전 검토 · ${s.sigun} ${s.dong} · ${s.name}`,
-      `지금 상권: ${s.signal} (반경 500m ${s.mine}곳, 시 평균의 ${s.ratio.toFixed(1)}배)${s.life ? ' · ' + s.life : ''}`,
+      `지금 상권: ${s.sig || s.signal} (반경 500m ${s.mine}곳, 시 평균의 ${s.ratio.toFixed(1)}배)${s.life ? ' · ' + s.life : ''}`,
       s.nts ? `같은 업종 사장님 수: ${s.nts}` : '',
       CALC ? `숫자로 본 가게: ${CALC.text}` : '',
       s.fr ? `프랜차이즈: ${s.fr}` : '',
@@ -1346,7 +1346,7 @@
     return [
       `[다음길 상담 요약] ${t.getFullYear()}.${t.getMonth() + 1}.${t.getDate()}`,
       `상황: 계속할지 고민 중 · ${s.sigun} ${s.dong} · ${s.name}`,
-      `상권 신호: ${s.signal} · 추천: ${s.rec}부터`,
+      `상권 신호: ${s.sig || s.signal} · 추천: ${s.rec}부터`,
       `- 경쟁 밀집: 반경 500m ${s.name} ${s.mine}곳 (시 평균 ${s.avg.toFixed(1)}곳, ${s.ratio.toFixed(1)}배)`,
       `- 상권 변화: ${s.ch ? s.dong + ' ' + s.ch.type + ' (2025년 3분기)' : '자료 없음'}`,
       s.life ? `- 얼마나 버텼나: ${s.life}` : '',
@@ -1364,47 +1364,84 @@
   // 상담용 요약 → PNG (화면 캡처 대신 직접 그려서 폰·PC 어디서나 같은 모양)
   async function sumImage(lines) {
     try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (e) {}
-    const W = 1080, P = 72, MW = W - P * 2, FF = "'Noto Sans KR', -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
-    const C = { ink: '#191f28', sub: '#6b7684', mute: '#8b95a1', acc: '#3182f6', line: '#e5e8eb', soft: '#f2f4f6' };
+    const W = 1080, P = 64, FF = "'Noto Sans KR', -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+    const C = { ink: '#191f28', sub: '#4e5968', mute: '#8b95a1', acc: '#3182f6', line: '#e5e8eb', card: '#f5f7fa', bad: '#e5303f' };
     const cv = document.createElement('canvas'), x = cv.getContext('2d');
+    const rr = (X, Y, w, h, r) => { x.beginPath(); if (x.roundRect) x.roundRect(X, Y, w, h, r); else x.rect(X, Y, w, h); };
+    // 줄바꿈: 띄어쓰기 단위, 너무 긴 낱말은 글자 단위
     const wrap = (t, font, mw) => { x.font = font; const out = []; let cur = '';
-      for (const w of t.split(' ')) { const cand = cur ? cur + ' ' + w : w;
+      for (const w of String(t).split(' ')) { const cand = cur ? cur + ' ' + w : w;
         if (x.measureText(cand).width <= mw) { cur = cand; continue; }
         if (cur) out.push(cur); cur = '';
         if (x.measureText(w).width <= mw) { cur = w; continue; }
         for (const ch of w) { if (x.measureText(cur + ch).width > mw) { out.push(cur); cur = ''; } cur += ch; } }
       if (cur) out.push(cur); return out; };
-    const items = [];
+    // 한 줄 그리기: 줄어든 % (-3.5%)·마이너스 금액(-200만 원)은 빨간색으로
+    const line = (real, t, font, col, X, Y) => { if (!real) return; x.font = font; let cx = X;
+      t.split(/(-\d[\d.,]*(?:%|만 원))/).forEach(part => { if (!part) return; x.fillStyle = /^-\d[\d.,]*(?:%|만 원)$/.test(part) ? C.bad : col; x.fillText(part, cx, Y); cx += x.measureText(part).width; }); };
+    const para = (real, t, font, col, X, Y, mw, lh) => { wrap(t, font, mw).forEach(l => { line(real, l, font, col, X, Y + lh * 0.72); Y += lh; }); return Y; };
+    const icon = (svg, X, Y, size) => { const g = new DOMParser().parseFromString(`<svg xmlns="http://www.w3.org/2000/svg">${svg}</svg>`, 'image/svg+xml').documentElement;
+      x.save(); x.translate(X, Y); x.scale(size / 64, size / 64);
+      [...g.children].forEach(el => { const A = k => el.getAttribute(k); let pth;
+        if (el.tagName === 'circle') { pth = new Path2D(); pth.arc(+A('cx'), +A('cy'), +A('r'), 0, Math.PI * 2); } else pth = new Path2D(A('d'));
+        if (A('fill') && A('fill') !== 'none') { x.fillStyle = A('fill'); x.fill(pth); }
+        if (A('stroke')) { x.strokeStyle = A('stroke'); x.lineWidth = +A('stroke-width') || 1; x.lineCap = A('stroke-linecap') || 'butt'; x.lineJoin = A('stroke-linejoin') || 'miter'; x.stroke(pth); } });
+      x.restore(); };
+    // 줄 → 묶음: '제목: 내용' 한 칸, '- 제목: 내용'은 바로 위 칸의 세부 항목
+    let head = null, sig = null; const cards = [], notes = [];
     lines.slice(1).forEach(l => { const i = l.indexOf(': ');
-      if (l.startsWith('※')) items.push({ k: 'note', v: l });
-      else if (l.startsWith('-')) items.push({ k: 'sub', v: l.replace(/^-\s*/, '') });
-      else if (i > 0) items.push({ k: 'row', t: l.slice(0, i), v: l.slice(i + 2) });
-      else items.push({ k: 'sub', v: l }); });
-    const F = { dt: `700 30px ${FF}`, dd: `500 36px ${FF}`, sub: `400 32px ${FF}`, note: `400 28px ${FF}` };
-    const draw = real => { let y = P;
-      const txt = (t, font, col, yy, xx) => { if (real) { x.font = font; x.fillStyle = col; x.fillText(t, xx || P, yy); } };
-      if (real) { x.fillStyle = '#fff'; x.fillRect(0, 0, W, cv.height); x.fillStyle = C.acc; x.fillRect(0, 0, W, 14);
-        x.save(); x.translate(P, y); x.scale(56 / 512, 56 / 512);
-        x.fillStyle = '#3182F6'; x.beginPath(); x.roundRect ? x.roundRect(0, 0, 512, 512, 112) : x.rect(0, 0, 512, 512); x.fill();
+      if (l.startsWith('※')) { notes.push(l.replace(/^※\s*/, '')); return; }
+      if (l.startsWith('-')) { const t = l.replace(/^-\s*/, ''), k = t.indexOf(': '); const c = cards[cards.length - 1] || sig;
+        if (c) (c.subs = c.subs || []).push(k > 0 ? [t.slice(0, k), t.slice(k + 2)] : ['', t]); return; }
+      const t = i > 0 ? l.slice(0, i) : '', v = i > 0 ? l.slice(i + 2) : l;
+      if (t === '상황') head = v;
+      else if ((t === '상권 신호' || t === '지금 상권') && SUM && SUM.level !== undefined && v.startsWith(SUM.sig)) sig = { t, v, rest: v.slice(SUM.sig.length).replace(/^\s*·\s*/, '').trim() };
+      else cards.push({ t, v }); });
+    const CW = W - P * 2, IN = 36;
+    const subs = (real, list, Y, X, mw) => { (list || []).forEach(([k, v]) => { Y += 18;
+      if (k) { if (real) { x.font = `700 27px ${FF}`; x.fillStyle = C.mute; x.fillText(k, X, Y + 22); } Y += 34; }
+      Y = para(real, v, `500 32px ${FF}`, C.ink, X, Y, mw, 46); }); return Y; };
+    const body = (real, c, Y) => { Y += IN; if (real) { x.font = `700 28px ${FF}`; x.fillStyle = C.acc; x.fillText(c.t, P + IN, Y + 22); } Y += 22 + 16;
+      const ds = c.v.split(' / ');
+      if (ds.length > 1 && ds.every(d => /^\d{4}\.\d{1,2}\.\d{1,2} /.test(d))) {
+        // 일정은 한 줄에 하나씩: 날짜 | 할 일
+        x.font = `700 32px ${FF}`; const dw = x.measureText('2027.12.31').width + 24;
+        ds.forEach((d, n) => { const k = d.indexOf(' '); if (n) Y += 10;
+          if (real) { x.font = `700 32px ${FF}`; x.fillStyle = C.ink; x.fillText(d.slice(0, k), P + IN, Y + 34); }
+          Y = para(real, d.slice(k + 1), `500 32px ${FF}`, C.ink, P + IN + dw, Y, CW - IN * 2 - dw, 46); });
+      } else Y = para(real, c.v, `500 34px ${FF}`, C.ink, P + IN, Y, CW - IN * 2, 50);
+      Y = subs(real, c.subs, Y, P + IN, CW - IN * 2); return Y + IN; };
+    const sigBody = (real, Y) => { const SG = SIGNS[SUM.level]; Y += IN; const ic = 92;
+      if (real) icon(SG[3], P + IN, Y, ic);
+      const tx = P + IN + ic + 28, tw = CW - IN * 2 - ic - 28; let ty = Y;
+      if (real) { x.font = `700 27px ${FF}`; x.fillStyle = SG[1]; x.fillText(sig.t, tx, ty + 22); } ty += 22 + 14;
+      ty = para(real, SUM.sig, `800 44px ${FF}`, SG[1], tx, ty, tw, 58);
+      if (sig.rest) ty = para(real, sig.rest.replace(/^\((.*?)\)/, '$1'), `500 30px ${FF}`, C.ink, tx, ty + 6, tw, 44);
+      Y = Math.max(Y + ic, ty);
+      if (sig.subs) { Y += 10; if (real) { x.fillStyle = 'rgba(0,0,0,.08)'; x.fillRect(P + IN, Y, CW - IN * 2, 2); } Y += 6; Y = subs(real, sig.subs, Y, P + IN, CW - IN * 2); }
+      return Y + IN; };
+    const card = (real, Y, bg, fn) => { const h = fn(false, Y) - Y; if (real) { x.fillStyle = bg; rr(P, Y, CW, h, 28); x.fill(); } fn(real, Y); return Y + h; };
+    const draw = real => { let y = 0;
+      if (real) { x.fillStyle = '#fff'; x.fillRect(0, 0, W, cv.height); x.fillStyle = C.acc; x.fillRect(0, 0, W, 12); }
+      y = 60;
+      if (real) { x.save(); x.translate(P, y); x.scale(52 / 512, 52 / 512); x.fillStyle = '#3182F6'; rr(0, 0, 512, 512, 112); x.fill();
         x.strokeStyle = '#fff'; x.lineWidth = 56; x.lineCap = 'round'; x.lineJoin = 'round';
         x.stroke(new Path2D('M150 400 C150 300 200 250 270 230 L330 212')); x.stroke(new Path2D('M290 150 L372 200 L318 280'));
-        x.fillStyle = '#BFDBFF'; x.beginPath(); x.arc(150, 400, 34, 0, Math.PI * 2); x.fill(); x.restore(); }
-      x.textBaseline = 'alphabetic';
-      txt('다음길', `800 34px ${FF}`, C.acc, y + 40, P + 72); y += 56 + 52;
-      txt('상담용 요약', `800 60px ${FF}`, C.ink, y + 50); y += 50 + 26;
-      txt(`${lines[0].replace('[다음길 상담 요약] ', '')} 작성 · 상담 창구에서 이 화면을 보여 주세요`, `400 28px ${FF}`, C.mute, y + 24); y += 24 + 34;
-      if (real) { x.fillStyle = C.line; x.fillRect(P, y, MW, 2); } y += 2;
-      items.forEach(it => {
-        if (it.k === 'row') { y += 34; txt(it.t, F.dt, C.acc, y + 26); y += 26 + 14;
-          wrap(it.v, F.dd, MW).forEach(l => { txt(l, F.dd, C.ink, y + 34); y += 50; }); }
-        else if (it.k === 'sub') { y += 8; wrap(it.v, F.sub, MW - 34).forEach((l, j) => { if (!j && real) { x.fillStyle = C.sub; x.beginPath(); x.arc(P + 10, y + 20, 5, 0, Math.PI * 2); x.fill(); } txt(l, F.sub, C.ink, y + 31, P + 34); y += 46; }); }
-        else { y += 40; const ls = wrap(it.v, F.note, MW - 48); if (real) { x.fillStyle = C.soft; x.beginPath(); const h = ls.length * 42 + 36; x.roundRect ? x.roundRect(P, y, MW, h, 20) : x.rect(P, y, MW, h); x.fill(); }
-          y += 18; ls.forEach(l => { txt(l, F.note, C.sub, y + 29, P + 24); y += 42; }); y += 18; } });
-      y += 48; if (real) { x.fillStyle = C.line; x.fillRect(P, y, MW, 2); } y += 2 + 28;
-      txt('다음길 · 경기도 소상공인 다음 길 찾기', `700 26px ${FF}`, C.sub, y + 22);
-      txt('daineom02-source.github.io/daeumgil', `400 26px ${FF}`, C.mute, y + 22 + 38); y += 22 + 38 + P - 20;
-      return y; };
-    const H = Math.ceil(draw(false)); cv.width = W; cv.height = H; draw(true); return cv;
+        x.fillStyle = '#BFDBFF'; x.beginPath(); x.arc(150, 400, 34, 0, Math.PI * 2); x.fill(); x.restore();
+        x.font = `800 32px ${FF}`; x.fillStyle = C.acc; x.fillText('다음길', P + 66, y + 37);
+        x.font = `400 26px ${FF}`; x.fillStyle = C.mute; const d = lines[0].replace('[다음길 상담 요약] ', '') + ' 작성'; x.fillText(d, W - P - x.measureText(d).width, y + 35); }
+      y += 52 + 48;
+      if (real) { x.font = `800 58px ${FF}`; x.fillStyle = C.ink; x.fillText('상담용 요약', P, y + 50); } y += 50 + 22;
+      if (head) y = para(real, head, `600 34px ${FF}`, C.sub, P, y, CW, 50);
+      y += 30;
+      if (sig) { y = card(real, y, SIGNS[SUM.level][0], sigBody); y += 20; }
+      cards.forEach(c => { y = card(real, y, C.card, (r, Y) => body(r, c, Y)); y += 20; });
+      notes.forEach(n => { y += 6; y = para(real, '※ ' + n, `400 27px ${FF}`, C.mute, P, y, CW, 40); });
+      y += 30; if (real) { x.fillStyle = C.line; x.fillRect(P, y, CW, 2); } y += 2 + 26;
+      if (real) { x.font = `700 26px ${FF}`; x.fillStyle = C.sub; x.fillText('상담 창구에서 이 이미지를 보여 주세요', P, y + 22);
+        x.font = `400 24px ${FF}`; x.fillStyle = C.mute; x.fillText('다음길 · daineom02-source.github.io/daeumgil', P, y + 60); }
+      return y + 60 + 50; };
+    const H = Math.ceil(draw(false)); cv.width = W; cv.height = H; x.textBaseline = 'alphabetic'; draw(true); return cv;
   }
   document.querySelectorAll('.sumgo').forEach(b => b.addEventListener('click', () => openSum()));
   function openSum() {
@@ -1661,6 +1698,7 @@
     $('reco').innerHTML = `<svg viewBox="0 0 64 64" role="img" aria-label="${SG[2]}">${SG[3]}</svg><span>${recoTxt}</span>`;
     document.querySelectorAll('#tabs .rk').forEach(x => x.remove());
     const recT = level === 2 ? 'close' : 'stay';
+    if (SUM) { SUM.level = level; SUM.sig = ['아직 해 볼 만해요', '대비가 필요해요', '위험 신호가 많아요'][level]; SUM.rec = recT === 'close' ? '정리하기' : '버티기'; }
     document.querySelectorAll('#tabs button').forEach(x => { if (x.dataset.t === recT) x.insertAdjacentHTML('beforeend', '<span class="rk">추천</span>'); });
   }
   function goAct(a) {
