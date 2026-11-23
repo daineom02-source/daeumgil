@@ -87,6 +87,7 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233182f6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: calc(100% - 16px) 50%; background-size: 20px; }
   .shopmeta { margin: 8px 2px 0; font-size: 14px; color: var(--sub); }
   .shopmeta b { color: var(--ink); font-weight: 700; }
+  .docsave { margin: 10px 2px 0; font-size: 13px; color: var(--sub); } .docsave button { border: 0; background: none; padding: 0 0 0 4px; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
   .shopfix { margin-top: 8px; padding: 10px 12px; border-radius: 12px; background: var(--mid-soft); color: var(--ink); font-size: 14px; line-height: 1.5; }
   .shopfix.ok { background: var(--accent-soft); }
   .shopfix button { display: block; margin-top: 8px; border: 0; border-radius: 10px; padding: 6px 12px; background: #fff; color: var(--accent); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
@@ -2321,10 +2322,15 @@
       [P.dt === 'y' || (P.ln && P.ln !== 'no'), '대출 내역 (기관·잔액·금리·만기)', '은행 앱이나 대출 약정서에서 확인 · 상환 방법을 바꾸거나 채무조정 상담할 때 기관별로 정리해 가요'],
       [1, '사실증명 (총사업자등록내역)', '전직장려수당 신청 때 내요 · 홈택스 발급']
     ].filter(d => d[0]);
-    const done = PLAN.done || (PLAN.done = {});
+    // 체크한 서류는 이 폰(브라우저)에만 기억해 둔다 — 서류 이름과 체크 여부뿐, 매출·대출 같은 숫자는 저장하지 않는다
+    if (!PLAN.done) { PLAN.done = {}; try { Object.assign(PLAN.done, JSON.parse(localStorage.getItem('dg_docs') || '{}')); } catch (e) {} }
+    const done = PLAN.done;
+    const saveDocs = () => { try { const o = {}; Object.keys(done).forEach(k => { if (done[k]) o[k] = 1; }); localStorage.setItem('dg_docs', JSON.stringify(o)); } catch (e) {} };
     $('docs').innerHTML = `<ul class="docl">${DOCS.map(([, n, t]) => `<li><label><input type="checkbox" data-d="${n}"${done[n] ? ' checked' : ''}><span>${n}<small>${t}</small></span></label></li>`).join('')}</ul>`;
-    $('docs').querySelectorAll('input').forEach(i => i.onchange = () => { done[i.dataset.d] = i.checked; docCount(); });
-    const docCount = () => { const n = DOCS.filter(d => done[d[1]]).length; $('docN').textContent = `${DOCS.length}가지 중 ${n}가지 준비 · 체크는 이 화면에서만 기억해요`; };
+    $('docs').insertAdjacentHTML('beforeend', `<p class="docsave">체크한 서류는 이 휴대폰에 기억돼서, 나갔다 와도 그대로 남아 있어요. <button type="button" id="docClear">체크 모두 지우기</button></p>`);
+    $('docs').querySelectorAll('input').forEach(i => i.onchange = () => { done[i.dataset.d] = i.checked; saveDocs(); docCount(); });
+    $('docClear').onclick = () => { Object.keys(done).forEach(k => delete done[k]); saveDocs(); $('docs').querySelectorAll('input').forEach(i => i.checked = false); docCount(); };
+    const docCount = () => { const n = DOCS.filter(d => done[d[1]]).length; $('docN').textContent = `${DOCS.length}가지 중 ${n}가지 준비`; $('docClear').classList.toggle('hidden', !n); };
     docCount();
     const upN = ev.filter(e => left(e[0]) >= 0).length;
     $('icsBtn').disabled = !upN; $('icsNote').textContent = upN ? `일정 ${upN}가지 · 하루 전에 알림` : '남은 일정이 없어요.';
