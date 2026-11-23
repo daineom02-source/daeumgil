@@ -270,8 +270,21 @@
   .sheet .dim { position: absolute; inset: 0; background: rgba(0,0,0,.45); }
   .sheet .body { position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; width: 100%; max-width: 480px; max-height: 88vh; overflow: auto; background: #fff; border-radius: 24px 24px 0 0; padding: 10px 20px calc(20px + env(safe-area-inset-bottom)); }
   .sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--gray2); margin: 0 auto 12px; }
-  .sum h3 { font-size: 20px; font-weight: 800; margin: 4px 0 2px; } .sum .meta { color: var(--mute); font-size: 13px; margin-bottom: 8px; }
-  .sum dl { margin: 0; } .sum dt { font-weight: 700; font-size: 13px; margin-top: 14px; color: var(--accent); } .sum dd { margin: 3px 0 0; font-size: 15px; }
+  .sum .sumtop { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--mute); margin: 6px 0 10px; }
+  .sum .brand { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; color: var(--accent); }
+  .sum h3 { font-size: 24px; font-weight: 800; margin: 0; } .sum .shead { margin: 2px 0 14px; font-size: 15px; font-weight: 600; color: #4e5968; }
+  .sum .ssig, .sum .scard { border-radius: 16px; padding: 16px 18px; margin-top: 10px; }
+  .sum .scard { background: #f5f7fa; }
+  .sum .ssig-h { display: flex; gap: 14px; align-items: flex-start; } .sum .ssig-h svg { width: 48px; height: 48px; flex: none; }
+  .sum .ssig-h small { display: block; font-size: 13px; font-weight: 700; color: var(--sc); } .sum .ssig-h b { display: block; font-size: 22px; font-weight: 800; color: var(--sc); line-height: 1.35; }
+  .sum .ssig-h p { margin: 4px 0 0; font-size: 14px; }
+  .sum .ssig dl { border-top: 1px solid rgba(0,0,0,.08); margin-top: 12px; padding-top: 2px; }
+  .sum h4 { margin: 0 0 4px; font-size: 13px; font-weight: 700; color: var(--accent); } .sum .scard p { margin: 0; font-size: 15px; }
+  .sum dl { margin: 0; } .sum dt { font-size: 12.5px; font-weight: 700; color: var(--mute); margin-top: 10px; } .sum dd { margin: 1px 0 0; font-size: 15px; }
+  .sum .scard dl { margin-top: 4px; }
+  .sum .ssched { list-style: none; margin: 0; padding: 0; } .sum .ssched li { display: flex; gap: 12px; font-size: 15px; padding: 3px 0; } .sum .ssched b { flex: none; min-width: 92px; }
+  .sum .neg { color: #e5303f; font-weight: 600; }
+  .sum .snote { margin: 14px 2px 0; font-size: 13px; color: var(--mute); }
   .sum .btn { width: 100%; margin-top: 18px; }
   .imgprev { margin-top: 12px; text-align: center; font-size: 14px; color: var(--sub); } .imgprev p { margin: 0 0 8px; } .imgprev img { width: 100%; border: 1px solid var(--line); border-radius: 12px; -webkit-touch-callout: default; }
   .copied { display: block; text-align: center; color: var(--ok); font-size: 14px; margin-top: 8px; }
@@ -1361,6 +1374,33 @@
       `※ 참고용 정보예요. 신청 전 각 기관 공고를 확인하세요.`
     ].filter(Boolean).join('\n');
   }
+  // 요약 글 줄 → 묶음 (화면과 이미지가 같은 묶음을 쓴다)
+  //  '제목: 내용'은 한 칸, '- 제목: 내용'은 바로 위 칸의 세부 항목, '상황'은 머리글, 상권 신호는 색 카드
+  function sumModel(lines) {
+    let head = null, sig = null; const cards = [], notes = [];
+    lines.slice(1).forEach(l => { const i = l.indexOf(': ');
+      if (l.startsWith('※')) { notes.push(l.replace(/^※\s*/, '')); return; }
+      if (l.startsWith('-')) { const t = l.replace(/^-\s*/, ''), k = t.indexOf(': '); const c = cards[cards.length - 1] || sig;
+        if (c) (c.subs = c.subs || []).push(k > 0 ? [t.slice(0, k), t.slice(k + 2)] : ['', t]); return; }
+      const t = i > 0 ? l.slice(0, i) : '', v = i > 0 ? l.slice(i + 2) : l;
+      if (t === '상황') head = v;
+      else if ((t === '상권 신호' || t === '지금 상권') && SUM && SUM.level !== undefined && v.startsWith(SUM.sig)) sig = { t, v, rest: v.slice(SUM.sig.length).replace(/^\s*·\s*/, '').trim().replace(/^\((.*?)\)/, '$1') };
+      else cards.push({ t, v }); });
+    cards.forEach(c => { const ds = c.v.split(' / '); if (ds.length > 1 && ds.every(d => /^\d{4}\.\d{1,2}\.\d{1,2} /.test(d))) c.sched = ds.map(d => [d.slice(0, d.indexOf(' ')), d.slice(d.indexOf(' ') + 1)]); });
+    return { date: lines[0].replace('[다음길 상담 요약] ', ''), head, sig, cards, notes };
+  }
+  const LOGO_SVG = '<svg viewBox="0 0 512 512" width="22" height="22" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#3182F6"/><path d="M150 400 C150 300 200 250 270 230 L330 212" fill="none" stroke="#fff" stroke-width="56" stroke-linecap="round"/><path d="M290 150 L372 200 L318 280" fill="none" stroke="#fff" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/><circle cx="150" cy="400" r="34" fill="#BFDBFF"/></svg>';
+  function sumHtml(lines) {
+    const m = sumModel(lines);
+    const hx = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]).replace(/(-\d[\d.,]*(?:%|만 원))/g, '<span class="neg">$1</span>');
+    const subs = l => l && l.length ? `<dl>${l.map(([k, v]) => (k ? `<dt>${hx(k)}</dt>` : '') + `<dd>${hx(v)}</dd>`).join('')}</dl>` : '';
+    let h = `<div class="sumtop"><span class="brand">${LOGO_SVG}다음길</span><span>${hx(m.date)} 작성</span></div><h3>상담용 요약</h3>` + (m.head ? `<p class="shead">${hx(m.head)}</p>` : '');
+    if (m.sig) { const SG = SIGNS[SUM.level];
+      h += `<div class="ssig" style="background:${SG[0]};--sc:${SG[1]}"><div class="ssig-h"><svg viewBox="0 0 64 64" role="img" aria-label="${SG[2]}">${SG[3]}</svg><div><small>${hx(m.sig.t)}</small><b>${hx(SUM.sig)}</b>${m.sig.rest ? `<p>${hx(m.sig.rest)}</p>` : ''}</div></div>${subs(m.sig.subs)}</div>`; }
+    m.cards.forEach(c => { h += `<div class="scard"><h4>${hx(c.t)}</h4>` + (c.sched ? `<ul class="ssched">${c.sched.map(([d, t]) => `<li><b>${hx(d)}</b><span>${hx(t)}</span></li>`).join('')}</ul>` : `<p>${hx(c.v)}</p>`) + subs(c.subs) + '</div>'; });
+    m.notes.forEach(n => { h += `<p class="snote">※ ${hx(n)}</p>`; });
+    return h;
+  }
   // 상담용 요약 → PNG (화면 캡처 대신 직접 그려서 폰·PC 어디서나 같은 모양)
   async function sumImage(lines) {
     try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (e) {}
@@ -1387,28 +1427,18 @@
         if (A('fill') && A('fill') !== 'none') { x.fillStyle = A('fill'); x.fill(pth); }
         if (A('stroke')) { x.strokeStyle = A('stroke'); x.lineWidth = +A('stroke-width') || 1; x.lineCap = A('stroke-linecap') || 'butt'; x.lineJoin = A('stroke-linejoin') || 'miter'; x.stroke(pth); } });
       x.restore(); };
-    // 줄 → 묶음: '제목: 내용' 한 칸, '- 제목: 내용'은 바로 위 칸의 세부 항목
-    let head = null, sig = null; const cards = [], notes = [];
-    lines.slice(1).forEach(l => { const i = l.indexOf(': ');
-      if (l.startsWith('※')) { notes.push(l.replace(/^※\s*/, '')); return; }
-      if (l.startsWith('-')) { const t = l.replace(/^-\s*/, ''), k = t.indexOf(': '); const c = cards[cards.length - 1] || sig;
-        if (c) (c.subs = c.subs || []).push(k > 0 ? [t.slice(0, k), t.slice(k + 2)] : ['', t]); return; }
-      const t = i > 0 ? l.slice(0, i) : '', v = i > 0 ? l.slice(i + 2) : l;
-      if (t === '상황') head = v;
-      else if ((t === '상권 신호' || t === '지금 상권') && SUM && SUM.level !== undefined && v.startsWith(SUM.sig)) sig = { t, v, rest: v.slice(SUM.sig.length).replace(/^\s*·\s*/, '').trim() };
-      else cards.push({ t, v }); });
+    const { head, sig, cards, notes } = sumModel(lines);
     const CW = W - P * 2, IN = 36;
     const subs = (real, list, Y, X, mw) => { (list || []).forEach(([k, v]) => { Y += 18;
       if (k) { if (real) { x.font = `700 27px ${FF}`; x.fillStyle = C.mute; x.fillText(k, X, Y + 22); } Y += 34; }
       Y = para(real, v, `500 32px ${FF}`, C.ink, X, Y, mw, 46); }); return Y; };
     const body = (real, c, Y) => { Y += IN; if (real) { x.font = `700 28px ${FF}`; x.fillStyle = C.acc; x.fillText(c.t, P + IN, Y + 22); } Y += 22 + 16;
-      const ds = c.v.split(' / ');
-      if (ds.length > 1 && ds.every(d => /^\d{4}\.\d{1,2}\.\d{1,2} /.test(d))) {
+      if (c.sched) {
         // 일정은 한 줄에 하나씩: 날짜 | 할 일
         x.font = `700 32px ${FF}`; const dw = x.measureText('2027.12.31').width + 24;
-        ds.forEach((d, n) => { const k = d.indexOf(' '); if (n) Y += 10;
-          if (real) { x.font = `700 32px ${FF}`; x.fillStyle = C.ink; x.fillText(d.slice(0, k), P + IN, Y + 34); }
-          Y = para(real, d.slice(k + 1), `500 32px ${FF}`, C.ink, P + IN + dw, Y, CW - IN * 2 - dw, 46); });
+        c.sched.forEach(([d, t], n) => { if (n) Y += 10;
+          if (real) { x.font = `700 32px ${FF}`; x.fillStyle = C.ink; x.fillText(d, P + IN, Y + 34); }
+          Y = para(real, t, `500 32px ${FF}`, C.ink, P + IN + dw, Y, CW - IN * 2 - dw, 46); });
       } else Y = para(real, c.v, `500 34px ${FF}`, C.ink, P + IN, Y, CW - IN * 2, 50);
       Y = subs(real, c.subs, Y, P + IN, CW - IN * 2); return Y + IN; };
     const sigBody = (real, Y) => { const SG = SIGNS[SUM.level]; Y += IN; const ic = 92;
@@ -1416,7 +1446,7 @@
       const tx = P + IN + ic + 28, tw = CW - IN * 2 - ic - 28; let ty = Y;
       if (real) { x.font = `700 27px ${FF}`; x.fillStyle = SG[1]; x.fillText(sig.t, tx, ty + 22); } ty += 22 + 14;
       ty = para(real, SUM.sig, `800 44px ${FF}`, SG[1], tx, ty, tw, 58);
-      if (sig.rest) ty = para(real, sig.rest.replace(/^\((.*?)\)/, '$1'), `500 30px ${FF}`, C.ink, tx, ty + 6, tw, 44);
+      if (sig.rest) ty = para(real, sig.rest, `500 30px ${FF}`, C.ink, tx, ty + 6, tw, 44);
       Y = Math.max(Y + ic, ty);
       if (sig.subs) { Y += 10; if (real) { x.fillStyle = 'rgba(0,0,0,.08)'; x.fillRect(P + IN, Y, CW - IN * 2, 2); } Y += 6; Y = subs(real, sig.subs, Y, P + IN, CW - IN * 2); }
       return Y + IN; };
@@ -1447,8 +1477,7 @@
   function openSum() {
     if (!SUM) return;
     const lines = sumText().split('\n');
-    $('sumBox').innerHTML = `<div class="sum"><h3>상담용 요약</h3><div class="meta">${lines[0].replace('[다음길 상담 요약] ', '')} 작성 · 상담 창구에서 이 화면을 보여 주세요</div><dl>${lines.slice(1).map(l => {
-      const i = l.indexOf(': '); return i > 0 && !l.startsWith('-') && !l.startsWith('※') ? `<dt>${l.slice(0, i)}</dt><dd>${l.slice(i + 2)}</dd>` : `<dd>${l}</dd>`; }).join('')}</dl>
+    $('sumBox').innerHTML = `<div class="sum">${sumHtml(lines)}
       <button class="btn" id="copyBtn">요약 글 복사</button><button class="btn line sharebtn" id="imgBtn">이미지로 저장</button><button class="btn line sharebtn" id="shareBtn">결과 링크 보내기</button><span id="copied" class="copied"></span><div id="imgPrev" class="imgprev hidden"></div></div>`;
     $('sheet').classList.remove('hidden');
     try { history.pushState({ scr: cur, p: PATH, sheet: 1 }, ''); } catch (e) {}
