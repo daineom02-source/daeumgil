@@ -272,7 +272,9 @@
   .sheet { position: fixed; inset: 0; z-index: 10; }
   .sheet .dim { position: absolute; inset: 0; background: rgba(0,0,0,.45); }
   .sheet .body { position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; width: 100%; max-width: 480px; max-height: 88vh; overflow: auto; background: #fff; border-radius: 24px 24px 0 0; padding: 10px 20px calc(20px + env(safe-area-inset-bottom)); }
-  .sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--gray2); margin: 0 auto 12px; }
+  .sheet .grab { position: relative; width: 40px; height: 5px; border-radius: 3px; background: #c9cfd6; margin: 0 auto 12px; cursor: pointer; }
+  .sheet .grab::before { content: ''; position: absolute; left: -60px; right: -60px; top: -14px; bottom: -14px; }
+  .sheet .body { overscroll-behavior: contain; }
   .sum .sumtop { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--mute); margin: 6px 0 10px; }
   .sum .brand { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; color: var(--accent); }
   .sum h3 { font-size: 24px; font-weight: 800; margin: 0; } .sum .shead { margin: 2px 0 14px; font-size: 15px; font-weight: 600; color: #4e5968; }
@@ -1343,6 +1345,28 @@
   document.querySelectorAll('[data-home]').forEach(b => b.addEventListener('click', () => show('s0')));
   const closeSheet = () => { const open = !$('sheet').classList.contains('hidden'); $('sheet').classList.add('hidden'); if (open && history.state && history.state.sheet) history.back(); };
   $('sheetDim').addEventListener('click', closeSheet);
+  // 아래로 끌어내려 닫기 (아이폰·안드로이드의 시트처럼). 맨 위까지 올린 상태에서 끌 때만 닫히고, 그 밖엔 평소처럼 스크롤
+  const sheetBody = document.querySelector('#sheet .body'), sheetDim = $('sheetDim');
+  const resetSheet = () => { sheetBody.style.transition = ''; sheetBody.style.transform = ''; sheetDim.style.opacity = ''; sheetDim.style.transition = ''; };
+  {
+    let y0 = null, dy = 0, t0 = 0, drag = false, fromGrab = false;
+    sheetBody.addEventListener('touchstart', e => { if (e.touches.length !== 1) { y0 = null; return; } y0 = e.touches[0].clientY; dy = 0; t0 = Date.now(); drag = false; fromGrab = !!e.target.closest('.grab'); }, { passive: true });
+    sheetBody.addEventListener('touchmove', e => {
+      if (y0 === null) return; const d = e.touches[0].clientY - y0;
+      if (!drag) { if (d > 6 && (sheetBody.scrollTop <= 0 || fromGrab)) { drag = true; sheetBody.style.transition = 'none'; } else if (Math.abs(d) > 6) { y0 = null; return; } else return; }
+      dy = Math.max(0, d); sheetBody.style.transform = `translate(-50%, ${dy}px)`; sheetDim.style.opacity = String(1 - Math.min(dy / 500, 0.8));
+      if (e.cancelable) e.preventDefault();
+    }, { passive: false });
+    const end = () => {
+      if (y0 === null) return; y0 = null; if (!drag) return; drag = false;
+      const fast = dy / Math.max(1, Date.now() - t0) > 0.5;
+      sheetBody.style.transition = 'transform .22s ease'; sheetDim.style.transition = 'opacity .22s';
+      if (dy > 110 || (fast && dy > 30)) { sheetBody.style.transform = 'translate(-50%, 100%)'; sheetDim.style.opacity = '0'; setTimeout(() => { closeSheet(); resetSheet(); }, 220); }
+      else { sheetBody.style.transform = ''; sheetDim.style.opacity = ''; }
+    };
+    sheetBody.addEventListener('touchend', end); sheetBody.addEventListener('touchcancel', end);
+    document.querySelector('#sheet .grab').addEventListener('click', closeSheet);
+  }
 
   // 철거비 예상: ㎡ → 평(소수점 올림) × 20만 원, 최대 600만 원
   $('area').addEventListener('input', e => {
@@ -1511,7 +1535,7 @@
     const lines = sumText().split('\n');
     $('sumBox').innerHTML = `<div class="sum">${sumHtml(lines)}
       <button class="btn" id="copyBtn">요약 글 복사</button><button class="btn line sharebtn" id="imgBtn">이미지로 저장</button><button class="btn line sharebtn" id="shareBtn">결과 링크 보내기</button><span id="copied" class="copied"></span><div id="imgPrev" class="imgprev hidden"></div></div>`;
-    $('sheet').classList.remove('hidden');
+    resetSheet(); $('sheet').classList.remove('hidden');
     try { history.pushState({ scr: cur, p: PATH, sheet: 1 }, ''); } catch (e) {}
     // 이미지는 시트를 열 때 미리 만들어 둔다 (공유 창은 누른 직후에만 열려서)
     let IMG = null; const t8 = new Date(), imgName = `다음길_상담요약_${t8.getFullYear()}${String(t8.getMonth() + 1).padStart(2, '0')}${String(t8.getDate()).padStart(2, '0')}.png`;
