@@ -87,6 +87,9 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233182f6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: calc(100% - 16px) 50%; background-size: 20px; }
   .shopmeta { margin: 8px 2px 0; font-size: 14px; color: var(--sub); }
   .shopmeta b { color: var(--ink); font-weight: 700; }
+  .shopfix { margin-top: 8px; padding: 10px 12px; border-radius: 12px; background: var(--mid-soft); color: var(--ink); font-size: 14px; line-height: 1.5; }
+  .shopfix.ok { background: var(--accent-soft); }
+  .shopfix button { display: block; margin-top: 8px; border: 0; border-radius: 10px; padding: 6px 12px; background: #fff; color: var(--accent); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
   .shopcard { display: flex; align-items: center; gap: 12px; margin-top: 4px; padding: 16px; border-radius: 16px; background: var(--accent-soft); border: 1.5px solid var(--accent); }
   .shopcard .ic { flex: none; width: 40px; height: 40px; border-radius: 12px; background: #fff; display: grid; place-items: center; color: var(--accent); font-size: 20px; }
   .shopcard b { display: block; font-size: 17px; font-weight: 800; word-break: keep-all; }
@@ -1013,13 +1016,38 @@
     setTimeout(() => { if (PICKED && !q.value) { q.value = q.dataset.prev || ''; q.classList.add('picked'); } q.placeholder = SHOP_PH; }, 150);
   });
   let PICK_I = -1;
+  // 상가정보에 업종이 잘못 등록된 가게가 있다 (예: 이름은 '카페드림'인데 '피부 관리실').
+  // 이름이 다른 분야 업종을 뚜렷이 가리키면 바꿀지 물어본다. 자동으로 바꾸지는 않는다.
+  const NAME_HINT = [
+    [/카페|커피|coffee|cafe/i, '카페', /스터디|pc|피씨|키즈|용품|프린트|만화|보드|북카페|애견|고양이|룸|파티|인터넷|게임|폰|헤어|네일|뷰티|꽃|플라워/i],
+    [/치킨/, '치킨·닭요리', /용품|정육/], [/피자/, '피자', /용품/],
+    [/미용실|헤어/, '미용실', /용품|재료|아카데미|학원|쇼핑|몰/],
+    [/공인중개|부동산/, '부동산 중개소', /컨설팅|법무|행정|개발|건설|분양|경매|자산/]];
+  function nameHint(i) {
+    const n = (NAMES && NAMES[i]) || '', c0 = city.cat[i];
+    for (const [re, to, ex] of NAME_HINT) {
+      if (!re.test(n) || (ex && ex.test(n))) continue;
+      const t = cats.findIndex(c => c[2] === to);
+      return t >= 0 && t !== c0 && FIELD(t) !== FIELD(c0) && catCount[t] ? t : -1;
+    }
+    return -1;
+  }
+  const ro = w => { const k = w.charCodeAt(w.length - 1) - 0xAC00, j = k % 28; return k < 0 || k > 11171 || j === 0 || j === 8 ? '로' : '으로'; };
+  function shopMetaPaint(i, c) {
+    const c0 = city.cat[i], where = `${SIGUN} ${city.dongs[city.dong[i]]}`, h = nameHint(i), box = $('shopMeta');
+    box.innerHTML = `<b>${cats[c][2]}</b> · ${where}` +
+      (c !== c0 ? `<div class="shopfix ok">상가정보의 '${cats[c0][2]}' 대신 <b>${cats[c][2]}</b>${ro(cats[c][2])} 볼게요. <button type="button" data-c="${c0}">원래대로</button></div>`
+        : h >= 0 ? `<div class="shopfix">가게 이름은 <b>${cats[h][2]}</b> 같은데, 상가정보에는 '${cats[c0][2]}'${ro(cats[c0][2])} 등록돼 있어요. <button type="button" data-c="${h}">${cats[h][2]}${ro(cats[h][2])} 볼게요</button></div>` : '');
+    box.querySelectorAll('[data-c]').forEach(b => { b.onmousedown = e => e.preventDefault(); b.onclick = () => {
+      const t = Number(b.dataset.c); $('catq').value = ''; $('cat').value = t; curField = FIELD(t); paintCats(); shopMetaPaint(i, t); }; });
+  }
   function pickShop(i) {
     PICK_I = i;
     $('dong').value = city.dong[i];
     if (catCount[city.cat[i]]) { $('catq').value = ''; $('cat').value = city.cat[i]; curField = FIELD(city.cat[i]); paintCats(); }
     me = [city.lon[i], city.lat[i]]; drawPick(true);
     $('shopBox').classList.add('hidden'); $('shopq').value = NAMES[i]; $('shopq').classList.add('picked'); $('shopq').blur();
-    $('shopMeta').innerHTML = `<b>${cats[city.cat[i]][2]}</b> · ${SIGUN} ${city.dongs[city.dong[i]]}`;
+    shopMetaPaint(i, city.cat[i]);
     $('shopMeta').classList.remove('hidden'); PICKED = true; updGo();
     if (MANUAL) setTimeout(() => { if (MODE !== 'svg') fitPick(); }, 60);
   }
@@ -1341,6 +1369,7 @@
     const head = `[다음길 상담 요약] ${t.getFullYear()}.${t.getMonth() + 1}.${t.getDate()}`;
     if (PATH === 'close' || PATH === 'closed') return [head,
       `상황: ${PATH === 'close' ? '폐업 예정' : '폐업함'} · ${s.sigun}${PATH === 'closed' ? '' : ' ' + s.dong + ' · ' + s.name}`,
+      PATH === 'close' && s.sigFull ? `상권 신호: ${s.sigFull}` : '',
       `${PATH === 'close' ? '폐업 예정일' : '폐업일'}: ${PLAN.text.date}`,
       `받을 수 있는 돈: ${PLAN.text.money}`,
       `챙길 일정: ${PLAN.text.sched}`,
