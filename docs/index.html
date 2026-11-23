@@ -32,6 +32,15 @@
   .bar-top .back span { font-size: 22px; line-height: 1; margin-top: -2px; }
   .bar-top .back:active { background: var(--gray2); }
   .bar-top .back:disabled { visibility: hidden; }
+  .bar-top .big { justify-self: end; height: 38px; padding: 0 12px; border: 0; border-radius: 19px; background: var(--gray); font: inherit; font-size: 15px; font-weight: 700; color: var(--ink); cursor: pointer; white-space: nowrap; }
+  .bar-top .big b { font-size: 19px; }
+  .bar-top .big[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  body.bigtxt .scr > *:not(.cta), body.bigtxt #sumBox { zoom: 1.15; }
+  body.bigtxt .leaflet-container { zoom: 0.8696; }
+  body.bigtxt .money-in label .ico { display: none; }
+  body.bigtxt .money-in input { width: 82px; }
+  body.bigtxt .money-in em { width: 30px; }
+  body.bigtxt .cta .btn { font-size: 18px; }
   .bar-top .ttl { text-align: center; font-weight: 700; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .progress { height: 3px; background: var(--gray); } .progress i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
   .scr { padding: 8px 20px 120px; }
@@ -387,7 +396,7 @@
 <body>
 <div class="app">
   <div class="bar-top">
-    <div class="row"><button class="back" id="backBtn" aria-label="이전 화면" disabled><span>‹</span>이전</button><div class="ttl" id="ttl">다음길</div></div>
+    <div class="row"><button class="back" id="backBtn" aria-label="이전 화면" disabled><span>‹</span>이전</button><div class="ttl" id="ttl">다음길</div><button class="big" id="bigBtn" aria-pressed="false" aria-label="글씨 크게 보기">가<b>가</b></button></div>
     <div class="progress"><i id="prog"></i></div>
   </div>
 
@@ -1243,6 +1252,10 @@
     window.scrollTo({ top: 0 });
     if (MODE !== 'svg') setTimeout(() => { if (id === 's1') fitPick(); if (id === 's2') fitRad(); }, 30);
   }
+  // 글씨 크게 보기: 이 기기에서만 기억 (가게 정보·숫자는 저장하지 않음)
+  const setBig = on => { document.body.classList.toggle('bigtxt', on); $('bigBtn').setAttribute('aria-pressed', on ? 'true' : 'false'); $('bigBtn').setAttribute('aria-label', on ? '글씨 원래대로' : '글씨 크게 보기'); };
+  try { setBig(localStorage.getItem('dg_big') === '1'); } catch (e) {}
+  $('bigBtn').addEventListener('click', () => { const on = !document.body.classList.contains('bigtxt'); setBig(on); try { localStorage.setItem('dg_big', on ? '1' : '0'); } catch (e) {} });
   $('backBtn').addEventListener('click', () => {
     if (history.state && history.state.scr && history.length > 1) history.back();
     else { const k = ORDER.indexOf(cur); if (k > 0) show(ORDER[k - 1], true); }
