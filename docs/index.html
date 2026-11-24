@@ -118,6 +118,15 @@
   .addr input { flex: 1; min-width: 0; }
   .addr button { flex: none; border: 0; border-radius: 14px; padding: 0 18px; font: inherit; font-size: 16px; font-weight: 700; background: var(--accent); color: #fff; cursor: pointer; }
   #addrMsg { font-size: 13px; color: var(--sub); margin: -4px 0 10px; min-height: 0; }
+  .radhint { margin: 6px 2px 0; font-size: 13px; color: var(--sub); }
+  .radpick { margin-top: 8px; padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); font-size: 15px; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start; }
+  .radpick b { font-weight: 800; } .radpick small { display: block; color: var(--sub); font-size: 13px; } .radpick span { flex: 1; }
+  .radpick button { border: 0; background: none; font-size: 18px; color: var(--sub); cursor: pointer; padding: 0 2px; }
+  .radlist ol { margin: 8px 0 0; padding: 0; list-style: none; max-height: 340px; overflow: auto; }
+  .radlist li { display: flex; justify-content: space-between; gap: 10px; padding: 9px 2px; border-bottom: 1px solid var(--gray); font-size: 15px; cursor: pointer; }
+  .radlist li em { font-style: normal; color: var(--sub); font-size: 13px; white-space: nowrap; }
+  .radlist li .fr { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 6px; background: var(--gray); color: var(--sub); font-size: 12px; font-weight: 700; }
+  .radlist li.me { color: var(--warn); font-weight: 700; }
   .maplegend { font-size: 12px; color: var(--sub); margin-top: 8px; }
   .maplegend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin: 0 3px 0 8px; vertical-align: 0; }
   .hint { font-size: 13px; color: var(--mute); margin-top: 8px; }
@@ -532,13 +541,16 @@
       <div class="lmap hidden" id="radL"></div>
       <div class="maplegend hidden" id="radLegend"><i style="background:#3182f6"></i>같은 업종(원 안)<i style="background:#fff;border:2px solid #3182f6;width:7px;height:7px"></i>같은 업종(원 밖)<i style="background:#b0b8c1"></i>다른 점포</div>
       <svg class="map" id="radmap" viewBox="0 0 400 400" role="img" aria-label="반경 500미터 지도"></svg>
+      <p class="radhint">파란 점을 누르면 어떤 가게인지 보여요.</p>
+      <div class="radpick hidden" id="radPick" role="status"></div>
       <div class="stat">
         <div><b id="nMine">-</b><span>내 가게 반경 500m 같은 업종</span></div>
         <div><b id="nAvg">-</b><span id="avgLabel">시 같은 업종 평균</span></div>
       </div>
+      <details class="more radlist" id="radListBox"><summary id="radListT">반경 안 같은 업종 가게 보기</summary><ol id="radList"></ol><p class="cnote">상가정보(2026.9.30)에 등록된 상호명 기준이에요. 문을 닫았거나 이름이 바뀐 가게가 있을 수 있어요.</p></details>
     </div>
     <details class="more"><summary>신호는 어떻게 계산하나요?</summary>
-      <p>두 지표가 모두 해당하면 주의, 하나만 해당하면 보통, 해당이 없으면 양호예요. 경쟁 밀집은 시 평균의 1.5배 이상(초기값), 동네 상권 변화는 행정동이 '상권축소'일 때 해당이에요.</p>
+      <p>기본 지표 2개(경쟁 밀집, 동네 상권축소)가 모두 해당하면 위험, 하나면 주의, 없으면 양호예요. 보조 지표 3개(같은 업종 사장님 수 감소, 3년 넘게 버틴 가게 비율, 프랜차이즈 비율)까지 합쳐 나쁜 신호가 2개 이상이면 주의로, 기본 지표 하나에 나쁜 신호가 3개 이상이면 위험으로 올려요. 경쟁 밀집은 시 평균의 1.5배 이상(초기값), 동네 상권 변화는 행정동이 '상권축소'일 때 해당이에요.</p>
       <p>'얼마나 버텼나'는 경기도 일반음식점 인허가 기록(문 연 날·문 닫은 날)으로 계산해요. 음식점 업종만 나오고, 휴게음식점으로 등록하는 카페·빵집은 일부만 들어 있어요.</p>
       <p>'같은 업종 사장님 수'는 국세청 100대 생활업종 사업자 현황(2026년 9월, 시군구별)이에요. 개인·법인 사업자 수를 1년 전과 비교해요.</p>
       <p>프랜차이즈는 상가정보의 상호명과 지점명으로 추정해요. 같은 이름으로 여러 곳에 지점을 낸 상호를 브랜드로 보고 세기 때문에, 공정거래위원회 공식 가맹점 수와는 다를 수 있어요.</p>
@@ -1174,7 +1186,8 @@
       if (city.cat[i] !== c) continue;
       if (Math.abs((city.lon[i] - me[0]) * k) > half || Math.abs((city.lat[i] - me[1]) * M_LAT) > half) continue;
       const inside = dist(me[0], me[1], city.lon[i], city.lat[i]) <= R;
-      nDot(nRad, city.lon[i], city.lat[i], inside ? '#3182f6' : '#ffffff', '#3182f6', nRadObjs);
+      const mk_ = new naver.maps.Marker({ map: nRad, position: NLL(city.lon[i], city.lat[i]), clickable: true, icon: { content: `<div style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer">${dotHTML(inside ? '#3182f6' : '#ffffff', '#3182f6')}</div>`, anchor: new naver.maps.Point(13, 13) } });
+      const ii = i; naver.maps.Event.addListener(mk_, 'click', () => radPick(ii)); nRadObjs.push(mk_);
     }
     const circ = new naver.maps.Circle({ map: nRad, center: NLL(me[0], me[1]), radius: R, strokeColor: '#3182f6', strokeWeight: 2, strokeStyle: 'shortdash', fillColor: '#3182f6', fillOpacity: 0.06, clickable: false });
     nRadObjs.push(circ);
@@ -1899,7 +1912,7 @@
     $('sIcs').innerHTML = `${ic('cal')} ${calLabel()}`; $('sIcs').disabled = !sEv.length;
     $('sIcsNote').textContent = sEv.length ? `일정 ${sEv.length}가지 · 하루 전에 알림` : '계약 끝나는 날을 넣으면 켜져요.';
     $('sIcs').onclick = () => icsSave(sEv, '다음길 가게 넘기기', '다음길_가게넘기기', $('sIcsNote'), '다음길 가게 넘기기');
-    $('sTl').innerHTML = '<ol>' + steps.map(([w, t, x, d], k) => `<li data-n="${k + 1}"><b>${t}</b><small>${x}</small><span class="when">${w}${d ? ' · ' + (left(d) < 0 ? '지남' : left(d) === 0 ? 'D-DAY' : 'D-' + left(d)) : ''}</span></li>`).join('') + '</ol>';
+    $('sTl').innerHTML = '<ol>' + steps.map(([w, t, x, d], k) => `<li data-n="${k + 1}"><b>${t}</b><small>${x}</small><span class="when">${w}${d ? ' · ' + (left(d) < 0 ? '마감' : left(d) === 0 ? 'D-DAY' : 'D-' + left(d)) : ''}</span></li>`).join('') + '</ol>';
     // 건물주 · 세금 · 상담
     $('sMore').innerHTML = `
       <details class="mrow"><summary>${ic('scale')}<span style="flex:1">건물주가 막으면<small class="muted" style="display:block;font-weight:500;font-size:13px">하면 안 되는 4가지 · 손해배상 3년</small></span></summary><div class="bd">
@@ -2387,7 +2400,7 @@
       if (Math.abs((city.lon[i] - me[0]) * k) > half || Math.abs((city.lat[i] - me[1]) * M_LAT) > half) continue;
       if (city.cat[i] === c) {
         const inside = dist(me[0], me[1], city.lon[i], city.lat[i]) <= R;
-        L.circleMarker([city.lat[i], city.lon[i]], { radius: 5, color: '#3182f6', weight: 1.5, fillColor: inside ? '#3182f6' : '#fff', fillOpacity: 1, interactive: false }).addTo(radLayer);
+        const ii = i; L.circleMarker([city.lat[i], city.lon[i]], { radius: 6, color: '#3182f6', weight: 1.5, fillColor: inside ? '#3182f6' : '#fff', fillOpacity: 1, interactive: true }).on('click', () => radPick(ii)).addTo(radLayer);
       } else L.circleMarker([city.lat[i], city.lon[i]], { radius: 2, stroke: false, fillColor: '#b0b8c1', fillOpacity: .7, interactive: false }).addTo(radLayer);
     }
     const circ = L.circle([me[1], me[0]], { radius: R, color: '#3182f6', weight: 2, dashArray: '6 5', fillColor: '#3182f6', fillOpacity: .06, interactive: false }).addTo(radLayer);
@@ -2396,8 +2409,37 @@
     radBounds = circ.getBounds();
   }
   function fitRad() { if (MODE === 'naver') return nFit(nRad, 'radN', nRadBounds); if (radMap && radBounds && $('radL').offsetWidth) { radMap.invalidateSize(); radMap.fitBounds(radBounds, { padding: [10, 10] }); } }
+  // 지도 점·목록에서 고른 가게 (상가정보 상호명). 내 가게(10m 안)는 이름 대신 '내 가게'
+  const radName = i => { const n = NAMES && NAMES[i]; return n && n !== '업소명없음' ? n : '이름이 등록되지 않은 가게'; };
+  const radBrand = i => (FMETA && FRB.has(i)) ? FMETA.brands[FRB.get(i)] : '';
+  let RAD_SELF = -1;
+  function radPick(i) {
+    const d = dist(me[0], me[1], city.lon[i], city.lat[i]), box = $('radPick');
+    const show = () => {
+      const meShop = i === RAD_SELF, br = radBrand(i);
+      box.innerHTML = `<span>${meShop ? '<b>내 가게</b>' : `<b>${radName(i).replace(/</g, '')}</b>`}<small>${cats[city.cat[i]][2]} · ${city.dongs[city.dong[i]]} · ${meShop ? '바로 여기' : d < 10 ? '내 가게 바로 옆' : `내 가게에서 ${Math.round(d / 10) * 10}m`}${d <= R ? ' (반경 안)' : ' (반경 밖)'}${br && !meShop ? ` · 프랜차이즈 추정(${br})` : ''}</small></span><button type="button" aria-label="닫기">×</button>`;
+      box.classList.remove('hidden'); box.querySelector('button').onclick = () => box.classList.add('hidden');
+    };
+    if (NAMES) show(); else loadNames().then(show);
+  }
+  function radListRender(c) {
+    const box = $('radList'); $('radPick').classList.add('hidden');
+    const list = []; for (let i = 0; i < N; i++) if (city.cat[i] === c) { const d = dist(me[0], me[1], city.lon[i], city.lat[i]); if (d <= R) list.push([d, i]); }
+    list.sort((a, b) => a[0] - b[0]);
+    // 내 가게 = 고른 가게(같은 업종·10m 안), 직접 고른 위치면 10m 안 가장 가까운 한 곳 (리포트 숫자와 같은 기준)
+    RAD_SELF = PICKED && PICK_I >= 0 && list.some(([d, i]) => i === PICK_I && d < 10) ? PICK_I : (list.length && list[0][0] < 10 ? list[0][1] : -1);
+    const nOther = list.length - (RAD_SELF >= 0 ? 1 : 0);
+    $('radListT').textContent = `반경 안 같은 업종 ${nOther}곳 보기 (가까운 순)`;
+    const draw = () => {
+      box.innerHTML = list.map(([d, i]) => i === RAD_SELF ? `<li class="me" data-i="${i}"><span>내 가게</span><em>여기</em></li>`
+        : `<li data-i="${i}"><span>${radName(i).replace(/</g, '')}${radBrand(i) ? '<b class="fr">프랜차이즈</b>' : ''}</span><em>${d < 10 ? '바로 옆' : Math.round(d / 10) * 10 + 'm'}</em></li>`).join('');
+      box.querySelectorAll('li').forEach(li => li.onclick = () => { radPick(Number(li.dataset.i)); $('radPick').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+    };
+    $('radListBox').open = false; box.innerHTML = '';
+    if (NAMES) draw(); else loadNames().then(draw);
+  }
   function drawRadius(c, same) {
-    lastRad = c;
+    lastRad = c; radListRender(c);
     if (MODE === 'naver') return drawRadiusN(c);
     if (MODE === 'leaflet') return drawRadiusL(c);
     const svg = $('radmap'); svg.innerHTML = '';
@@ -2411,7 +2453,9 @@
       const [x, y] = P(city.lon[i], city.lat[i]);
       if (city.cat[i] === c) {
         const inside = dist(me[0], me[1], city.lon[i], city.lat[i]) <= R;
-        g2.appendChild(mk('circle', { cx: x, cy: y, r: 4, fill: inside ? 'var(--accent)' : '#fff', stroke: 'var(--accent)', 'stroke-width': 1.5 }));
+        const dot = mk('circle', { cx: x, cy: y, r: 4, fill: inside ? 'var(--accent)' : '#fff', stroke: 'var(--accent)', 'stroke-width': 1.5 });
+        const hit = mk('circle', { cx: x, cy: y, r: 10, fill: 'transparent', style: 'cursor:pointer' }); const ii = i; hit.addEventListener('click', () => radPick(ii));
+        g2.append(dot, hit);
       } else g1.appendChild(mk('circle', { cx: x, cy: y, r: 1.4, fill: 'var(--dot)' }));
     }
     svg.append(mk('circle', { cx: 200, cy: 200, r: R * s, fill: 'rgba(49,130,246,0.07)', stroke: 'var(--accent)', 'stroke-dasharray': '5 4', 'stroke-width': 1.5 }));
