@@ -421,6 +421,59 @@
   .tl li.past::before { background: var(--gray2); color: var(--mute); }
   .tl li.past b { color: var(--mute); } .tl li.past .when { color: var(--mute); background: var(--gray); }
   .tl li.now::before { background: var(--warn); }
+
+  /* ---- 토스식: 한 화면에 한 가지 ---- */
+  .vh { display: none !important; }
+  .vbadge { display: inline-block; padding: 3px 10px; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 800; margin: 0 0 6px; }
+  .tcard { background: #f9fafb; border-radius: 20px; padding: 2px 18px; margin: 0 0 8px; }
+  .tcard .r, .tlist .r { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 15px 0; border: 0; border-bottom: 1px solid var(--gray); background: none; font: inherit; color: var(--ink); text-align: left; cursor: pointer; }
+  .tcard .r:last-child, .tlist .r:last-child { border-bottom: 0; }
+  .tcard .r > span, .tlist .r > span { font-size: 16px; color: #4e5968; flex-shrink: 0; max-width: 58%; word-break: keep-all; }
+  .tcard .r > div, .tlist .r > div { display: flex; flex-direction: column; align-items: flex-end; text-align: right; margin-left: auto; }
+  .tcard .r b, .tlist .r b { font-size: 17px; font-weight: 800; white-space: nowrap; }
+  .tcard .r b.bad, .tlist .r b.bad { color: var(--warn); } .tcard .r b.good, .tlist .r b.good { color: var(--ok); }
+  .tcard .r small, .tlist .r small { font-size: 13px; color: var(--sub); white-space: nowrap; }
+  .tcard .r i.ch, .tlist .r i.ch { font-style: normal; color: #b0b8c1; font-size: 20px; margin-left: 4px; }
+  .tlist { margin: 4px 0 8px; }
+  .thint { font-size: 13px; color: var(--mute); margin: 2px 2px 14px; }
+  .tbig { margin: 8px 0 18px; } .tbig .tk { font-size: 15px; color: var(--sub); }
+  .tbig h2 { margin: 4px 0 0; font-size: 28px; line-height: 1.35; font-weight: 800; word-break: keep-all; }
+  .tbig p { margin: 8px 0 0; font-size: 15px; color: #4e5968; line-height: 1.55; word-break: keep-all; }
+  .ttime { background: #f9fafb; border-radius: 20px; padding: 16px 18px; margin: 0 0 8px; }
+  .ttime .a { display: flex; justify-content: space-between; font-size: 13px; color: var(--sub); }
+  .ttime .bar { height: 10px; border-radius: 5px; margin: 8px 0; background: linear-gradient(90deg, #3182f6, #f04452); }
+  .ttime .b { display: flex; justify-content: space-between; font-size: 15px; font-weight: 800; }
+  .tsheet h2 { margin: 0 0 4px; font-size: 22px; font-weight: 800; word-break: keep-all; }
+  .tsheet .tk { font-size: 15px; color: var(--sub); }
+  .tsheet .big { display: block; margin: 4px 0 6px; font-size: 30px; font-weight: 800; }
+  .tsheet p { word-break: keep-all; }
+  .tsheet .tbar { margin: 14px 0 0; } .tsheet .tbar div { display: flex; justify-content: space-between; font-size: 15px; margin-bottom: 6px; } .tsheet .tbar div span { color: #4e5968; }
+  .tsheet .tbar i { display: block; height: 12px; border-radius: 6px; background: var(--gray); } .tsheet .tbar i i { height: 12px; }
+  .tsheet .ok { width: 100%; margin-top: 18px; }
+  .tsheet .life, .tsheet .ind { display: block !important; border: 0; padding: 0; margin: 10px 0 0; }
+  /* 질문 한 장씩 */
+  .wq { margin: 18px 0 22px; } .wq .n { font-size: 15px; font-weight: 800; color: var(--accent); }
+  .wq h2 { margin: 6px 0 0; font-size: 25px; line-height: 1.4; font-weight: 800; word-break: keep-all; }
+  .wq p { margin: 8px 0 0; font-size: 15px; color: var(--sub); word-break: keep-all; }
+  #s6.wiz #cin .grp, #s6.wiz #cin label:not(.on), #s6.wiz #cin summary, #s6.wiz #cin label > span, #s6.wiz #cin label > .ico { display: none; }
+  #s6.wiz #cin, #s6.wiz #cin .money-in { display: block; margin: 0; }
+  #s6.wiz #cin label.on { display: flex; align-items: baseline; gap: 8px; background: none; padding: 6px 0; border-radius: 0; border-bottom: 2px solid var(--accent); }
+  #s6.wiz #cin input::placeholder { color: #c9cfd6; }
+  #s6.wiz #cFold { border: 0; padding: 0; margin: 0; background: none; }
+  #s6.wiz #cin label.on input { border: 0; box-shadow: none; -webkit-appearance: none; appearance: none; flex: 1; width: 100%; min-width: 0; background: none; padding: 4px 0; font-size: 34px; font-weight: 800; text-align: left; border-radius: 0; outline: 0; }
+  #s6.wiz #cin label.on em { width: auto; font-size: 22px; font-weight: 700; color: #4e5968; white-space: nowrap; }
+  .wnote { font-size: 14px; color: var(--sub); margin: 10px 0 0; word-break: keep-all; }
+  .wchips { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; }
+  .wchips button { height: 40px; padding: 0 16px; border: 0; border-radius: 20px; background: var(--gray); font: inherit; font-size: 15px; color: #333d4b; cursor: pointer; }
+  #s5.wiz #plan { border: 0; padding: 0; margin: 0; }
+  #s5.wiz #plan .q:not(.on) { display: none; }
+  #s5.wiz #plan .q.on { margin: 0; } #s5.wiz #plan .q.on > span { display: none; }
+  #s5.wiz #plan .chips { flex-direction: column; gap: 10px; }
+  #s5.wiz #plan .chips button { width: 100%; padding: 18px 20px; border-radius: 18px; background: #fff; border: 1px solid var(--line); font-size: 18px; font-weight: 700; text-align: left; }
+  #s5.wiz #plan .chips button.on { background: var(--accent-soft); color: var(--ink); border: 2px solid var(--accent); }
+  #s5.wiz #plan .dateinp { width: 100%; font-size: 22px; font-weight: 700; padding: 12px 4px; border: 0; border-bottom: 2px solid var(--accent); border-radius: 0; background: none; }
+  .scr[data-view] .deep.vopen > summary, .scr[data-view] details.vopen > summary { display: none; }
+  .scr[data-view] details.vopen { border: 0; margin-top: 0; }
 </style>
 </head>
 <body>
@@ -472,7 +525,7 @@
   <section id="s1" class="scr hidden">
     <div class="vhead"><div class="vart" style="background:#e8f3ff" id="s1art"></div><h2 id="s1t" style="--hlc:var(--accent)">가게 정보를 알려 주세요</h2></div>
     <p class="lead" id="s1l">세 가지만 고르면 돼요.</p>
-    <div class="field"><label for="sigun">시·군</label><select id="sigun"></select><p class="hint hidden" id="sigunMsg" role="alert" style="color:var(--warn)"></p></div>
+    <div class="field"><label for="sigun">시·군</label><select id="sigun"></select></div>
     <div class="field" id="f-shop"><label for="shopq">가게 이름</label>
       <input type="text" id="shopq" placeholder="가게 이름 (예: 메가커피 의정부역점)" autocomplete="off">
       <div class="shopbox hidden" id="shopBox"></div><div class="shopok hidden" id="shopOk"></div>
@@ -499,12 +552,13 @@
   <!-- 리포트 -->
   <section id="s2" class="scr hidden">
     <div class="steps" id="s2steps" data-steps></div>
-    <p class="lead vloc" id="s2lead"></p>
-    <div class="vhead"><div class="vart" id="vArt"></div><h2 id="s2title"></h2></div>
+    <p class="lead vloc" id="s2lead" data-vw="main"></p>
+    <div class="vhead" data-vw="main"><div class="vart" id="vArt"></div><div><span class="vbadge" id="vBadge"></span><h2 id="s2title"></h2></div></div>
     <div class="signal hidden" id="sig"><span id="sigSmall">상권 신호</span><b id="sigWord">-</b><span id="sigNote"></span><p class="vline" id="vLine"></p></div>
-    <div class="vrows" id="vTiles"></div>
-    <div class="vgo" id="vAct"></div>
-    <details class="deep" id="deep"><summary><span>근거 자세히 보기<small id="deepNote">지표별 설명과 숫자</small></span></summary>
+    <div class="tcard" id="vTiles" data-vw="main"></div>
+    <p class="thint" data-vw="main">줄을 누르면 근거를 보여 드려요</p>
+    <div class="tlist" id="vAct" data-vw="main"></div>
+    <details class="deep" id="deep" data-vw="why"><summary><span>근거 자세히 보기<small id="deepNote">지표별 설명과 숫자</small></span></summary>
     <ul class="why" id="vWhy"></ul>
     <div class="ind">
       <div class="top"><span>경쟁 밀집</span><span class="tag" id="denTag"></span></div>
@@ -535,8 +589,8 @@
       <div class="bars" id="dongBars"></div>
     </div>
     </details>
-    <div class="sect">
-      <h3>반경 500m 지도</h3>
+    <div class="sect" data-vw="map">
+      <h3 class="vh">반경 500m 지도</h3>
       <div class="lmap hidden" id="radN"></div>
       <div class="lmap hidden" id="radL"></div>
       <div class="maplegend hidden" id="radLegend"><i style="background:#3182f6"></i>같은 업종(원 안)<i style="background:#fff;border:2px solid #3182f6;width:7px;height:7px"></i>같은 업종(원 밖)<i style="background:#b0b8c1"></i>다른 점포</div>
@@ -549,13 +603,13 @@
       </div>
       <details class="more radlist" id="radListBox"><summary id="radListT">반경 안 같은 업종 가게 보기</summary><ol id="radList"></ol><p class="cnote">상가정보(2026.9.30)에 등록된 상호명 기준이에요. 문을 닫았거나 이름이 바뀐 가게가 있을 수 있어요.</p></details>
     </div>
-    <details class="more"><summary>신호는 어떻게 계산하나요?</summary>
+    <details class="more" data-vw="why"><summary>신호는 어떻게 계산하나요?</summary>
       <p>기본 지표 2개(경쟁 밀집, 동네 상권축소)가 모두 해당하면 위험, 하나면 주의, 없으면 양호예요. 보조 지표 3개(같은 업종 사장님 수 감소, 3년 넘게 버틴 가게 비율, 프랜차이즈 비율)까지 합쳐 나쁜 신호가 2개 이상이면 주의로, 기본 지표 하나에 나쁜 신호가 3개 이상이면 위험으로 올려요. 경쟁 밀집은 시 평균의 1.5배 이상(초기값), 동네 상권 변화는 행정동이 '상권축소'일 때 해당이에요.</p>
       <p>'얼마나 버텼나'는 경기도 일반음식점 인허가 기록(문 연 날·문 닫은 날)으로 계산해요. 음식점 업종만 나오고, 휴게음식점으로 등록하는 카페·빵집은 일부만 들어 있어요.</p>
       <p>'같은 업종 사장님 수'는 국세청 100대 생활업종 사업자 현황(2026년 9월, 시군구별)이에요. 개인·법인 사업자 수를 1년 전과 비교해요.</p>
       <p>프랜차이즈는 상가정보의 상호명과 지점명으로 추정해요. 같은 이름으로 여러 곳에 지점을 낸 상호를 브랜드로 보고 세기 때문에, 공정거래위원회 공식 가맹점 수와는 다를 수 있어요.</p>
       <p>이 데이터에는 매출과 유동인구가 없어서, 장사가 잘되는지는 판단하지 않아요. 결과는 참고용이에요.</p></details>
-    <div class="cta hidden"><button class="btn" id="s2next">다음 단계 보기</button></div>
+    <div class="cta" data-vw="main"><button class="btn" id="s2next">다음 단계 보기</button></div>
   </section>
 
   <!-- 다음 단계 -->
@@ -653,9 +707,10 @@
   <!-- 폐업 플랜 -->
   <section id="s5" class="scr hidden">
     <div class="steps hidden" data-steps></div>
-    <div class="vhead"><div class="vart" style="background:#e8f3ff"><svg viewBox="0 0 64 64" role="img" aria-label="체크리스트 아이콘"><rect x="12" y="10" width="40" height="48" rx="6" fill="#fff" stroke="#3182f6" stroke-width="3"/><rect x="24" y="5" width="16" height="10" rx="3" fill="#3182f6"/><path d="M20 26l4 4 7-8M20 38l4 4 7-8" stroke="#3182f6" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="25" cy="51" r="4.5" fill="none" stroke="#3182f6" stroke-width="2.6"/><path d="M36 28h10M36 40h10M36 52h10" stroke="#8b95a1" stroke-width="3" stroke-linecap="round"/></svg></div><h2 id="s5t" style="--hlc:var(--accent)">손해 없이<br><span class="hl">정리하는 순서예요</span></h2></div>
-    <p class="lead" id="s5l">몇 가지만 알려 주시면 받을 돈, 대출 정리 방법, 날짜를 맞춰 드려요.</p>
-    <div class="quiz" id="plan">
+    <div class="vhead vh"><div class="vart" style="background:#e8f3ff"><svg viewBox="0 0 64 64" role="img" aria-label="체크리스트 아이콘"><rect x="12" y="10" width="40" height="48" rx="6" fill="#fff" stroke="#3182f6" stroke-width="3"/><rect x="24" y="5" width="16" height="10" rx="3" fill="#3182f6"/><path d="M20 26l4 4 7-8M20 38l4 4 7-8" stroke="#3182f6" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="25" cy="51" r="4.5" fill="none" stroke="#3182f6" stroke-width="2.6"/><path d="M36 28h10M36 40h10M36 52h10" stroke="#8b95a1" stroke-width="3" stroke-linecap="round"/></svg></div><h2 id="s5t" style="--hlc:var(--accent)">손해 없이<br><span class="hl">정리하는 순서예요</span></h2></div>
+    <p class="lead vh" id="s5l">몇 가지만 알려 주시면 받을 돈, 대출 정리 방법, 날짜를 맞춰 드려요.</p>
+    <div class="wq" id="pq" data-vw="q"><span class="n" id="pqN"></span><h2 id="pqT"></h2><p id="pqP"></p></div>
+    <div class="quiz" id="plan" data-vw="q">
       <div class="q"><span id="cdLab">폐업 예정일</span><input type="date" id="cdate" class="dateinp"></div>
       <div class="q"><span>가게 건물</span><div class="chips" data-k="ls"><button data-v="rent">임차(월세·전세)</button><button data-v="own">내 건물</button></div></div>
       <div class="q" data-need="rent"><span>전용면적 (철거비 계산용)</span><input id="parea" class="dateinp" type="number" min="1" inputmode="decimal" placeholder="예: 57 (㎡)"></div>
@@ -664,34 +719,37 @@
       <div class="q"><span>가게 하면서 받은 대출이 있나요? <small class="muted">여러 개 고를 수 있어요</small></span><div class="chips" data-k="ln" data-multi="1"><button data-v="sb">정책자금 (소진공)</button><button data-v="gs">보증서 대출 (신용보증재단)</button><button data-v="bk">은행 사업자대출</button><button data-v="cd">카드론·현금서비스</button><button data-v="no">없어요</button></div></div>
       <div class="q hidden" id="qOd"><span>대출 갚는 건 어떤가요?</span><div class="chips" data-k="od"><button data-v="ok">밀리지 않고 갚고 있어요</button><button data-v="hard">아직 안 밀렸지만 힘들어요</button><button data-v="late">이미 밀렸어요</button></div></div>
     </div>
-    <div id="mtot"></div>
-    <div class="acts hidden" id="sellCta" style="margin:12px 0 0"><button type="button" data-a2="sell"><i class="aic" data-ic="store"></i><span><b>철거 대신 권리금 받고 넘길 수 있을까요?</b><small>계약 끝나기 6개월 전부터 법이 보호해요 · 넘기는 순서 보기</small></span><span class="arr">›</span></button></div>
-    <h3 style="margin-top:22px">받을 수 있는 돈 <small class="muted" style="font-weight:500;font-size:13px">눌러서 신청 방법 보기</small></h3>
-    <div id="money"></div>
-    <div id="debtBox" class="hidden"><h3 style="margin-top:22px">대출 정리하는 법 <small class="muted" style="font-weight:500;font-size:13px">폐업 신고 전에 먼저 보세요</small></h3><div id="debt"></div></div>
-    <h3 style="margin-top:22px">폐업 뒤 생활비 챙기기 <small class="muted" style="font-weight:500;font-size:13px">신청해야 줄거나 받아요</small></h3>
-    <div id="life"></div>
-    <button type="button" class="btn line" id="icsBtn" style="width:100%;margin:6px 0 4px;display:flex;align-items:center;justify-content:center;gap:6px">휴대폰 캘린더에 일정 넣기</button>
-    <p class="cnote" id="icsNote" style="margin:0 0 6px;text-align:center">하루 전에 알림이 가요.</p>
-    <details class="deep" id="schedBox"><summary><span id="schedT">전체 일정 보기<small id="schedN"></small></span></summary><div class="tl" id="sched"></div></details>
-    <details class="deep" id="docBox"><summary><span>챙길 서류<small id="docN"></small></span></summary><div id="docs"></div></details>
-    <details class="deep"><summary><span>다시 일할 곳<small>취업 교육 · 폴리텍 · 일자리센터</small></span></summary>
+    <div id="mtot" data-vw="res"></div>
+    <div class="tlist" id="s5rows" data-vw="res"></div>
+    <div class="acts hidden" data-vw="res" id="sellCta" style="margin:12px 0 0"><button type="button" data-a2="sell"><i class="aic" data-ic="store"></i><span><b>철거 대신 권리금 받고 넘길 수 있을까요?</b><small>계약 끝나기 6개월 전부터 법이 보호해요 · 넘기는 순서 보기</small></span><span class="arr">›</span></button></div>
+    <h3 style="margin-top:22px" data-vw="money">받을 수 있는 돈 <small class="muted" style="font-weight:500;font-size:13px">눌러서 신청 방법 보기</small></h3>
+    <div id="money" data-vw="money"></div>
+    <div id="debtBox" class="hidden" data-vw="debt"><h3 style="margin-top:22px">대출 정리하는 법 <small class="muted" style="font-weight:500;font-size:13px">폐업 신고 전에 먼저 보세요</small></h3><div id="debt"></div></div>
+    <h3 style="margin-top:22px" data-vw="life">폐업 뒤 생활비 챙기기 <small class="muted" style="font-weight:500;font-size:13px">신청해야 줄거나 받아요</small></h3>
+    <div id="life" data-vw="life"></div>
+    <button type="button" class="btn line" data-vw="sched" id="icsBtn" style="width:100%;margin:6px 0 4px;display:flex;align-items:center;justify-content:center;gap:6px">휴대폰 캘린더에 일정 넣기</button>
+    <p class="cnote" data-vw="sched res" id="icsNote" style="margin:0 0 6px;text-align:center">하루 전에 알림이 가요.</p>
+    <details class="deep vopen" id="schedBox" data-vw="sched"><summary><span id="schedT">전체 일정 보기<small id="schedN"></small></span></summary><div class="tl" id="sched"></div></details>
+    <details class="deep vopen" id="docBox" data-vw="docs"><summary><span>챙길 서류<small id="docN"></small></span></summary><div id="docs"></div></details>
+    <details class="deep vopen" data-vw="jobs"><summary><span>다시 일할 곳<small>취업 교육 · 폴리텍 · 일자리센터</small></span></summary>
     <ol class="check" style="margin-top:0">
       <li>희망리턴패키지 특화취업지원<small>온라인 기초교육 → 심화교육(1:1 상담 포함)을 마치면 전직장려수당 60만 원, 취업해 60일 이상 다니면 40만 원을 더 받아요. 2023.1.1 이후 폐업자가 대상이에요.</small><span class="dday" data-end="2026-12-10" data-label="교육 신청"></span><br><a class="go" href="https://www.sbiz24.kr/#/pbanc" target="_blank" rel="noopener">소상공인24에서 교육 신청 ›</a><a class="go tel" href="https://www.sbiz.or.kr/nhrp/edc/edcCgjbAbout.do" target="_blank" rel="noopener">수당 자세히 ›</a></li>
       <li>가까운 폴리텍 재취업 과정<small>교육비 무료, 훈련수당 지급. 2027학년도 과정은 2026.11.1 ~ 2027.3월 중순 모집 중이에요. 아래는 2025년 운영 과정이에요.</small><div class="polyList"></div><a class="go" href="https://www.kopo.ac.kr" target="_blank" rel="noopener">폴리텍 모집 과정 보기 ›</a></li>
       <li class="jcItem"></li>
     </ol>
     </details>
-    <p class="src">날짜는 입력한 폐업일로 계산한 기준이에요. 세금·보험 신고 기한은 국세청·근로복지공단 안내를 함께 확인하세요.<br>출처: 희망리턴패키지 누리집(2026.11.17 확인), 노란우산공제·새출발기금·통합폐업신고 공개 안내, 학교법인한국폴리텍 재취업과정(2025).</p>
-    <div class="cta"><button class="btn sub" data-home>처음으로</button><button class="btn sumgo">상담용 요약</button></div>
+    <p class="src" data-vw="res">날짜는 입력한 폐업일로 계산한 기준이에요. 세금·보험 신고 기한은 국세청·근로복지공단 안내를 함께 확인하세요.<br>출처: 희망리턴패키지 누리집(2026.11.17 확인), 노란우산공제·새출발기금·통합폐업신고 공개 안내, 학교법인한국폴리텍 재취업과정(2025).</p>
+    <div class="cta" data-vw="q"><button class="btn" id="pqNext">다음</button></div>
+    <div class="cta" data-vw="res"><button class="btn sub" id="pCal">캘린더</button><button class="btn sumgo">상담용 요약</button></div>
   </section>
 
   <!-- 숫자로 따져 보기 -->
   <section id="s6" class="scr hidden">
     <div class="steps hidden" data-steps></div>
-    <div class="vhead"><div class="vart" style="background:#e8f3ff"><svg viewBox="0 0 64 64" role="img" aria-label="계산기 아이콘"><rect x="13" y="6" width="38" height="52" rx="8" fill="#3182f6"/><rect x="19" y="12" width="26" height="12" rx="3" fill="#e8f3ff"/><g fill="#fff"><circle cx="23" cy="33" r="3.2"/><circle cx="32" cy="33" r="3.2"/><circle cx="41" cy="33" r="3.2"/><circle cx="23" cy="43" r="3.2"/><circle cx="32" cy="43" r="3.2"/><circle cx="23" cy="52" r="3.2"/><circle cx="32" cy="52" r="3.2"/></g><rect x="38" y="40" width="6.4" height="15" rx="3.2" fill="#ffb020"/></svg></div><h2 style="--hlc:var(--accent)">언제까지<br><span class="hl">버틸 수 있을까요?</span></h2></div>
-    <p class="lead">한 달 기준 숫자를 대략 넣어 주세요. 이 화면에서만 계산하고 어디에도 저장하지 않아요.</p>
-    <div class="money-in" id="cin">
+    <div class="vhead vh"><div class="vart" style="background:#e8f3ff"><svg viewBox="0 0 64 64" role="img" aria-label="계산기 아이콘"><rect x="13" y="6" width="38" height="52" rx="8" fill="#3182f6"/><rect x="19" y="12" width="26" height="12" rx="3" fill="#e8f3ff"/><g fill="#fff"><circle cx="23" cy="33" r="3.2"/><circle cx="32" cy="33" r="3.2"/><circle cx="41" cy="33" r="3.2"/><circle cx="23" cy="43" r="3.2"/><circle cx="32" cy="43" r="3.2"/><circle cx="23" cy="52" r="3.2"/><circle cx="32" cy="52" r="3.2"/></g><rect x="38" y="40" width="6.4" height="15" rx="3.2" fill="#ffb020"/></svg></div><h2 style="--hlc:var(--accent)">언제까지<br><span class="hl">버틸 수 있을까요?</span></h2></div>
+    <p class="lead vh">한 달 기준 숫자를 대략 넣어 주세요. 이 화면에서만 계산하고 어디에도 저장하지 않아요.</p>
+    <div class="wq" data-vw="q"><span class="n" id="cqN"></span><h2 id="cqT"></h2><p id="cqP"></p></div>
+    <div class="money-in" id="cin" data-vw="q">
       <div class="grp">들어오는 돈</div>
       <label><i class="ico" data-ic="coin"></i><span>월 평균 매출<small>카드·현금·배달 모두 합쳐서</small></span><input data-f="s" inputmode="numeric" placeholder="0"><em>만 원</em></label>
       <div class="grp">나가는 돈</div>
@@ -709,10 +767,12 @@
       <label><i class="ico" data-ic="brief"></i><span>접은 뒤 한 달 수입<small>취업 월급·실업급여 등 (모르면 0)</small></span><input data-f="w" inputmode="numeric" placeholder="0"><em>만 원</em></label>
       </div></details>
     </div>
-    <button type="button" class="linkbtn sm" id="cEx">예시 숫자로 채워 보기</button>
-    <div class="cres" id="cres"></div>
-    <p class="src">계산은 입력한 숫자만으로 한 단순 추정이에요. 세금과 계절 변동은 넣지 않았어요. 보증금은 '가게를 접는다면'을 채웠을 때만 넣어요. 지원 마감일은 2026년 공고 기준이에요.<br>업종 평균 연매출: 국세청 통계로 보는 생활업종(개인사업자 종합소득세 신고 총수입금액, 2024년 귀속).</p>
-    <div class="cta"><button class="btn sub" data-home>처음으로</button><button class="btn sumgo">상담용 요약</button></div>
+    <p class="wnote" id="cqNote" data-vw="q"></p>
+    <div class="wchips" data-vw="q"><button type="button" id="cEx">모르겠어요 · 예시로 채우기</button></div>
+    <div class="cres" id="cres" data-vw="res"></div>
+    <p class="src" data-vw="res">계산은 입력한 숫자만으로 한 단순 추정이에요. 세금과 계절 변동은 넣지 않았어요. 보증금은 '가게를 접는다면'을 채웠을 때만 넣어요. 지원 마감일은 2026년 공고 기준이에요.<br>업종 평균 연매출: 국세청 통계로 보는 생활업종(개인사업자 종합소득세 신고 총수입금액, 2024년 귀속).</p>
+    <div class="cta" data-vw="q"><button class="btn sub hidden" id="cSkip">결과 보기</button><button class="btn" id="cNext">다음</button></div>
+    <div class="cta" data-vw="res"><button class="btn sub" id="cEdit">숫자 고치기</button><button class="btn" id="cMain">다음</button></div>
   </section>
   <!-- 가게 넘기기 (권리금) -->
   <section id="s7" class="scr hidden">
@@ -946,28 +1006,13 @@
       : `${SIGUN} 소상공인 지원사업<small>공고 목록(2026.10.19)에 ${SIGUN} 이름이 붙은 소상공인 공고가 없어요. 경기도 공통 사업은 아래 '손해 없이 정리하는 방법'에 있어요.</small>`;
   }
 
-  // 시·군을 빠르게 바꾸면 늦게 도착한 이전 응답은 버린다 (마지막으로 고른 시·군만 반영)
-  let cityReq = 0;
   async function loadCity(name) {
-    const e = IDX.find(x => x.name === name); if (!e) return false;
-    const req = ++cityReq;
-    $('go').disabled = true; $('go').textContent = '불러오는 중…'; $('sigunMsg').classList.add('hidden');
-    let c2, lic, fr;
-    try {
-      [c2, lic, fr] = await Promise.all([fetch('data/gg/' + e.file + '.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
-        LMETA ? fetch('data/gg/lic/' + e.file + '.json').then(r => r.json()).catch(() => null) : null,
-        FMETA ? fetch('data/gg/fr/' + e.file + '.json').then(r => r.json()).catch(() => null) : null]);
-    } catch (err) {
-      if (req !== cityReq) return false;
-      $('sigunMsg').textContent = `${name} 정보를 불러오지 못했어요. 인터넷 연결을 확인하고 시·군을 다시 골라 주세요.`;
-      $('sigunMsg').classList.remove('hidden');
-      // 이전에 불러온 시·군이 있으면 그 상태로 되돌려 계속 쓸 수 있게 한다
-      if (city) { $('sigun').value = SIGUN; $('go').disabled = false; $('go').textContent = $('go').dataset.l || '내 상권 보기'; updGo(); }
-      else $('go').textContent = '정보를 불러오지 못했어요';
-      return false;
-    }
-    if (req !== cityReq) return false;
-    city = c2; LIC = lic;
+    const e = IDX.find(x => x.name === name); if (!e) return;
+    $('go').disabled = true; $('go').textContent = '불러오는 중…';
+    let fr;
+    [city, LIC, fr] = await Promise.all([fetch('data/gg/' + e.file + '.json').then(r => r.json()),
+      LMETA ? fetch('data/gg/lic/' + e.file + '.json').then(r => r.json()).catch(() => null) : null,
+      FMETA ? fetch('data/gg/fr/' + e.file + '.json').then(r => r.json()).catch(() => null) : null]);
     FRB = new Map(); if (fr) fr.i.forEach((k, j) => FRB.set(k, fr.b[j]));
     NAMES = null; NAMES_FILE = e.file; $('shopq').value = ''; $('shopBox').classList.add('hidden'); $('shopOk').classList.add('hidden');
     PICKED = false; $('shopMeta').classList.add('hidden'); $('shopq').classList.remove('picked');
@@ -988,7 +1033,6 @@
     renderLocal();
     me = defaultSpot(); drawPick();
     $('go').disabled = false; $('go').textContent = $('go').dataset.l || '내 상권 보기'; updGo();
-    return true;
   }
   $('catq').addEventListener('input', () => paintCats());
 
@@ -1330,12 +1374,46 @@
     $('backBtn').disabled = k === 0; $('ttl').textContent = TITLE[id];
     window.scrollTo({ top: 0 });
     if (MODE !== 'svg') setTimeout(() => { if (id === 's1') fitPick(); if (id === 's2') fitRad(); }, 30);
+    // 한 화면에 한 가지: 리포트·숫자·정리 플랜은 화면 안에서 보기(view)를 바꾼다
+    if (VDEF[id]) {
+      const st = fromPop && history.state && history.state.scr === id ? history.state : null;
+      setView(id, st && st.v ? st.v : VDEF[id](), st ? st.k || 0 : 0, true);
+      if (!st) { try { history.replaceState(Object.assign({}, history.state, { v: VIEW[id].v, k: VIEW[id].k }), ''); } catch (e) {} }
+    }
+  }
+  // ---------- 화면 안의 보기 (토스식: 한 화면에 한 가지) ----------
+  const VIEW = {}, VDONE = {};
+  const VDEF = { s2: () => 'main', s5: () => VDONE.s5 ? 'res' : 'q', s6: () => VDONE.s6 ? 'res' : 'q' };
+  const VTITLE = { map: '반경 500m 지도', why: '근거 자세히 보기', money: '받을 수 있는 돈', debt: '대출 정리하는 법', life: '폐업 뒤 생활비', sched: '전체 일정', docs: '챙길 서류', jobs: '다시 일할 곳' };
+  function setView(id, v, k, noPush) {
+    const sc = $(id); VIEW[id] = { v, k: k || 0 };
+    sc.dataset.view = v;
+    sc.querySelectorAll('[data-vw]').forEach(el => el.classList.toggle('vh', !el.dataset.vw.split(' ').includes(v)));
+    sc.querySelectorAll('details.vopen').forEach(d => { if (!d.classList.contains('vh')) d.open = true; });
+    if (id === 's2' && v === 'why') $('deep').open = true;
+    sc.classList.toggle('wiz', v === 'q');
+    $('ttl').textContent = VTITLE[v] || TITLE[id];
+    // 질문 넘기기는 기록을 바꿔 쓴다: 폰 뒤로가기는 이전 화면으로, 위 '이전' 버튼은 이전 질문으로
+    if (noPush === 'replace') { try { history.replaceState(Object.assign({}, history.state, { scr: id, p: PATH, v, k: k || 0 }), ''); } catch (e) {} }
+    else if (!noPush) { try { history.pushState({ scr: id, p: PATH, v, k: k || 0 }, ''); } catch (e) {} }
+    window.scrollTo({ top: 0 });
+    if (id === 's2' && v === 'map' && MODE !== 'svg') setTimeout(fitRad, 30);
+    if (v === 'q') (id === 's6' ? calcStep : planStep)(k || 0);
+    if (id === 's5' && v === 'res') planRows();
+  }
+  // 근거·비교는 눌렀을 때만 아래에서 올라오는 시트로
+  function openInfo(html) {
+    $('sumBox').innerHTML = `<div class="tsheet">${html}<button type="button" class="btn ok" id="infoOk">확인</button></div>`;
+    $('infoOk').onclick = () => closeSheet();
+    resetSheet(); $('sheet').classList.remove('hidden');
+    try { history.pushState(Object.assign({}, history.state, { sheet: 1 }), ''); } catch (e) {}
   }
   // 글씨 크게 보기: 이 기기에서만 기억 (가게 정보·숫자는 저장하지 않음)
   const setBig = on => { document.body.classList.toggle('bigtxt', on); $('bigBtn').setAttribute('aria-pressed', on ? 'true' : 'false'); $('bigBtn').setAttribute('aria-label', on ? '글씨 원래대로' : '글씨 크게 보기'); };
   try { setBig(localStorage.getItem('dg_big') === '1'); } catch (e) {}
   $('bigBtn').addEventListener('click', () => { const on = !document.body.classList.contains('bigtxt'); setBig(on); try { localStorage.setItem('dg_big', on ? '1' : '0'); } catch (e) {} });
   $('backBtn').addEventListener('click', () => {
+    if (VIEW[cur] && VIEW[cur].v === 'q' && VIEW[cur].k > 0) return setView(cur, 'q', VIEW[cur].k - 1, 'replace');
     if (history.state && history.state.scr && history.length > 1) history.back();
     else { const k = ORDER.indexOf(cur); if (k > 0) show(ORDER[k - 1], true); }
   });
@@ -1754,6 +1832,23 @@
   }
 
   // ---------- 리포트 맨 위: 한 줄 결론 · 핵심 숫자 3개 · 이유 · 다음 행동 ----------
+  function whySheet(key, o, level) {
+    const strip = el => el ? el.innerHTML.replace(/ id="[^"]*"/g, '') : '';
+    let h = '';
+    if (key === 'den') {
+      const avg = o.ratio > 0 ? o.mine / o.ratio : 0, mx = Math.max(o.mine, avg) || 1, r1 = Math.round(o.ratio * 10) / 10;
+      const col = o.dense ? 'var(--warn)' : r1 < 1 ? 'var(--ok)' : 'var(--ink)';
+      h = `<span class="tk">반경 500m 같은 업종 가게</span><b class="big" style="color:${col}">${o.mine}곳 · ${o.ratio.toFixed(1)}배</b>
+        <p style="margin:0;font-size:16px;color:#4e5968">${SIGUN} 평균보다 ${o.dense ? '경쟁이 많은 자리예요' : r1 < 1 ? '경쟁이 덜한 편이에요' : '조금 많은 편이에요'}</p>
+        <div class="tbar"><div><span>내 가게 주변</span><b>${o.mine}곳</b></div><i><i style="width:${o.mine / mx * 100}%;background:${col}"></i></i></div>
+        <div class="tbar"><div><span>${SIGUN} 같은 업종 평균</span><b>${avg.toFixed(1)}곳</b></div><i><i style="width:${avg / mx * 100}%;background:#c9cfd6"></i></i></div>
+        <p class="cnote" style="margin-top:14px">${$('denText').textContent}</p>`;
+    } else {
+      const el = key === 'nts' ? $('ntsBox') : key === 'fr' ? $('frBox') : key === 'life' ? $('life') : $('chgText').closest('.ind');
+      h = `<div class="${el.className.replace(/\bhidden\b/, '')}">${strip(el)}</div>`;
+    }
+    openInfo(h + `<p class="cnote" style="margin-top:12px">이 신호 하나만으로 정하지 않아요. 지표 5가지를 함께 봐요 · 상가정보 2026.9.30 기준</p>`);
+  }
   function renderVerdict(o) {
     const { name, mine, ratio, dense, ch, shrink, hits, dn } = o;
     const bad = [], good = [], mid = [];
@@ -1773,6 +1868,7 @@
       ['#ffeded', '#d63b3b', '빨간 경고 표지판: 위험 신호가 많아요', '<path d="M22 6h20l16 16v20L42 58H22L6 42V22z" fill="#f04452" stroke="#c9303d" stroke-width="3" stroke-linejoin="round"/><path d="M32 18v18" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/><circle cx="32" cy="45" r="3.6" fill="#fff"/>']
     ][level];
     $('vArt').style.background = ART[0]; $('s2title').style.setProperty('--hlc', ART[1]);
+    $('vBadge').textContent = ['양호', '주의', '위험'][level]; $('vBadge').style.background = ['#0a8a52', '#c26a00', '#d63b3b'][level];
     $('vArt').innerHTML = `<svg viewBox="0 0 64 64" role="img" aria-label="${ART[2]}">${ART[3]}</svg>`;
     $('s2lead').textContent = `${SIGUN} ${dn} · ${name} · 반경 500m`;
     $('vLine').textContent = [
@@ -1780,14 +1876,18 @@
       `위험 신호가 ${bad.length}가지 보여요. 버티는 방법과 함께, 매출이 계속 줄 때를 대비해 정리 방법도 미리 알아 두세요.`,
       `위험 신호가 ${bad.length}가지예요. 정리하거나 업종·자리를 바꾸는 방법을 먼저 보시길 권해요. 철거비 같은 지원은 정리하기 전에 신청해야 받아요.`][level];
     // 핵심 숫자 3개
-    const row = (l, v, c, sm) => `<div class="r"><span>${l}</span><div><b class="${c}">${v}</b>${sm ? `<small>${sm}</small>` : ''}</div></div>`;
+    let WK = 'den';
+    const row = (l, v, c, sm) => `<button type="button" class="r" data-why="${WK}"><span>${l}</span><div><b class="${c}">${v}</b>${sm ? `<small>${sm}</small>` : ''}</div><i class="ch" aria-hidden="true">›</i></button>`;
     const t1 = row(`반경 500m 같은 업종`, `${mine}곳`, dense ? 'bad' : Math.round(ratio * 10) / 10 < 1 ? 'good' : '', `시 평균의 ${ratio.toFixed(1)}배`);
+    WK = VN ? 'nts' : 'chg';
     const t2 = VN ? row(`${SIGUN} 사장님 수 1년 변화`, sgn(VN.r), VN.r < -0.03 ? 'bad' : VN.r > 0.03 ? 'good' : '', '')
       : row('동네 상권 변화', ch ? ch.type : '-', shrink ? 'bad' : ch && ch.type === '상권확장' ? 'good' : '', '');
+    WK = VL && VL.s !== null ? 'life' : VF ? 'fr' : 'chg';
     const t3 = VL && VL.s !== null ? row('3년 넘게 버틴 가게', pct(VL.s), VL.low ? 'bad' : VL.high ? 'good' : '', VL.low ? '시 평균보다 낮아요' : VL.high ? '시 평균보다 높아요' : '')
       : VF ? row('주변 같은 업종 중 프랜차이즈', Math.round(VF.p * 100) + '%', VF.hi ? 'bad' : '', '')
       : row('동네 상권 변화', ch ? ch.type : '-', shrink ? 'bad' : '', '');
     $('vTiles').innerHTML = t1 + t3 + t2;
+    $('vTiles').querySelectorAll('[data-why]').forEach(b => b.onclick = () => whySheet(b.dataset.why, o, level));
     $('vWhy').innerHTML = bad.map(x => `<li class="bad">${x}</li>`).concat(good.map(x => `<li class="good">${x}</li>`), mid.slice(0, 1).map(x => `<li class="mid">${x}</li>`)).slice(0, 5).join('');
     const nInd = 2 + (VN ? 1 : 0) + (VL ? 1 : 0) + (VF ? 1 : 0);
     $('sigNote').textContent = `기본 지표 2개 중 ${hits}개 해당`;
@@ -1803,9 +1903,13 @@
     const ord = PATH === 'restart' ? ['move', 'calc', 'stay', 'close'] : level === 2 ? ['calc', 'close', 'sell', 'move', 'stay'] : level === 1 ? ['calc', 'stay', 'move', 'close', 'sell'] : ['stay', 'calc', 'move', 'close'];
     const AS = { stay: '버티는 방법 (지원사업)', move: '업종이나 자리 바꾸기', close: '손해 없이 정리하는 방법', calc: '숫자로 따져 보기', sell: '권리금 받고 넘기기' };
     const alts = ['stay', 'move', 'close', 'sell', 'calc'].filter(k => k !== ord[0] && (k !== 'sell' || PATH !== 'restart'));
-    $('vAct').innerHTML = `<button type="button" class="gomain" data-a="${ord[0]}">다음 · ${A[ord[0]][0]}</button><span class="gosub">${A[ord[0]][1]}</span>` +
-      `<h3>다른 방법</h3>` + alts.map(k => `<button type="button" class="alt" data-a="${k}">${ic(A[k][2])}<span>${AS[k]}</span><em>›</em></button>`).join('');
-    $('vAct').querySelectorAll('button').forEach(b => b.onclick = () => goAct(b.dataset.a));
+    const rr = (k, l, v) => `<button type="button" class="r" data-k="${k}"><span>${l}</span><div><b>${v}</b></div><i class="ch" aria-hidden="true">›</i></button>`;
+    $('vAct').innerHTML = rr('map', '반경 500m 지도', `같은 업종 ${mine}곳`) + rr('alt', '다른 길 보기', `${alts.length}가지`) + rr('why', '근거 자세히 보기', `지표 ${2 + (VN ? 1 : 0) + (VL ? 1 : 0) + (VF ? 1 : 0)}가지`);
+    $('vAct').querySelectorAll('button').forEach(b => b.onclick = () => {
+      if (b.dataset.k !== 'alt') return setView('s2', b.dataset.k);
+      openInfo(`<h2>다른 길</h2><p class="tk" style="margin:0 0 6px">${A[ord[0]][0]} 말고도 이런 길이 있어요</p><div class="vgo" style="margin:0">` + alts.map(k => `<button type="button" class="alt" data-a="${k}">${ic(A[k][2])}<span>${AS[k]}</span><em>›</em></button>`).join('') + '</div>');
+      $('sumBox').querySelectorAll('[data-a]').forEach(x => x.onclick = () => { $('sheet').classList.add('hidden'); goAct(x.dataset.a); });
+    });
     $('s2next').dataset.a = ord[0]; $('s2next').textContent = A[ord[0]][0];
     $('deep').open = false;
     // '버티는 방법' 화면 맨 위 안내도 리포트와 같은 단계·표지판·색으로 맞춘다
@@ -1912,7 +2016,7 @@
     $('sIcs').innerHTML = `${ic('cal')} ${calLabel()}`; $('sIcs').disabled = !sEv.length;
     $('sIcsNote').textContent = sEv.length ? `일정 ${sEv.length}가지 · 하루 전에 알림` : '계약 끝나는 날을 넣으면 켜져요.';
     $('sIcs').onclick = () => icsSave(sEv, '다음길 가게 넘기기', '다음길_가게넘기기', $('sIcsNote'), '다음길 가게 넘기기');
-    $('sTl').innerHTML = '<ol>' + steps.map(([w, t, x, d], k) => `<li data-n="${k + 1}"><b>${t}</b><small>${x}</small><span class="when">${w}${d ? ' · ' + (left(d) < 0 ? '마감' : left(d) === 0 ? 'D-DAY' : 'D-' + left(d)) : ''}</span></li>`).join('') + '</ol>';
+    $('sTl').innerHTML = '<ol>' + steps.map(([w, t, x, d], k) => `<li data-n="${k + 1}"><b>${t}</b><small>${x}</small><span class="when">${w}${d ? ' · D-' + left(d) : ''}</span></li>`).join('') + '</ol>';
     // 건물주 · 세금 · 상담
     $('sMore').innerHTML = `
       <details class="mrow"><summary>${ic('scale')}<span style="flex:1">건물주가 막으면<small class="muted" style="display:block;font-weight:500;font-size:13px">하면 안 되는 4가지 · 손해배상 3년</small></span></summary><div class="bd">
@@ -1941,7 +2045,7 @@
   ];
   // ---------- 숫자로 따져 보기: 월 손익 · 버틸 기간 · 손익분기 매출 · 업종 평균 연매출 비교 ----------
   const CV = { s: 0, r: 0, l: 0, c: 0, o: 0, p: 0, v: 0, k: 0, b: 0, x: 0, w: 0 };
-  const man = v => { v = Math.round(v); const a = Math.abs(v), e = Math.floor(a / 10000), r = a % 10000; return (v < 0 ? '-' : '') + (e ? e.toLocaleString() + '억' + (r ? ' ' + r.toLocaleString() + '만 원' : ' 원') : r.toLocaleString() + '만 원'); };
+  const man = v => { v = Math.round(v); const a = Math.abs(v), e = Math.floor(a / 10000), r = a % 10000; return (v < 0 ? '-' : '') + (e ? e + '억' + (r ? ' ' + r.toLocaleString() : '') : r.toLocaleString()) + '만 원'; };
   const ymLater = m => { const d = new Date(today); d.setMonth(d.getMonth() + Math.floor(m)); return `${d.getFullYear()}년 ${d.getMonth() + 1}월`; };
   function revAvg() {
     if (!REV || !SUM) return null;
@@ -1962,7 +2066,7 @@
       box.innerHTML = ra ? `<div class="cnote">참고: ${ra.where} ${ra.t} 평균 연매출은 <b>${man(ra.avg)}</b>이에요 (한 달 약 ${man(ra.avg / 12)}).</div>`
         : t0 && REV && REV.g && REV.g[SIGUN] ? `<div class="cnote">참고: ${SIGUN}의 ${t0}${bat(t0) ? '은' : '는'} 사업자가 20명 이하라서 국세청이 평균 연매출을 공개하지 않아요. 그래서 평균과 비교는 할 수 없지만, 위에 숫자를 넣으면 버틸 기간은 계산할 수 있어요.</div>` : '';
       box.innerHTML += `<div class="chead" style="margin-top:14px"><div class="vart" style="background:#e8f3ff"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 8v38M18 32l14 14 14-14" stroke="#3182f6" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 56h36" stroke="#ffb020" stroke-width="5" stroke-linecap="round"/></svg></div><div><h3 style="--hlc:var(--accent)">숫자를 넣으면<br><span class="hl">여기에 결과가 나와요</span></h3><p>월 매출과 비용, 지금 쓸 수 있는 돈을 넣으면 '약 몇 개월 버틸 수 있어요'를 바로 계산해요. 위 '예시 숫자로 채워 보기'로 먼저 볼 수도 있어요.</p></div></div>`;
-      CALC = null; return;
+      CALC = null; $('cMain').dataset.a = 'stay'; $('cMain').textContent = '버티는 방법 보기'; return;
     }
     const cost = r + l + c + o + p, prof = s - cost, net = prof - v;
     const vr = c / s, fixed = r + l + o + p + v, be = vr < 1 ? fixed / (1 - vr) : null;
@@ -2031,31 +2135,67 @@
     } else if (net < 0) cmp = `<p class="cnote" style="margin-top:14px">위 <b>'가게를 접는다면'</b>을 펼쳐 채우면 계속할 때와 지금 접을 때를 1년 기준으로 나란히 비교해 드려요.</p>`;
     const SG = SIGNS[level];
     const revSum = ra ? `평균의 ${Math.round(s * 12 / ra.avg * 100)}%` : kt >= 0 ? '평균 비공개' : '';
-    box.innerHTML = `<div class="chead"><div class="vart" style="background:${SG[0]}"><svg viewBox="0 0 64 64" role="img" aria-label="${SG[2]}">${SG[3]}</svg></div><div><h3 style="--hlc:${SG[1]}">${h2[0]}<br><span class="hl">${h2[1]}</span></h3><p>${line}</p></div></div>
-      <div class="vrows" style="margin-top:12px">
-        <div class="r"><span>생활비까지 빼면 매달</span><div><b class="${net < 0 ? 'bad' : 'good'}">${man(net)}</b></div></div>
-        ${net < 0 && k ? `<div class="r"><span>돈이 바닥나는 때</span><div><b class="${k / -net < 6 ? 'bad' : ''}">${ymLater(k / -net)}쯤</b><small>약 ${Math.floor(k / -net)}개월 뒤</small></div></div>` : ''}
-        ${be ? `<div class="r"><span>생활비까지 나오는 매출</span><div><b class="${be > s ? 'bad' : 'good'}">${man(be)}</b>${be > s ? `<small>지금보다 ${Math.round((be / s - 1) * 100)}% 더 팔아야 해요</small>` : '<small>지금 매출로 충분해요</small>'}</div></div>` : ''}
-      </div>
-      ${cmp}
-      <details class="deep"><summary><span>한 달 돈의 흐름<small>매출 ${man(s)} · 나가는 돈 ${man(cost + v)}</small></span></summary>${bar}
-        ${rows.map(([a, b, cl]) => `<div class="crow"><span>${a}</span><b class="${cl}">${b}</b></div>`).join('')}</details>
-      ${net < 0 && k ? `<details class="deep" style="margin-top:0"><summary><span>6개월 더 버티면<small>6개월 뒤 쓸 수 있는 돈 ${k6 < 0 ? man(k6) + ' (빚)' : man(k6)}</small></span></summary><div class="crow"><span>지금 쓸 수 있는 돈</span><b>${man(k)}</b></div><div class="crow"><span>6개월 뒤</span><b class="${k6 < 0 ? 'bad' : ''}">${k6 < 0 ? man(k6) + ' (빚)' : man(k6)}</b></div>` +
-        (DL.length ? `<p class="cnote">그 사이에 끝나는 지원도 있어요: ${DL.map(d => `${d[0]} ${d[1].slice(5).replace('-', '.')}`).join(' · ')}</p>` : '') + '</details>' : ''}
-      ${rev ? `<details class="deep" style="margin-top:0"><summary><span>같은 업종과 비교<small>${revSum}</small></span></summary>${rev}</details>` : ''}
-      <div class="acts" style="margin-top:22px"><h3>다음으로</h3>
-        <button type="button" data-a3="${level === 2 ? 'close' : 'stay'}" class="pri">${ic(level === 2 ? 'box' : 'shield', 'aic')}<span><b>${level === 2 ? '손해 없이 정리하는 방법' : '버티는 방법 보기'}</b><small>${level === 2 ? '받을 수 있는 돈과 날짜별 할 일' : '우리 시 지원사업 · 경영 상담'}</small></span><span class="arr">›</span></button>
-        <button type="button" data-a3="${level === 2 ? 'stay' : 'close'}">${ic(level === 2 ? 'shield' : 'box', 'aic')}<span><b>${level === 2 ? '그래도 버텨 보고 싶다면' : '정리할 때를 대비하려면'}</b><small>${level === 2 ? '우리 시 지원사업 · 경영 상담' : '받을 수 있는 돈과 날짜별 할 일'}</small></span><span class="arr">›</span></button>
-      </div>`;
+    const m0 = net < 0 && k ? k / -net : null;
+    const SH = {};
+    const rr = (key, l, v, cl, sm) => `<button type="button" class="r" data-sh="${key}"><span>${l}</span><div><b class="${cl || ''}">${v}</b>${sm ? `<small>${sm}</small>` : ''}</div>${key ? '<i class="ch" aria-hidden="true">›</i>' : ''}</button>`;
+    SH.flow = `<h2>한 달 돈의 흐름</h2><p class="tk" style="margin:0">매출 ${man(s)} · 나가는 돈 ${man(cost + v)}</p>${bar}` + rows.map(([a, b, cl]) => `<div class="crow"><span>${a}</span><b class="${cl}">${b}</b></div>`).join('');
+    if (m0 !== null) SH.six = `<h2>6개월 더 버티면</h2><div class="crow"><span>지금 쓸 수 있는 돈</span><b>${man(k)}</b></div><div class="crow"><span>6개월 뒤</span><b class="${k6 < 0 ? 'bad' : ''}">${k6 < 0 ? man(k6) + ' (빚)' : man(k6)}</b></div>` +
+      (DL.length ? `<p class="cnote">그 사이에 끝나는 지원도 있어요: ${DL.map(d => `${d[0]} ${d[1].slice(5).replace('-', '.')}`).join(' · ')}</p>` : '');
+    if (rev) SH.rev = `<h2>같은 업종과 비교</h2>${rev}`;
+    if (cmp && (b || x || w)) SH.cmp = cmp.replace('<div class="cbox"><h3>', '<div class="cbox" style="border:0;padding:0;margin:0"><h3 style="font-size:22px">');
+    const cNet = w - v - p, c12 = k + b - x + cNet * 12, k12 = k + net * 12;
+    const other = level === 2 ? 'stay' : 'close';
+    box.innerHTML = `<div class="tbig"><span class="tk">지금처럼 하면</span><h2><span style="color:${SG[1]}">${h2[0]}</span><br>${h2[1]}</h2><p>${line}</p></div>` +
+      (m0 !== null ? `<div class="ttime"><div class="a"><span>지금</span><span>${ymLater(m0)}</span></div><div class="bar"></div><div class="b"><span>${man(k)}</span><span style="color:var(--warn)">0원</span></div></div>` : '') +
+      `<div class="tlist">` +
+      (be ? rr('', '생활비까지 나오는 매출', man(be), be > s ? 'bad' : 'good', be > s ? `지금보다 ${Math.round((be / s - 1) * 100)}% 더` : '지금 매출로 충분해요') : '') +
+      (SH.cmp ? rr('cmp', '계속할까, 지금 접을까', '1년 뒤 비교', '', `1년 뒤 ${c12 >= k12 ? '접는' : '계속하는'} 쪽이 ${man(Math.abs(c12 - k12))} 더`) : net < 0 ? rr('more', '계속할까, 지금 접을까', '숫자 3개 더', '', '보증금·철거비·접은 뒤 수입') : '') +
+      (SH.rev ? rr('rev', '같은 업종과 비교', revSum, '', ra ? `${ra.where} ${ra.t}` : '') : '') +
+      rr('flow', '한 달 돈의 흐름', man(net), net < 0 ? 'bad' : 'good', '생활비까지 빼면') +
+      (SH.six ? rr('six', '6개월 더 버티면', k6 < 0 ? man(k6) : man(k6), k6 < 0 ? 'bad' : '', '6개월 뒤 쓸 수 있는 돈') : '') +
+      rr('alt', level === 2 ? '그래도 버텨 보고 싶다면' : '정리할 때를 대비하려면', '', '', level === 2 ? '지원사업 · 경영 상담' : '받을 돈과 날짜별 할 일') +
+      rr('sum', '상담용 요약', '', '', '이미지로 저장 · 보내기').replace('class="r"', 'class="r sumgo"') + `</div>`;
+    box.querySelectorAll('[data-sh]').forEach(b => b.onclick = () => {
+      const kk = b.dataset.sh;
+      if (kk === 'more') return setView('s6', 'q', 8, 'replace');
+      if (kk === 'alt') return goAct(other);
+      if (kk === 'sum') return openSum();
+      if (SH[kk]) openInfo(SH[kk]);
+    });
+    $('cMain').dataset.a = level === 2 ? 'close' : 'stay'; $('cMain').textContent = level === 2 ? '손해 없이 정리하는 방법' : '버티는 방법 보기';
     box.querySelectorAll('[data-a3]').forEach(b => b.onclick = () => goAct(b.dataset.a3));
     CALC = { text: `월 매출 ${man(s)} · 비용 ${man(cost)} · 생활비 뺀 월 ${man(net)}${net < 0 && k ? ` · 약 ${Math.floor(k / -net)}개월 버팀(${ymLater(k / -net)})` : ''}${ra ? ` · ${ra.where} ${ra.t} 평균의 ${Math.round(s * 12 / ra.avg * 100)}%` : ''}` };
   }
   let CALC = null;
+  // 숫자로 따져 보기: 질문 한 장씩
+  const CQ = [['s', '요즘 한 달 매출이<br>얼마쯤 되세요?', '카드·현금·배달 모두 합쳐서 대충 적어도 괜찮아요. 저장하지 않아요.'],
+    ['r', '임대료는<br>한 달에 얼마예요?', '월세와 관리비를 합쳐서요'], ['l', '직원 인건비는<br>한 달에 얼마예요?', '직원·아르바이트 (사장님 본인은 빼고요). 없으면 0'],
+    ['c', '재료비·원가는<br>한 달에 얼마예요?', '팔기 위해 사는 재료와 물건값이에요'], ['o', '그 밖의 비용은<br>한 달에 얼마예요?', '공과금·카드 수수료·배달 수수료 같은 것'],
+    ['p', '가게 대출은<br>한 달에 얼마씩 갚아요?', '원금과 이자를 합쳐서요. 없으면 0'], ['v', '사장님 생활비로<br>한 달에 얼마가 필요해요?', '가게에서 가져가야 하는 돈이에요'],
+    ['k', '지금 쓸 수 있는 돈은<br>얼마예요?', '예금·비상금이에요. 보증금은 빼고요'],
+    ['b', '가게를 접는다면,<br>돌려받을 보증금은요?', '여기부터는 선택이에요. 넣으면 계속할 때와 지금 접을 때를 비교해 드려요'],
+    ['x', '철거·원상복구에<br>얼마쯤 들까요?', '모르면 대략 적거나 비워 두세요'], ['w', '접은 뒤 한 달 수입은<br>얼마쯤일까요?', '취업 월급·실업급여 등 (모르면 0)']];
+  function calcStep(k) {
+    const [f, t, p] = CQ[k];
+    $('cqN').textContent = `${k + 1} / ${CQ.length}`; $('cqT').innerHTML = t; $('cqP').textContent = p;
+    $('cFold').open = true;
+    document.querySelectorAll('#cin label').forEach(l => l.classList.toggle('on', l.querySelector('input').dataset.f === f));
+    const ra = f === 's' && typeof revAvg === 'function' ? revAvg() : null;
+    $('cqNote').textContent = ra ? `${ra.where} ${ra.t} 평균은 한 달 약 ${man(ra.avg / 12)}이에요` : '';
+    $('cSkip').classList.toggle('hidden', k < 8); $('cNext').textContent = k === CQ.length - 1 ? '결과 보기' : '다음';
+    const inp = document.querySelector('#cin label.on input'); if (inp && matchMedia('(hover: hover)').matches) setTimeout(() => inp.focus(), 50);
+  }
+  const calcDone = () => { VDONE.s6 = true; calcOut(); setView('s6', 'res', 0, 'replace'); };
+  $('cNext').addEventListener('click', () => { const k = VIEW.s6.k; if (k >= CQ.length - 1) calcDone(); else setView('s6', 'q', k + 1, 'replace'); });
+  $('cSkip').addEventListener('click', calcDone);
+  $('cEdit').addEventListener('click', () => setView('s6', 'q', 0, 'replace'));
+  $('cMain').addEventListener('click', () => goAct($('cMain').dataset.a || 'stay'));
+  document.querySelectorAll('#cin input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('cNext').click(); } }));
   document.querySelectorAll('#cin input').forEach(i => i.addEventListener('input', () => {
     const raw = i.value.replace(/[^0-9]/g, '').slice(0, 7); CV[i.dataset.f] = Number(raw) || 0;
     i.value = raw ? Number(raw).toLocaleString() : ''; calcOut();
   }));
-  $('cEx').addEventListener('click', () => { Object.assign(CV, { s: 1200, r: 250, l: 250, c: 420, o: 120, p: 60, v: 300, k: 2000, b: 3000, x: 500, w: 230 }); $('cFold').open = true; renderCalc(); });
+  $('cEx').addEventListener('click', () => { Object.assign(CV, { s: 1200, r: 250, l: 250, c: 420, o: 120, p: 60, v: 300, k: 2000, b: 3000, x: 500, w: 230 }); $('cFold').open = true; renderCalc(); calcDone(); });
 
   // ---------- 국세청 100대 생활업종: 우리 시 같은 업종 사업자 수와 1년 증감 ----------
   const NTSMAP = {
@@ -2210,15 +2350,13 @@
   const PLAN = { text: {} };
   const fmtD = d => `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`;
   const addD = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
-  // 날짜 칸 값(YYYY-MM-DD)은 기기 시간대 기준으로 만든다 (toISOString은 UTC라 한국에서는 하루 앞당겨짐)
-  const isoD = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   function initPlan() {
     const closed = PATH === 'closed';
     $('s5t').innerHTML = closed ? '폐업 후<br><span class="hl">놓친 것부터 챙겨요</span>' : '손해 없이<br><span class="hl">정리하는 순서예요</span>';
     $('s5l').textContent = closed ? '폐업한 날과 몇 가지를 알려 주시면, 아직 받을 수 있는 돈과 남은 기한을 맞춰 드려요.' : '몇 가지만 알려 주시면 받을 돈, 대출 정리 방법, 날짜를 맞춰 드려요.';
     $('cdLab').textContent = closed ? '폐업한 날' : '폐업 예정일';
     if (!$('cdate').value || $('cdate').dataset.p !== PATH) {
-      $('cdate').value = isoD(closed ? addD(today, -45) : addD(today, 60)); $('cdate').dataset.p = PATH;
+      $('cdate').value = (closed ? addD(today, -45) : addD(today, 60)).toISOString().slice(0, 10); $('cdate').dataset.p = PATH;
     }
     renderPlan();
   }
@@ -2238,7 +2376,7 @@
     P.dt = hasLn && (P.od === 'hard' || P.od === 'late') ? 'y' : P.ln ? 'n' : P.dt;
     document.querySelectorAll('#plan [data-need]').forEach(q => q.classList.toggle('hidden', P.ls !== 'rent'));
     $('sellCta').classList.toggle('hidden', !(P.ls === 'rent' && !closed));
-    const D = new Date(($('cdate').value || isoD(today)) + 'T00:00:00');
+    const D = new Date(($('cdate').value || today.toISOString().slice(0, 10)) + 'T00:00:00');
     const after23 = D >= new Date('2023-01-01T00:00:00');
     const m2 = parseFloat($('parea').value);
     const demol = m2 > 0 ? Math.min(Math.ceil(Math.round(m2 / 3.3058 * 10) / 10) * 20, 600) : 600;
@@ -2391,6 +2529,44 @@
     renderPlan();
   }));
   $('cdate').addEventListener('change', renderPlan); $('parea').addEventListener('input', renderPlan);
+  // 정리 플랜: 질문 한 장씩
+  const PQT = { cdate: () => PATH === 'closed' ? ['언제 폐업하셨어요?', '폐업한 날로 남은 기한을 계산해요'] : ['언제쯤 가게를<br>닫을 예정이세요?', '대략이어도 괜찮아요. 날짜에 맞춰 할 일을 정리해요'],
+    ls: () => ['가게는 빌려서<br>쓰고 계세요?', '철거비 지원과 보증금 정리가 달라져요'],
+    parea: () => ['가게 전용면적은<br>몇 ㎡예요?', '철거비 지원 금액을 계산할 때 써요. 모르면 비워 두세요 (최대 600만 원으로 보여 드려요)'],
+    yu: () => ['노란우산공제에<br>가입했나요?', '가입했다면 폐업 공제금을 받을 수 있어요'],
+    ei: () => ['사장님 본인이 고용보험에<br>1년 넘게 가입했나요?', '자영업자 실업급여를 받을 수 있는지 봐요'],
+    ln: () => ['가게 하면서 받은<br>대출이 있나요?', '여러 개 고를 수 있어요'],
+    od: () => ['대출 갚는 건<br>어떤가요?', '채무조정을 받을 수 있는지 봐요'] };
+  const pqList = () => [...document.querySelectorAll('#plan .q')].filter(q => !q.classList.contains('hidden'));
+  const pqKey = q => q.querySelector('#cdate') ? 'cdate' : q.querySelector('#parea') ? 'parea' : q.querySelector('.chips').dataset.k;
+  function planStep(k) {
+    const L = pqList(); k = Math.min(k, L.length - 1); VIEW.s5.k = k;
+    L.forEach((q, i) => q.classList.toggle('on', i === k));
+    document.querySelectorAll('#plan .q.hidden').forEach(q => q.classList.remove('on'));
+    const key = pqKey(L[k]), [t, p] = PQT[key]();
+    $('pqN').textContent = `${k + 1} / ${L.length}`; $('pqT').innerHTML = t; $('pqP').textContent = p;
+    $('pqNext').textContent = k === L.length - 1 ? '결과 보기' : '다음';
+  }
+  const planNext = () => { const L = pqList(), k = VIEW.s5.k; if (k >= L.length - 1) { VDONE.s5 = true; renderPlan(); setView('s5', 'res', 0, 'replace'); } else setView('s5', 'q', k + 1, 'replace'); };
+  $('pqNext').addEventListener('click', planNext);
+  // 하나만 고르는 질문은 누르면 바로 다음으로
+  document.querySelectorAll('#plan .chips:not([data-multi])').forEach(g => g.addEventListener('click', e => {
+    if (!e.target.closest('button') || !$('s5').classList.contains('wiz')) return;
+    const at = VIEW.s5.k; setTimeout(() => { if ($('s5').classList.contains('wiz') && VIEW.s5.k === at) planNext(); }, 260);
+  }));
+  $('pCal').addEventListener('click', () => $('icsBtn').click());
+  function planRows() {
+    const closed = PATH === 'closed';
+    const rr = (k, l, v, sm) => `<button type="button" class="r" data-k="${k}"><span>${l}</span><div><b>${v}</b>${sm ? `<small>${sm}</small>` : ''}</div><i class="ch" aria-hidden="true">›</i></button>`;
+    $('s5rows').innerHTML = rr('money', '받을 수 있는 돈 자세히', '', '신청 방법까지') +
+      ($('debtBox').classList.contains('hidden') ? '' : rr('debt', '대출 정리하는 법', '', '폐업 신고 전에 보세요')) +
+      rr('life', '폐업 뒤 생활비', '', '건강보험·연금 줄이기') +
+      rr('sched', closed ? '남은 일정' : '전체 일정', ($('schedN').textContent.split('·')[0] || '').trim(), '내 캘린더에 넣기') +
+      rr('docs', '챙길 서류', $('docN').textContent.replace(/(\d+)가지 중 (\d+)가지 준비/, '$2 / $1 준비'), '체크하면 기억해 둬요') +
+      rr('jobs', '다시 일할 곳', '', '취업 교육 · 폴리텍 · 일자리센터') +
+      rr('edit', '답 고치기', '', '질문 다시 보기');
+    $('s5rows').querySelectorAll('button').forEach(b => b.onclick = () => b.dataset.k === 'edit' ? setView('s5', 'q', 0, 'replace') : setView('s5', b.dataset.k));
+  }
 
   function drawRadiusL(c) {
     if (!radMap) { radMap = baseMap('radL'); radLayer = L.layerGroup().addTo(radMap); }
@@ -2519,7 +2695,7 @@
     const p = new URLSearchParams({
       g: IDX.findIndex(x => x.name === SIGUN), d: $('dong').value, c: $('cat').value,
       x: me[0].toFixed(6), y: me[1].toFixed(6), q: [Q.st, Q.ls, Q.dr, Q.op].join('.'), a: $('area').value || '',
-      p: PATH, k: [P.ls, P.yu, P.ei, P.dt].join('.'), l: P.ln || '', o: P.od || '', t: $('cdate').value || '', m: $('parea').value || ''
+      p: PATH, k: [P.ls, P.yu, P.ei, P.dt].join('.'), t: $('cdate').value || '', m: $('parea').value || ''
     });
     return location.origin + location.pathname + '#' + p.toString();
   }
@@ -2527,17 +2703,13 @@
     const p = new URLSearchParams(location.hash.slice(1));
     const e = IDX[Number(p.get('g'))]; if (!e || !p.get('c')) return;
     const x = Number(p.get('x')), y = Number(p.get('y')); if (!(x && y)) return;
-    $('sigun').value = e.name; if (!(await loadCity(e.name))) return;
+    $('sigun').value = e.name; await loadCity(e.name);
     if (!catCount[Number(p.get('c'))]) return;
     $('catq').value = ''; fillCats(); $('cat').value = p.get('c'); curField = FIELD(Number(p.get('c'))); paintCats();
     if (p.get('d') !== null && Number(p.get('d')) < city.dongs.length) $('dong').value = p.get('d');
     me = [x, y]; drawPick();
-    MANUAL = true; if (PATHS[p.get('p')]) setPath(p.get('p')); else setManual(true);
+    MANUAL = true; VDONE.s5 = true; if (PATHS[p.get('p')]) setPath(p.get('p')); else setManual(true);
     const [pl, py, pe, pd] = (p.get('k') || '').split('.'); Object.assign(P, { ls: pl || '', yu: py || '', ei: pe || '', dt: pd || '' });
-    // 대출 종류·상환 상태 (알려진 값만 받는다)
-    const LNV = ['sb', 'gs', 'bk', 'cd', 'no'];
-    P.ln = (p.get('l') || '').split(',').filter(v => LNV.includes(v)).join(',');
-    P.od = ['ok', 'hard', 'late'].includes(p.get('o')) ? p.get('o') : '';
     if (p.get('t')) { $('cdate').value = p.get('t'); $('cdate').dataset.p = PATH; } if (p.get('m')) $('parea').value = p.get('m');
     const [st, ls, dr, op] = (p.get('q') || '').split('.');
     Object.assign(Q, { st: st || '', ls: ls || '', dr: dr || '', op: op || '' });
